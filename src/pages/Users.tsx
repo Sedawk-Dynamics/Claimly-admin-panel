@@ -9,20 +9,19 @@ export default function Users() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [page, setPage] = useState(1);
-  const [search, setSearch] = useState('');
-  const [searchInput, setSearchInput] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
   const limit = 25;
   const navigate = useNavigate();
 
   useEffect(() => {
     loadUsers();
-  }, [page, search]);
+  }, [page, searchQuery]);
 
   const loadUsers = async () => {
     try {
       setLoading(true);
       setError('');
-      const data = await adminService.getUsers(page, limit, search || undefined);
+      const data = await adminService.getUsers(page, limit, searchQuery || undefined);
       // Ensure data has the expected structure
       if (data && data.data && Array.isArray(data.data)) {
         setUsers(data);
@@ -38,18 +37,6 @@ export default function Users() {
     }
   };
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    const trimmedSearch = searchInput.trim();
-    setSearch(trimmedSearch);
-    setPage(1);
-  };
-
-  const handleClearSearch = () => {
-    setSearchInput('');
-    setSearch('');
-    setPage(1);
-  };
 
   const handleViewDetails = (userId: string) => {
     navigate(`/users/${userId}`);
@@ -97,55 +84,21 @@ export default function Users() {
       </div>
 
       {/* Search Bar */}
-      <form onSubmit={handleSearch} className="w-full max-w-2xl">
-        <div className="relative group">
-          <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
-            <Search className="w-5 h-5 text-gray-400 group-focus-within:text-primary-500 transition-colors" />
-          </div>
+      <div className="w-full max-w-2xl">
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
           <input
             type="text"
-            value={searchInput}
-            onChange={(e) => setSearchInput(e.target.value)}
-            placeholder="Search by email, name, or phone..."
-            className="w-full pl-12 pr-24 py-3 border border-gray-300 rounded-xl bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all shadow-sm hover:shadow-md"
+            placeholder="Search users by name, email, or phone..."
+            value={searchQuery}
+            onChange={(e) => {
+              setSearchQuery(e.target.value);
+              setPage(1);
+            }}
+            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
           />
-          {searchInput && (
-            <button
-              type="button"
-              onClick={handleClearSearch}
-              className="absolute inset-y-0 right-20 flex items-center pr-2 text-gray-400 hover:text-gray-600 transition-colors group/clear"
-              title="Clear search"
-            >
-              <div className="p-1.5 rounded-lg hover:bg-gray-100 transition-colors">
-                <X className="w-4 h-4" />
-              </div>
-            </button>
-          )}
-          <button
-            type="submit"
-            className="absolute inset-y-0 right-0 flex items-center px-6 bg-primary-600 text-white rounded-r-xl hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition-all font-medium shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
-            disabled={loading}
-          >
-            {loading ? (
-              <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-            ) : (
-              'Search'
-            )}
-          </button>
         </div>
-        {search && (
-          <div className="mt-2 flex items-center space-x-2 text-sm text-gray-600">
-            <span>Searching for:</span>
-            <span className="font-medium text-gray-900">"{search}"</span>
-            <button
-              onClick={handleClearSearch}
-              className="text-primary-600 hover:text-primary-700 underline"
-            >
-              Clear
-            </button>
-          </div>
-        )}
-      </form>
+      </div>
 
       {error && (
         <div className="bg-red-50 border-l-4 border-red-400 text-red-700 px-4 py-3 rounded-r-lg shadow-sm">
@@ -256,7 +209,7 @@ export default function Users() {
                           <UsersIcon className="w-12 h-12 text-gray-300" />
                           <div>
                             <p className="text-sm font-medium text-gray-900">No users found</p>
-                            {search && (
+                            {searchQuery && (
                               <p className="text-sm text-gray-500 mt-1">
                                 Try adjusting your search criteria
                               </p>

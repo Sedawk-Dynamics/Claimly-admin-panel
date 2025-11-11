@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { adminService } from '../services/admin.service';
 import { Policy, PaginatedResponse } from '../types';
-import { ChevronLeft, ChevronRight, FileText } from 'lucide-react';
+import { ChevronLeft, ChevronRight, FileText, Search } from 'lucide-react';
 import { format } from 'date-fns';
 
 export default function Policies() {
@@ -9,22 +9,23 @@ export default function Policies() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [page, setPage] = useState(1);
-  const limit = 20;
+  const [searchQuery, setSearchQuery] = useState('');
+  const limit = 25;
 
   useEffect(() => {
     loadPolicies();
-  }, [page]);
+  }, [page, searchQuery]);
 
   const loadPolicies = async () => {
     try {
       setLoading(true);
       setError('');
-      const data = await adminService.getPolicies(page, limit);
+      const data = await adminService.getPolicies(page, limit, searchQuery);
       // Ensure data has the expected structure
       if (data && data.data && Array.isArray(data.data)) {
         setPolicies(data);
       } else {
-        setPolicies({ data: [], pagination: { page: 1, limit: 20, total: 0, totalPages: 0 } });
+        setPolicies({ data: [], pagination: { page: 1, limit: 25, total: 0, totalPages: 0 } });
         setError('Invalid response format from server');
       }
     } catch (err: any) {
@@ -46,6 +47,23 @@ export default function Policies() {
     <div>
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-3xl font-bold text-gray-900">Policies</h1>
+      </div>
+
+      {/* Search Bar */}
+      <div className="mb-6">
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+          <input
+            type="text"
+            placeholder="Search policies by policy number, user name, phone, or company name..."
+            value={searchQuery}
+            onChange={(e) => {
+              setSearchQuery(e.target.value);
+              setPage(1);
+            }}
+            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+          />
+        </div>
       </div>
 
       {error && (
@@ -128,8 +146,8 @@ export default function Policies() {
                   ))
                 ) : (
                   <tr>
-                    <td colSpan={7} className="px-6 py-8 text-center text-sm text-gray-500">
-                      No policies found
+                    <td colSpan={6} className="px-6 py-8 text-center text-sm text-gray-500">
+                      {searchQuery ? 'No policies found matching your search' : 'No policies found'}
                     </td>
                   </tr>
                 )}

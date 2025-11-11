@@ -129,8 +129,9 @@ export const adminService = {
   },
 
   // Policies
-  async getPolicies(page = 1, limit = 20): Promise<PaginatedResponse<Policy>> {
+  async getPolicies(page = 1, limit = 20, search?: string): Promise<PaginatedResponse<Policy>> {
     const params = new URLSearchParams({ page: page.toString(), limit: limit.toString() });
+    if (search && search.trim()) params.append('search', search.trim());
     const response = await api.get<{ success: boolean; data: PoliciesResponse }>(
       `/admin/policies?${params.toString()}`
     );
