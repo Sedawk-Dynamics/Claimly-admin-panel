@@ -15,6 +15,7 @@ import {
   AdminActionsResponse,
   KycUser,
   KycUsersResponse,
+  ReVerificationDocumentsResponse,
 } from '../types';
 
 const apiBaseUrl = (api.defaults.baseURL || window.location.origin).replace(/\/$/, '');
@@ -54,6 +55,13 @@ export const adminService = {
       nominees: data.nominees.map((nominee) => ({
         ...nominee,
         documents: nominee.documents.map((document) => ({
+          ...document,
+          documentUrl: toAbsoluteUrl(document.documentUrl),
+        })),
+      })),
+      recentPolicies: data.recentPolicies.map((policy) => ({
+        ...policy,
+        documents: policy.documents?.map((document) => ({
           ...document,
           documentUrl: toAbsoluteUrl(document.documentUrl),
         })),
@@ -187,14 +195,19 @@ export const adminService = {
   // KYC Documents
   async getKycDocuments(
     page = 1,
-    limit = 20,
-    status: 'pending' | 'verified' = 'pending'
+    limit = 25,
+    status: 'pending' | 'verified' | 're-verification' = 'pending',
+    search?: string
   ): Promise<PaginatedResponse<KycUser>> {
     const params = new URLSearchParams({
       page: page.toString(),
       limit: limit.toString(),
       status,
     });
+    
+    if (search && search.trim()) {
+      params.append('search', search.trim());
+    }
 
     const response = await api.get<{ success: boolean; data: KycUsersResponse }>(
       `/admin/documents/kyc-documents?${params.toString()}`
@@ -216,6 +229,55 @@ export const adminService = {
     await api.patch(`/admin/documents/verify-document/${documentId}`, {
       documentType: 'user',
     });
+  },
+
+  async rejectKycDocument(documentId: string): Promise<void> {
+    await api.patch(`/admin/documents/reject-document/${documentId}`, {
+      documentType: 'user',
+    });
+  },
+
+  // Policy Documents
+  async verifyPolicyDocument(documentId: string): Promise<void> {
+    await api.patch(`/admin/documents/verify-document/${documentId}`, {
+      documentType: 'policy',
+    });
+  },
+
+  async rejectPolicyDocument(documentId: string): Promise<void> {
+    await api.patch(`/admin/documents/reject-document/${documentId}`, {
+      documentType: 'policy',
+    });
+  },
+
+  // Nominee Documents
+  async verifyNomineeDocument(documentId: string): Promise<void> {
+    await api.patch(`/admin/documents/verify-document/${documentId}`, {
+      documentType: 'nominee',
+    });
+  },
+
+  async rejectNomineeDocument(documentId: string): Promise<void> {
+    await api.patch(`/admin/documents/reject-document/${documentId}`, {
+      documentType: 'nominee',
+    });
+  },
+
+  // Re-verification Documents
+  async getReVerificationDocuments(page: number = 1, limit: number = 20): Promise<ReVerificationDocumentsResponse> {
+    const response = await api.get<{ success: boolean; data: ReVerificationDocumentsResponse }>(
+      `/admin/documents/re-verification`,
+      {
+        params: { page, limit },
+      }
+    );
+    // Convert document URLs to absolute URLs
+    const data = response.data.data;
+    data.documents = data.documents.map((doc) => ({
+      ...doc,
+      documentUrl: toAbsoluteUrl(doc.documentUrl),
+    }));
+    return data;
   },
 };
 

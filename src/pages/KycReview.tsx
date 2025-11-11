@@ -10,9 +10,14 @@ import {
   ChevronLeft,
   ChevronRight,
   RefreshCcw,
+  XCircle,
+  RotateCcw,
+  Search,
 } from 'lucide-react';
 
-type ReviewStatus = 'pending' | 'verified';
+type ReviewStatus = 'pending' | 'verified' | 're-verification';
+
+const REQUIRED_DOCUMENT_TYPES: Array<'AADHAAR' | 'PAN'> = ['AADHAAR', 'PAN'];
 
 export default function KycReview() {
   const [records, setRecords] = useState<PaginatedResponse<KycUser> | null>(null);
@@ -20,18 +25,25 @@ export default function KycReview() {
   const [error, setError] = useState('');
   const [page, setPage] = useState(1);
   const [statusFilter, setStatusFilter] = useState<ReviewStatus>('pending');
-  const limit = 10;
+  const [searchQuery, setSearchQuery] = useState('');
+  const limit = 25;
 
   useEffect(() => {
-    loadDocuments();
+    // Debounce search query to avoid too many API calls
+    const timer = setTimeout(() => {
+      loadDocuments();
+    }, searchQuery ? 500 : 0); // Wait 500ms after user stops typing, but immediate if clearing search
+
+    return () => clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [page, statusFilter]);
+  }, [page, statusFilter, searchQuery]);
 
   const loadDocuments = async () => {
     try {
       setLoading(true);
       setError('');
-      const data = await adminService.getKycDocuments(page, limit, statusFilter);
+      const search = searchQuery.trim() || undefined;
+      const data = await adminService.getKycDocuments(page, limit, statusFilter, search);
       setRecords(data);
     } catch (err: any) {
       setError(err.response?.data?.error || err.message || 'Failed to load KYC documents');
@@ -44,12 +56,41 @@ export default function KycReview() {
     }
   };
 
+  const handleSearchChange = (value: string) => {
+    setSearchQuery(value);
+    setPage(1); // Reset to first page when search changes
+  };
+
   const handleVerify = async (documentId: string) => {
     try {
       await adminService.verifyKycDocument(documentId);
       loadDocuments();
     } catch (err: any) {
       alert(err.response?.data?.error || 'Failed to verify document');
+    }
+  };
+
+  const handleReject = async (documentId: string) => {
+    if (!confirm('Are you sure you want to reject this document?')) {
+      return;
+    }
+    try {
+      await adminService.rejectKycDocument(documentId);
+      loadDocuments();
+    } catch (err: any) {
+      alert(err.response?.data?.error || 'Failed to reject document');
+    }
+  };
+
+  const handleRemoveVerification = async (documentId: string) => {
+    if (!confirm('Are you sure you want to remove verification from this document?')) {
+      return;
+    }
+    try {
+      await adminService.rejectKycDocument(documentId);
+      loadDocuments();
+    } catch (err: any) {
+      alert(err.response?.data?.error || 'Failed to remove verification');
     }
   };
 
@@ -91,10 +132,20 @@ export default function KycReview() {
             KYC Review
           </h1>
           <p className="text-sm text-gray-600 mt-1">
-            Review and verify Aadhaar and PAN documents submitted by users.
+            Review and verify Aadhaar and PAN documents submitted by users. Re-verification includes users who were previously verified but uploaded new documents.
           </p>
         </div>
         <div className="flex items-center space-x-3">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+            <input
+              type="text"
+              placeholder="Search by name, email, or phone..."
+              value={searchQuery}
+              onChange={(e) => handleSearchChange(e.target.value)}
+              className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent w-64"
+            />
+          </div>
           <select
             value={statusFilter}
             onChange={(e) => {
@@ -104,6 +155,7 @@ export default function KycReview() {
             className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent"
           >
             <option value="pending">Pending Verification</option>
+            <option value="re-verification">Re-verification</option>
             <option value="verified">Verified</option>
           </select>
           <button
@@ -159,6 +211,24 @@ export default function KycReview() {
                           Missing: {user.pendingDocuments.join(', ')}
                         </div>
                       )}
+                      {statusFilter === 'verified' && user.documents.length > 0 && (
+                        <div className="mt-1 text-xs text-green-600">
+                          Last verified: {(() => {
+                            const verifiedDates = user.documents
+                              .filter(doc => doc.isVerified && doc.verifiedAt)
+                              .map(doc => new Date(doc.verifiedAt!).getTime())
+                              .sort((a, b) => b - a);
+                            if (verifiedDates.length > 0) {
+                              return new Date(verifiedDates[0]).toLocaleDateString('en-US', {
+                                year: 'numeric',
+                                month: 'short',
+                                day: 'numeric'
+                              });
+                            }
+                            return 'N/A';
+                          })()}
+                        </div>
+                      )}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {user.documents.length > 0
@@ -168,34 +238,91 @@ export default function KycReview() {
                     <td className="px-6 py-4 whitespace-nowrap">{renderStatusBadge(user)}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
                       <div className="space-y-2">
-                        {user.documents.map((doc) => (
-                          <div key={doc.id} className="flex items-center justify-between">
-                            <div>
-                              <div className="text-sm font-medium">{doc.documentName}</div>
-                              <div className="text-xs uppercase text-gray-500">{doc.documentType}</div>
-                            </div>
-                            <div className="flex items-center space-x-3">
-                              <a
-                                href={doc.documentUrl}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="inline-flex items-center text-primary-600 hover:text-primary-700"
-                              >
-                                <ExternalLink className="w-4 h-4 mr-1" />
-                                View
-                              </a>
-                              {!doc.isVerified && (
-                                <button
-                                  onClick={() => handleVerify(doc.id)}
-                                  className="inline-flex items-center text-green-600 hover:text-green-700"
+                        {user.documents.map((doc) => {
+                          // When filter is 're-verification', all documents shown are re-verification documents
+                          // They are either:
+                          // 1. Documents with verified_at (previously verified document that was updated)
+                          // 2. New documents from users who already have all required documents verified
+                          const isReverification = statusFilter === 're-verification';
+                          const isVerified = statusFilter === 'verified';
+                          const hasVerifiedAt = doc.verifiedAt !== null && doc.verifiedAt !== undefined;
+                          const userHasAllVerified = user.verifiedDocuments && user.verifiedDocuments.length >= REQUIRED_DOCUMENT_TYPES.length;
+                          
+                          return (
+                            <div key={doc.id} className="flex items-center justify-between">
+                              <div>
+                                <div className="flex items-center gap-2">
+                                  <div className="text-sm font-medium">{doc.documentName}</div>
+                                  {isReverification && (
+                                    <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-orange-100 text-orange-800">
+                                      <RotateCcw className="w-3 h-3 mr-1" />
+                                      Re-verification
+                                    </span>
+                                  )}
+                                </div>
+                                <div className="text-xs uppercase text-gray-500">{doc.documentType}</div>
+                                {isVerified && doc.isVerified && hasVerifiedAt && (
+                                  <div className="text-xs text-green-600 mt-1">
+                                    Verified on: {new Date(doc.verifiedAt).toLocaleDateString('en-US', { 
+                                      year: 'numeric', 
+                                      month: 'short', 
+                                      day: 'numeric',
+                                      hour: '2-digit',
+                                      minute: '2-digit'
+                                    })}
+                                  </div>
+                                )}
+                                {isReverification && hasVerifiedAt && (
+                                  <div className="text-xs text-orange-600 mt-1">
+                                    Previously verified: {new Date(doc.verifiedAt).toLocaleDateString()}
+                                  </div>
+                                )}
+                                {isReverification && !hasVerifiedAt && userHasAllVerified && (
+                                  <div className="text-xs text-orange-600 mt-1">
+                                    New document from verified user
+                                  </div>
+                                )}
+                              </div>
+                              <div className="flex items-center space-x-3">
+                                <a
+                                  href={doc.documentUrl}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="inline-flex items-center text-primary-600 hover:text-primary-700"
                                 >
-                                  <CheckCircle className="w-4 h-4 mr-1" />
-                                  Verify
-                                </button>
-                              )}
+                                  <ExternalLink className="w-4 h-4 mr-1" />
+                                  View
+                                </a>
+                                {!doc.isVerified ? (
+                                  <>
+                                    <button
+                                      onClick={() => handleVerify(doc.id)}
+                                      className="inline-flex items-center text-green-600 hover:text-green-700 font-medium"
+                                    >
+                                      <CheckCircle className="w-4 h-4 mr-1" />
+                                      Accept
+                                    </button>
+                                    <button
+                                      onClick={() => handleReject(doc.id)}
+                                      className="inline-flex items-center text-red-600 hover:text-red-700 font-medium"
+                                    >
+                                      <XCircle className="w-4 h-4 mr-1" />
+                                      Reject
+                                    </button>
+                                  </>
+                                ) : (
+                                  <button
+                                    onClick={() => handleRemoveVerification(doc.id)}
+                                    className="inline-flex items-center text-orange-600 hover:text-orange-700 font-medium"
+                                  >
+                                    <RotateCcw className="w-4 h-4 mr-1" />
+                                    Remove Verification
+                                  </button>
+                                )}
+                              </div>
                             </div>
-                          </div>
-                        ))}
+                          );
+                        })}
                       </div>
                     </td>
                   </tr>

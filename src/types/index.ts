@@ -57,6 +57,16 @@ export interface NomineeDetail {
   documents: NomineeDocument[];
 }
 
+export interface PolicyDocument {
+  id: string;
+  documentType: string;
+  documentName: string;
+  documentUrl: string;
+  isVerified: boolean;
+  uploadedAt: string;
+  verifiedAt?: string | null;
+}
+
 export interface UserPolicySummary {
   id: string;
   policyNumber: string;
@@ -66,6 +76,7 @@ export interface UserPolicySummary {
     id: string;
     name: string;
   };
+  documents?: PolicyDocument[];
 }
 
 export interface UserSubscriptionSummary {
@@ -282,6 +293,43 @@ export interface KycUser {
 
 export interface KycUsersResponse {
   users: KycUser[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
+}
+
+export interface ReVerificationDocument {
+  id: string;
+  documentType: 'USER' | 'POLICY' | 'NOMINEE';
+  documentName: string;
+  documentUrl: string;
+  documentTypeDetail: string;
+  isVerified: boolean;
+  uploadedAt: string;
+  verifiedAt: string | null;
+  user: {
+    id: string;
+    name: string;
+    email: string;
+    mobileNumber: string;
+  };
+  policy: {
+    id: string;
+    policyNumber: string;
+    insuranceCompany: string;
+  } | null;
+  nominee: {
+    id: string;
+    name: string;
+    relationship: string;
+  } | null;
+}
+
+export interface ReVerificationDocumentsResponse {
+  documents: ReVerificationDocument[];
   pagination: {
     page: number;
     limit: number;

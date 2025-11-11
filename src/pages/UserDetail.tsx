@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, CheckCircle, XCircle, RotateCcw, ExternalLink } from 'lucide-react';
 import { adminService } from '../services/admin.service';
 import { UserDetail as AdminUserDetail } from '../types';
 
@@ -42,35 +42,141 @@ const formatCurrency = (value?: string | number | null) => {
   }).format(amount);
 };
 
+const getDocumentStatusBadge = (isVerified: boolean, verifiedAt?: string | null) => {
+  const isReverification = !isVerified && verifiedAt;
+  if (isVerified) {
+    return (
+      <span className="text-xs font-semibold uppercase text-green-600">Verified</span>
+    );
+  } else if (isReverification) {
+    return (
+      <span className="inline-flex items-center text-xs font-semibold uppercase text-orange-600">
+        <RotateCcw className="w-3 h-3 mr-1" />
+        Re-verification
+      </span>
+    );
+  } else {
+    return (
+      <span className="text-xs font-semibold uppercase text-amber-600">Pending</span>
+    );
+  }
+};
+
 export default function UserDetail() {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const [user, setUser] = useState<AdminUserDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [verifying, setVerifying] = useState<string | null>(null);
+
+  const fetchUser = async () => {
+    if (!id) {
+      setError('User not found');
+      setLoading(false);
+      return;
+    }
+    try {
+      setLoading(true);
+      const data = await adminService.getUserById(id);
+      setUser(data);
+      setError('');
+    } catch (err: any) {
+      setError(err.response?.data?.error || err.message || 'Failed to load user details');
+      setUser(null);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchUser = async () => {
-      if (!id) {
-        setError('User not found');
-        setLoading(false);
-        return;
-      }
-      try {
-        setLoading(true);
-        const data = await adminService.getUserById(id);
-        setUser(data);
-        setError('');
-      } catch (err: any) {
-        setError(err.response?.data?.error || err.message || 'Failed to load user details');
-        setUser(null);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchUser();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
+
+  const handleVerifyPolicyDocument = async (documentId: string) => {
+    try {
+      setVerifying(documentId);
+      await adminService.verifyPolicyDocument(documentId);
+      await fetchUser();
+    } catch (err: any) {
+      alert(err.response?.data?.error || 'Failed to verify document');
+    } finally {
+      setVerifying(null);
+    }
+  };
+
+  const handleRejectPolicyDocument = async (documentId: string) => {
+    if (!confirm('Are you sure you want to reject this policy document?')) {
+      return;
+    }
+    try {
+      setVerifying(documentId);
+      await adminService.rejectPolicyDocument(documentId);
+      await fetchUser();
+    } catch (err: any) {
+      alert(err.response?.data?.error || 'Failed to reject document');
+    } finally {
+      setVerifying(null);
+    }
+  };
+
+  const handleVerifyNomineeDocument = async (documentId: string) => {
+    try {
+      setVerifying(documentId);
+      await adminService.verifyNomineeDocument(documentId);
+      await fetchUser();
+    } catch (err: any) {
+      alert(err.response?.data?.error || 'Failed to verify document');
+    } finally {
+      setVerifying(null);
+    }
+  };
+
+  const handleRejectNomineeDocument = async (documentId: string) => {
+    if (!confirm('Are you sure you want to reject this nominee document?')) {
+      return;
+    }
+    try {
+      setVerifying(documentId);
+      await adminService.rejectNomineeDocument(documentId);
+      await fetchUser();
+    } catch (err: any) {
+      alert(err.response?.data?.error || 'Failed to reject document');
+    } finally {
+      setVerifying(null);
+    }
+  };
+
+  const handleRemoveNomineeVerification = async (documentId: string) => {
+    if (!confirm('Are you sure you want to remove verification from this nominee document?')) {
+      return;
+    }
+    try {
+      setVerifying(documentId);
+      await adminService.rejectNomineeDocument(documentId);
+      await fetchUser();
+    } catch (err: any) {
+      alert(err.response?.data?.error || 'Failed to remove verification');
+    } finally {
+      setVerifying(null);
+    }
+  };
+
+  const handleRemovePolicyVerification = async (documentId: string) => {
+    if (!confirm('Are you sure you want to remove verification from this policy document?')) {
+      return;
+    }
+    try {
+      setVerifying(documentId);
+      await adminService.rejectPolicyDocument(documentId);
+      await fetchUser();
+    } catch (err: any) {
+      alert(err.response?.data?.error || 'Failed to remove verification');
+    } finally {
+      setVerifying(null);
+    }
+  };
 
   return (
     <div className="space-y-8">
@@ -212,22 +318,46 @@ export default function UserDetail() {
                                   {formatEnumLabel(document.documentType)} • Uploaded {formatDate(document.uploadedAt)}
                                 </p>
                               </div>
-                              <div className="flex items-center gap-3">
-                                <span
-                                  className={`text-xs font-semibold uppercase ${
-                                    document.isVerified ? 'text-green-600' : 'text-amber-600'
-                                  }`}
-                                >
-                                  {document.isVerified ? 'Verified' : 'Pending'}
-                                </span>
+                              <div className="flex items-center gap-3 flex-wrap">
+                                {getDocumentStatusBadge(document.isVerified, document.verifiedAt)}
                                 <a
                                   href={document.documentUrl}
                                   target="_blank"
                                   rel="noopener noreferrer"
-                                  className="text-sm font-medium text-primary-600 hover:text-primary-700"
+                                  className="inline-flex items-center text-sm font-medium text-primary-600 hover:text-primary-700"
                                 >
+                                  <ExternalLink className="w-4 h-4 mr-1" />
                                   View
                                 </a>
+                                {!document.isVerified ? (
+                                  <>
+                                    <button
+                                      onClick={() => handleVerifyNomineeDocument(document.id)}
+                                      disabled={verifying === document.id}
+                                      className="inline-flex items-center text-sm text-green-600 hover:text-green-700 font-medium disabled:opacity-50"
+                                    >
+                                      <CheckCircle className="w-4 h-4 mr-1" />
+                                      Verify
+                                    </button>
+                                    <button
+                                      onClick={() => handleRejectNomineeDocument(document.id)}
+                                      disabled={verifying === document.id}
+                                      className="inline-flex items-center text-sm text-red-600 hover:text-red-700 font-medium disabled:opacity-50"
+                                    >
+                                      <XCircle className="w-4 h-4 mr-1" />
+                                      Reject
+                                    </button>
+                                  </>
+                                ) : (
+                                  <button
+                                    onClick={() => handleRemoveNomineeVerification(document.id)}
+                                    disabled={verifying === document.id}
+                                    className="inline-flex items-center text-sm text-orange-600 hover:text-orange-700 font-medium disabled:opacity-50"
+                                  >
+                                    <RotateCcw className="w-4 h-4 mr-1" />
+                                    Remove Verification
+                                  </button>
+                                )}
                               </div>
                             </div>
                           ))}
@@ -245,13 +375,76 @@ export default function UserDetail() {
           <section className="rounded-lg bg-white p-6 shadow">
             <h2 className="text-xl font-semibold text-gray-900">Policies</h2>
             {user.recentPolicies.length > 0 ? (
-              <div className="mt-6 grid gap-4 lg:grid-cols-2">
+              <div className="mt-6 space-y-5">
                 {user.recentPolicies.map((policy) => (
                   <div key={policy.id} className="rounded-lg border border-gray-200 p-4">
-                    <p className="text-sm font-semibold text-gray-900">Policy #{policy.policyNumber}</p>
-                    <p className="mt-2 text-sm text-gray-700">Sum Assured: {formatCurrency(policy.sumAssured)}</p>
-                    <p className="mt-1 text-sm text-gray-700">Status: {formatEnumLabel(policy.status)}</p>
-                    <p className="mt-1 text-sm text-gray-700">Insurer: {policy.insuranceCompany?.name || '-'}</p>
+                    <div className="mb-4">
+                      <p className="text-sm font-semibold text-gray-900">Policy #{policy.policyNumber}</p>
+                      <p className="mt-2 text-sm text-gray-700">Sum Assured: {formatCurrency(policy.sumAssured)}</p>
+                      <p className="mt-1 text-sm text-gray-700">Status: {formatEnumLabel(policy.status)}</p>
+                      <p className="mt-1 text-sm text-gray-700">Insurer: {policy.insuranceCompany?.name || '-'}</p>
+                    </div>
+                    {policy.documents && policy.documents.length > 0 && (
+                      <div className="mt-4 rounded-lg border border-gray-100 bg-gray-50 p-3">
+                        <p className="text-sm font-medium text-gray-700 mb-2">Policy Documents</p>
+                        <div className="space-y-2">
+                          {policy.documents.map((document) => (
+                            <div
+                              key={document.id}
+                              className="flex flex-col gap-2 rounded-md bg-white p-3 shadow-sm sm:flex-row sm:items-center sm:justify-between"
+                            >
+                              <div>
+                                <p className="text-sm font-medium text-gray-900">{document.documentName}</p>
+                                <p className="text-xs text-gray-500">
+                                  {formatEnumLabel(document.documentType)} • Uploaded {formatDate(document.uploadedAt)}
+                                </p>
+                              </div>
+                              <div className="flex items-center gap-3 flex-wrap">
+                                {getDocumentStatusBadge(document.isVerified, document.verifiedAt)}
+                                <a
+                                  href={document.documentUrl}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="inline-flex items-center text-sm font-medium text-primary-600 hover:text-primary-700"
+                                >
+                                  <ExternalLink className="w-4 h-4 mr-1" />
+                                  View
+                                </a>
+                                {!document.isVerified ? (
+                                  <>
+                                    <button
+                                      onClick={() => handleVerifyPolicyDocument(document.id)}
+                                      disabled={verifying === document.id}
+                                      className="inline-flex items-center text-sm text-green-600 hover:text-green-700 font-medium disabled:opacity-50"
+                                    >
+                                      <CheckCircle className="w-4 h-4 mr-1" />
+                                      Verify
+                                    </button>
+                                    <button
+                                      onClick={() => handleRejectPolicyDocument(document.id)}
+                                      disabled={verifying === document.id}
+                                      className="inline-flex items-center text-sm text-red-600 hover:text-red-700 font-medium disabled:opacity-50"
+                                    >
+                                      <XCircle className="w-4 h-4 mr-1" />
+                                      Reject
+                                    </button>
+                                  </>
+                                ) : (
+                                  <button
+                                    onClick={() => handleRemovePolicyVerification(document.id)}
+                                    disabled={verifying === document.id}
+                                    className="inline-flex items-center text-sm text-orange-600 hover:text-orange-700 font-medium disabled:opacity-50"
+                                  >
+                                    <RotateCcw className="w-4 h-4 mr-1" />
+                                    Remove Verification
+                                  </button>
+                                )}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
