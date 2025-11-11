@@ -11,7 +11,7 @@ export default function Users() {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
   const [searchInput, setSearchInput] = useState('');
-  const limit = 20;
+  const limit = 25;
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -27,12 +27,12 @@ export default function Users() {
       if (data && data.data && Array.isArray(data.data)) {
         setUsers(data);
       } else {
-        setUsers({ data: [], pagination: { page: 1, limit: 20, total: 0, totalPages: 0 } });
+        setUsers({ data: [], pagination: { page: 1, limit, total: 0, totalPages: 0 } });
         setError('Invalid response format from server');
       }
     } catch (err: any) {
       setError(err.response?.data?.error || err.message || 'Failed to load users');
-      setUsers({ data: [], pagination: { page: 1, limit: 20, total: 0, totalPages: 0 } });
+      setUsers({ data: [], pagination: { page: 1, limit, total: 0, totalPages: 0 } });
     } finally {
       setLoading(false);
     }
