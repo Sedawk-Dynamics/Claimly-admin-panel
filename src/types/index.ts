@@ -379,4 +379,23 @@ export interface PolicyUsersResponse {
   };
 }
 
+export interface UserActivityLog {
+  id: string;
+  userId: string;
+  activityType: string;
+  description: string | null;
+  metadata: Record<string, any> | null;
+  createdAt: string;
+}
+
+export interface UserActivityLogsResponse {
+  logs: UserActivityLog[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
+}
+
 

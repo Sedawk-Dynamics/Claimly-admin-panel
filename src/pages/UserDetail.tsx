@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, CheckCircle, XCircle, RotateCcw, ExternalLink } from 'lucide-react';
+import { ArrowLeft, CheckCircle, XCircle, RotateCcw, ExternalLink, Clock, FileText, CreditCard, UserPlus, UserCog, Shield, Upload, Edit } from 'lucide-react';
 import { adminService } from '../services/admin.service';
-import { UserDetail as AdminUserDetail } from '../types';
+import { UserDetail as AdminUserDetail, UserActivityLog, PaginatedResponse } from '../types';
 
 const formatDate = (value?: string | Date | null) => {
   if (!value) {
@@ -62,6 +62,36 @@ const getDocumentStatusBadge = (isVerified: boolean, verifiedAt?: string | null)
   }
 };
 
+const getActivityIcon = (activityType: string) => {
+  const iconMap: Record<string, any> = {
+    DOCUMENT_UPLOADED: Upload,
+    DOCUMENT_UPDATED: Edit,
+    SUBSCRIPTION_CREATED: CreditCard,
+    SUBSCRIPTION_EXPIRED: XCircle,
+    NOMINEE_ADDED: UserPlus,
+    NOMINEE_UPDATED: UserCog,
+    POLICY_ADDED: Shield,
+    POLICY_DOCUMENT_UPLOADED: FileText,
+    NOMINEE_DOCUMENT_UPLOADED: FileText,
+  };
+  return iconMap[activityType] || Clock;
+};
+
+const getActivityColor = (activityType: string) => {
+  const colorMap: Record<string, { bg: string; text: string; border: string; iconBg: string }> = {
+    DOCUMENT_UPLOADED: { bg: 'bg-blue-100', text: 'text-blue-700', border: 'border-blue-200', iconBg: 'bg-blue-200' },
+    DOCUMENT_UPDATED: { bg: 'bg-purple-100', text: 'text-purple-700', border: 'border-purple-200', iconBg: 'bg-purple-200' },
+    SUBSCRIPTION_CREATED: { bg: 'bg-green-100', text: 'text-green-700', border: 'border-green-200', iconBg: 'bg-green-200' },
+    SUBSCRIPTION_EXPIRED: { bg: 'bg-red-100', text: 'text-red-700', border: 'border-red-200', iconBg: 'bg-red-200' },
+    NOMINEE_ADDED: { bg: 'bg-indigo-100', text: 'text-indigo-700', border: 'border-indigo-200', iconBg: 'bg-indigo-200' },
+    NOMINEE_UPDATED: { bg: 'bg-cyan-100', text: 'text-cyan-700', border: 'border-cyan-200', iconBg: 'bg-cyan-200' },
+    POLICY_ADDED: { bg: 'bg-emerald-100', text: 'text-emerald-700', border: 'border-emerald-200', iconBg: 'bg-emerald-200' },
+    POLICY_DOCUMENT_UPLOADED: { bg: 'bg-amber-100', text: 'text-amber-700', border: 'border-amber-200', iconBg: 'bg-amber-200' },
+    NOMINEE_DOCUMENT_UPLOADED: { bg: 'bg-pink-100', text: 'text-pink-700', border: 'border-pink-200', iconBg: 'bg-pink-200' },
+  };
+  return colorMap[activityType] || { bg: 'bg-gray-100', text: 'text-gray-700', border: 'border-gray-200', iconBg: 'bg-gray-200' };
+};
+
 export default function UserDetail() {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
@@ -69,6 +99,9 @@ export default function UserDetail() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [verifying, setVerifying] = useState<string | null>(null);
+  const [activityLogs, setActivityLogs] = useState<PaginatedResponse<UserActivityLog> | null>(null);
+  const [activityLogsLoading, setActivityLogsLoading] = useState(false);
+  const [activityLogsPage, setActivityLogsPage] = useState(1);
 
   const fetchUser = async () => {
     if (!id) {
@@ -93,6 +126,26 @@ export default function UserDetail() {
     fetchUser();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
+
+  useEffect(() => {
+    if (id) {
+      fetchActivityLogs();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id, activityLogsPage]);
+
+  const fetchActivityLogs = async () => {
+    if (!id) return;
+    try {
+      setActivityLogsLoading(true);
+      const data = await adminService.getUserActivityLogs(id, activityLogsPage, 50);
+      setActivityLogs(data);
+    } catch (err: any) {
+      console.error('Failed to load activity logs:', err);
+    } finally {
+      setActivityLogsLoading(false);
+    }
+  };
 
   const handleVerifyPolicyDocument = async (documentId: string) => {
     try {
@@ -540,6 +593,116 @@ export default function UserDetail() {
               </div>
             ) : (
               <p className="mt-4 text-sm text-gray-500">No documents uploaded by this user.</p>
+            )}
+          </section>
+
+          <section className="rounded-lg bg-white p-6 shadow">
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h2 className="text-xl font-semibold text-gray-900">Activity Log</h2>
+                <p className="text-sm text-gray-500 mt-1">Track all user activities and changes</p>
+              </div>
+              {activityLogs && activityLogs.pagination.total > 0 && (
+                <div className="px-3 py-1 bg-primary-100 text-primary-700 rounded-full text-sm font-medium">
+                  {activityLogs.pagination.total} {activityLogs.pagination.total === 1 ? 'Activity' : 'Activities'}
+                </div>
+              )}
+            </div>
+            {activityLogsLoading ? (
+              <div className="flex min-h-[20vh] items-center justify-center">
+                <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-primary-600"></div>
+              </div>
+            ) : activityLogs && activityLogs.data.length > 0 ? (
+              <div className="space-y-3">
+                {activityLogs.data.map((log) => {
+                  const ActivityIcon = getActivityIcon(log.activityType);
+                  const colors = getActivityColor(log.activityType);
+                  return (
+                    <div
+                      key={log.id}
+                      className={`flex items-start gap-4 rounded-lg border-2 p-5 transition-all hover:shadow-lg ${colors.bg} ${colors.border}`}
+                    >
+                      <div className="flex-shrink-0 mt-0.5">
+                        <div className={`p-2.5 rounded-lg ${colors.iconBg} ${colors.text}`}>
+                          <ActivityIcon className="w-5 h-5" />
+                        </div>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-start justify-between gap-4">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-2">
+                              <p className={`text-base font-bold ${colors.text}`}>
+                                {formatEnumLabel(log.activityType)}
+                              </p>
+                            </div>
+                            {log.description && (
+                              <p className="text-sm font-semibold text-gray-800 mb-2 leading-relaxed">
+                                {log.description}
+                              </p>
+                            )}
+                            {log.metadata && Object.keys(log.metadata).length > 0 && (
+                              <div className="mt-3 pt-3 border-t-2 border-gray-300 border-opacity-30">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                  {Object.entries(log.metadata).map(([key, value]) => (
+                                    <div key={key} className="flex items-start gap-2">
+                                      <span className="text-xs font-bold text-gray-700 uppercase tracking-wide min-w-[120px]">
+                                        {formatEnumLabel(key)}:
+                                      </span>
+                                      <span className="text-xs font-semibold text-gray-900 break-words">
+                                        {String(value)}
+                                      </span>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                          <div className="flex-shrink-0 text-right">
+                            <div className="text-xs font-bold text-gray-700 uppercase tracking-wide mb-1">
+                              Time
+                            </div>
+                            <div className="text-sm font-bold text-gray-900 whitespace-nowrap">
+                              {formatDate(log.createdAt)}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+                {activityLogs.pagination.totalPages > 1 && (
+                  <div className="flex items-center justify-between mt-6 pt-4 border-t-2 border-gray-200">
+                    <p className="text-sm font-medium text-gray-600">
+                      Showing <span className="font-bold text-gray-900">{((activityLogsPage - 1) * 50) + 1}</span> to{' '}
+                      <span className="font-bold text-gray-900">
+                        {Math.min(activityLogsPage * 50, activityLogs.pagination.total)}
+                      </span>{' '}
+                      of <span className="font-bold text-gray-900">{activityLogs.pagination.total}</span> activities
+                    </p>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => setActivityLogsPage((p) => Math.max(1, p - 1))}
+                        disabled={activityLogsPage === 1}
+                        className="px-4 py-2 text-sm font-medium border-2 border-gray-300 rounded-lg hover:bg-gray-50 hover:border-gray-400 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                      >
+                        Previous
+                      </button>
+                      <button
+                        onClick={() => setActivityLogsPage((p) => p + 1)}
+                        disabled={activityLogsPage >= activityLogs.pagination.totalPages}
+                        className="px-4 py-2 text-sm font-medium border-2 border-gray-300 rounded-lg hover:bg-gray-50 hover:border-gray-400 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                      >
+                        Next
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="text-center py-12">
+                <Clock className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+                <p className="text-sm font-medium text-gray-500">No activity logs available for this user.</p>
+              </div>
             )}
           </section>
         </div>

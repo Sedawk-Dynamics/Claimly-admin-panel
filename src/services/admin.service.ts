@@ -18,6 +18,7 @@ import {
   ReVerificationDocumentsResponse,
   PolicyUser,
   PolicyUsersResponse,
+  UserActivityLog,
 } from '../types';
 
 const apiBaseUrl = (api.defaults.baseURL || window.location.origin).replace(/\/$/, '');
@@ -314,6 +315,18 @@ export const adminService = {
       documentUrl: toAbsoluteUrl(doc.documentUrl),
     }));
     return data;
+  },
+
+  // User Activity Logs
+  async getUserActivityLogs(userId: string, page: number = 1, limit: number = 50): Promise<PaginatedResponse<UserActivityLog>> {
+    const params = new URLSearchParams({ page: page.toString(), limit: limit.toString() });
+    const response = await api.get<{ success: boolean; data: UserActivityLogsResponse }>(
+      `/admin/users/${userId}/activity-logs?${params.toString()}`
+    );
+    return {
+      data: response.data.data.logs,
+      pagination: response.data.data.pagination,
+    };
   },
 };
 
