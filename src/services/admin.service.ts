@@ -19,6 +19,7 @@ import {
   PolicyUser,
   PolicyUsersResponse,
   UserActivityLog,
+  UserActivityLogsResponse,
 } from '../types';
 
 const apiBaseUrl = (api.defaults.baseURL || window.location.origin).replace(/\/$/, '');
