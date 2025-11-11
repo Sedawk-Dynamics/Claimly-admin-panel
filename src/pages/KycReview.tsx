@@ -215,8 +215,10 @@ export default function KycReview() {
                         <div className="mt-1 text-xs text-green-600">
                           Last verified: {(() => {
                             const verifiedDates = user.documents
-                              .filter(doc => doc.isVerified && doc.verifiedAt)
-                              .map(doc => new Date(doc.verifiedAt!).getTime())
+                              .filter(doc => doc.isVerified)
+                              .map(doc => doc.verifiedAt)
+                              .filter((date): date is string => date != null)
+                              .map(date => new Date(date).getTime())
                               .sort((a, b) => b - a);
                             if (verifiedDates.length > 0) {
                               return new Date(verifiedDates[0]).toLocaleDateString('en-US', {
@@ -261,7 +263,7 @@ export default function KycReview() {
                                   )}
                                 </div>
                                 <div className="text-xs uppercase text-gray-500">{doc.documentType}</div>
-                                {isVerified && doc.isVerified && hasVerifiedAt && (
+                                {isVerified && doc.isVerified && hasVerifiedAt && doc.verifiedAt && (
                                   <div className="text-xs text-green-600 mt-1">
                                     Verified on: {new Date(doc.verifiedAt).toLocaleDateString('en-US', { 
                                       year: 'numeric', 
@@ -272,7 +274,7 @@ export default function KycReview() {
                                     })}
                                   </div>
                                 )}
-                                {isReverification && hasVerifiedAt && (
+                                {isReverification && hasVerifiedAt && doc.verifiedAt && (
                                   <div className="text-xs text-orange-600 mt-1">
                                     Previously verified: {new Date(doc.verifiedAt).toLocaleDateString()}
                                   </div>
