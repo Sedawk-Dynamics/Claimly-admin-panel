@@ -79,9 +79,10 @@ export const adminService = {
   },
 
   // Companies
-  async getCompanies(page = 1, limit = 20, status?: 'ACTIVE' | 'INACTIVE'): Promise<PaginatedResponse<Company>> {
+  async getCompanies(page = 1, limit = 20, status?: 'ACTIVE' | 'INACTIVE', search?: string): Promise<PaginatedResponse<Company>> {
     const params = new URLSearchParams({ page: page.toString(), limit: limit.toString() });
     if (status) params.append('status', status);
+    if (search && search.trim()) params.append('search', search.trim());
     const response = await api.get<{ success: boolean; data: CompaniesResponse }>(
       `/admin/companies?${params.toString()}`
     );

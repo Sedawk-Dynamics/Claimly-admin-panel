@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { adminService } from '../services/admin.service';
 import { Company, PaginatedResponse } from '../types';
-import { Plus, Edit, Trash2, ChevronLeft, ChevronRight, Building2 } from 'lucide-react';
+import { Plus, Edit, Trash2, ChevronLeft, ChevronRight, Building2, Search } from 'lucide-react';
 
 export default function Companies() {
   const [companies, setCompanies] = useState<PaginatedResponse<Company> | null>(null);
@@ -9,9 +9,10 @@ export default function Companies() {
   const [error, setError] = useState('');
   const [page, setPage] = useState(1);
   const [statusFilter, setStatusFilter] = useState<'ACTIVE' | 'INACTIVE' | undefined>(undefined);
+  const [searchQuery, setSearchQuery] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [editingCompany, setEditingCompany] = useState<Company | null>(null);
-  const limit = 20;
+  const limit = 25;
 
   const [formData, setFormData] = useState({
     name: '',
@@ -24,18 +25,18 @@ export default function Companies() {
 
   useEffect(() => {
     loadCompanies();
-  }, [page, statusFilter]);
+  }, [page, statusFilter, searchQuery]);
 
   const loadCompanies = async () => {
     try {
       setLoading(true);
       setError('');
-      const data = await adminService.getCompanies(page, limit, statusFilter);
+      const data = await adminService.getCompanies(page, limit, statusFilter, searchQuery);
       // Ensure data has the expected structure
       if (data && data.data && Array.isArray(data.data)) {
         setCompanies(data);
       } else {
-        setCompanies({ data: [], pagination: { page: 1, limit: 20, total: 0, totalPages: 0 } });
+        setCompanies({ data: [], pagination: { page: 1, limit: 25, total: 0, totalPages: 0 } });
         setError('Invalid response format from server');
       }
     } catch (err: any) {
@@ -110,32 +111,49 @@ export default function Companies() {
         </button>
       </div>
 
-      {/* Filters */}
-      <div className="mb-6 flex space-x-4">
-        <button
-          onClick={() => setStatusFilter(undefined)}
-          className={`px-4 py-2 rounded-lg ${
-            statusFilter === undefined ? 'bg-primary-600 text-white' : 'bg-white text-gray-700'
-          }`}
-        >
-          All
-        </button>
-        <button
-          onClick={() => setStatusFilter('ACTIVE')}
-          className={`px-4 py-2 rounded-lg ${
-            statusFilter === 'ACTIVE' ? 'bg-primary-600 text-white' : 'bg-white text-gray-700'
-          }`}
-        >
-          Active
-        </button>
-        <button
-          onClick={() => setStatusFilter('INACTIVE')}
-          className={`px-4 py-2 rounded-lg ${
-            statusFilter === 'INACTIVE' ? 'bg-primary-600 text-white' : 'bg-white text-gray-700'
-          }`}
-        >
-          Inactive
-        </button>
+      {/* Search and Filters */}
+      <div className="mb-6 space-y-4">
+        <div className="flex items-center space-x-4">
+          <div className="flex-1 relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+            <input
+              type="text"
+              placeholder="Search companies by name, email, phone, website, or address..."
+              value={searchQuery}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                setPage(1);
+              }}
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+            />
+          </div>
+        </div>
+        <div className="flex space-x-4">
+          <button
+            onClick={() => setStatusFilter(undefined)}
+            className={`px-4 py-2 rounded-lg ${
+              statusFilter === undefined ? 'bg-primary-600 text-white' : 'bg-white text-gray-700'
+            }`}
+          >
+            All
+          </button>
+          <button
+            onClick={() => setStatusFilter('ACTIVE')}
+            className={`px-4 py-2 rounded-lg ${
+              statusFilter === 'ACTIVE' ? 'bg-primary-600 text-white' : 'bg-white text-gray-700'
+            }`}
+          >
+            Active
+          </button>
+          <button
+            onClick={() => setStatusFilter('INACTIVE')}
+            className={`px-4 py-2 rounded-lg ${
+              statusFilter === 'INACTIVE' ? 'bg-primary-600 text-white' : 'bg-white text-gray-700'
+            }`}
+          >
+            Inactive
+          </button>
+        </div>
       </div>
 
       {error && (
