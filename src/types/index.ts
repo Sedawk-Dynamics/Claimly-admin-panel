@@ -338,4 +338,45 @@ export interface ReVerificationDocumentsResponse {
   };
 }
 
+export interface PolicyUserDocument {
+  id: string;
+  documentType: string;
+  documentName: string;
+  documentUrl: string;
+  isVerified: boolean;
+  uploadedAt: string;
+  verifiedAt?: string | null;
+  rejectedAt?: string | null;
+}
+
+export interface PolicyUser {
+  id: string;
+  policyNumber: string;
+  sumAssured: string;
+  status: string;
+  uploadedAt: string;
+  user: {
+    id: string;
+    name: string;
+    email: string | null;
+    mobileNumber: string;
+  };
+  insuranceCompany: {
+    id: string;
+    name: string;
+  };
+  documents: PolicyUserDocument[];
+  verifiedDocuments: string[];
+}
+
+export interface PolicyUsersResponse {
+  policies: PolicyUser[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
+}
+
 

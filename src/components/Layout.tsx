@@ -18,6 +18,7 @@ const navigation = [
   { name: 'Dashboard', href: '/', icon: LayoutDashboard },
   { name: 'Users', href: '/users', icon: Users },
   { name: 'KYC Review', href: '/kyc-review', icon: ShieldCheck },
+  { name: 'Policy Review', href: '/policy-review', icon: FileText },
   { name: 'Companies', href: '/companies', icon: Building2 },
   { name: 'Policies', href: '/policies', icon: FileText },
   { name: 'Alerts', href: '/alerts', icon: Bell },

@@ -6,6 +6,7 @@ import Dashboard from './pages/Dashboard';
 import Users from './pages/Users';
 import UserDetail from './pages/UserDetail';
 import KycReview from './pages/KycReview';
+import PolicyReview from './pages/PolicyReview';
 import Companies from './pages/Companies';
 import Policies from './pages/Policies';
 import Alerts from './pages/Alerts';
@@ -32,6 +33,7 @@ function App() {
           <Route path="users" element={<Users />} />
           <Route path="users/:id" element={<UserDetail />} />
           <Route path="kyc-review" element={<KycReview />} />
+          <Route path="policy-review" element={<PolicyReview />} />
           <Route path="companies" element={<Companies />} />
           <Route path="policies" element={<Policies />} />
           <Route path="alerts" element={<Alerts />} />

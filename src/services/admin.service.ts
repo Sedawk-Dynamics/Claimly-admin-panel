@@ -16,6 +16,8 @@ import {
   KycUser,
   KycUsersResponse,
   ReVerificationDocumentsResponse,
+  PolicyUser,
+  PolicyUsersResponse,
 } from '../types';
 
 const apiBaseUrl = (api.defaults.baseURL || window.location.origin).replace(/\/$/, '');
@@ -238,6 +240,38 @@ export const adminService = {
   },
 
   // Policy Documents
+  async getPolicyDocuments(
+    page = 1,
+    limit = 25,
+    status: 'pending' | 'verified' | 're-verification' | 'rejected' = 'pending',
+    search?: string
+  ): Promise<PaginatedResponse<PolicyUser>> {
+    const params = new URLSearchParams({
+      page: page.toString(),
+      limit: limit.toString(),
+      status,
+    });
+    
+    if (search && search.trim()) {
+      params.append('search', search.trim());
+    }
+
+    const response = await api.get<{ success: boolean; data: PolicyUsersResponse }>(
+      `/admin/documents/policy-documents?${params.toString()}`
+    );
+
+    return {
+      data: response.data.data.policies.map((policy) => ({
+        ...policy,
+        documents: policy.documents.map((document) => ({
+          ...document,
+          documentUrl: toAbsoluteUrl(document.documentUrl),
+        })),
+      })),
+      pagination: response.data.data.pagination,
+    };
+  },
+
   async verifyPolicyDocument(documentId: string): Promise<void> {
     await api.patch(`/admin/documents/verify-document/${documentId}`, {
       documentType: 'policy',
