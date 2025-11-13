@@ -148,10 +148,18 @@ export const adminService = {
   async getAlerts(
     page = 1,
     limit = 20,
-    status?: 'PENDING' | 'VERIFIED' | 'FALSE_ALERT'
+    status?: 'PENDING' | 'VERIFIED' | 'FALSE_ALERT',
+    search?: string,
+    detectedVia?: 'SMS' | 'MANUAL',
+    startDate?: string,
+    endDate?: string
   ): Promise<PaginatedResponse<Alert>> {
     const params = new URLSearchParams({ page: page.toString(), limit: limit.toString() });
     if (status) params.append('status', status);
+    if (search) params.append('search', search);
+    if (detectedVia) params.append('detectedVia', detectedVia);
+    if (startDate) params.append('startDate', startDate);
+    if (endDate) params.append('endDate', endDate);
     const response = await api.get<{ success: boolean; data: AlertsResponse }>(
       `/admin/alerts?${params.toString()}`
     );
@@ -177,6 +185,17 @@ export const adminService = {
 
   async getAlertStats(): Promise<AlertStats> {
     const response = await api.get<{ success: boolean; data: AlertStats }>('/admin/alerts/stats');
+    return response.data.data;
+  },
+
+  async bulkVerifyAlerts(
+    alertIds: string[],
+    data: { verificationStatus: 'VERIFIED' | 'FALSE_ALERT'; remarks?: string }
+  ): Promise<{ success: number; failed: number; results: Alert[]; errors: any[] }> {
+    const response = await api.post<{ success: boolean; data: { success: number; failed: number; results: Alert[]; errors: any[] } }>(
+      '/admin/alerts/bulk-verify',
+      { alertIds, ...data }
+    );
     return response.data.data;
   },
 

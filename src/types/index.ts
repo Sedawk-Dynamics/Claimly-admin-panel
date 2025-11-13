@@ -176,6 +176,7 @@ export interface Alert {
     email: string;
   } | null;
   createdAt: string;
+  alertType?: string;
   user?: {
     id: string;
     name: string;
@@ -269,6 +270,15 @@ export interface AlertStats {
   pending: number;
   verified: number;
   falseAlerts: number;
+  smsAlerts?: number;
+  manualAlerts?: number;
+  typeStats?: {
+    NEW_USER: number;
+    NEW_POLICY: number;
+    NEW_NOMINEE: number;
+    SUBSCRIPTION: number;
+    OTHER: number;
+  };
 }
 
 export interface KycUserDocument {
