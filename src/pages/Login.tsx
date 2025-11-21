@@ -1,7 +1,7 @@
 import { useState, FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { authService } from '../services/auth.service';
-import { Shield } from 'lucide-react';
+import logo from '../logo/claimly logo png.png';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -32,10 +32,9 @@ export default function Login() {
       <div className="max-w-md w-full">
         <div className="bg-white rounded-2xl shadow-xl p-8">
           <div className="text-center mb-8">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-primary-100 rounded-full mb-4">
-              <Shield className="w-8 h-8 text-primary-600" />
+            <div className="flex justify-center mb-4">
+              <img src={logo} alt="Claimly" className="h-20 w-auto" />
             </div>
-            <h1 className="text-3xl font-bold text-gray-900">Claimly Admin</h1>
             <p className="text-gray-600 mt-2">Sign in to your admin account</p>
           </div>
 
@@ -57,7 +56,7 @@ export default function Login() {
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition"
-                placeholder="admin@claimly.com"
+                placeholder="Enter your email"
               />
             </div>
 
