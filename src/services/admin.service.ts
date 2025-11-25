@@ -221,7 +221,7 @@ export const adminService = {
   async getKycDocuments(
     page = 1,
     limit = 25,
-    status: 'pending' | 'verified' | 're-verification' = 'pending',
+    status: 'pending' | 'verified' | 're-verification' | 'rejected' = 'pending',
     search?: string
   ): Promise<PaginatedResponse<KycUser>> {
     const params = new URLSearchParams({
@@ -259,6 +259,18 @@ export const adminService = {
   async rejectKycDocument(documentId: string): Promise<void> {
     await api.patch(`/admin/documents/reject-document/${documentId}`, {
       documentType: 'user',
+    });
+  },
+
+  async acceptUserWithoutDocuments(userId: string): Promise<void> {
+    await api.post(`/admin/documents/accept-entity/${userId}`, {
+      entityType: 'user',
+    });
+  },
+
+  async rejectUserWithoutDocuments(userId: string): Promise<void> {
+    await api.post(`/admin/documents/reject-entity/${userId}`, {
+      entityType: 'user',
     });
   },
 
@@ -307,6 +319,18 @@ export const adminService = {
     });
   },
 
+  async acceptPolicyWithoutDocuments(policyId: string): Promise<void> {
+    await api.post(`/admin/documents/accept-entity/${policyId}`, {
+      entityType: 'policy',
+    });
+  },
+
+  async rejectPolicyWithoutDocuments(policyId: string): Promise<void> {
+    await api.post(`/admin/documents/reject-entity/${policyId}`, {
+      entityType: 'policy',
+    });
+  },
+
   // Nominee Documents
   async verifyNomineeDocument(documentId: string): Promise<void> {
     await api.patch(`/admin/documents/verify-document/${documentId}`, {
@@ -317,6 +341,18 @@ export const adminService = {
   async rejectNomineeDocument(documentId: string): Promise<void> {
     await api.patch(`/admin/documents/reject-document/${documentId}`, {
       documentType: 'nominee',
+    });
+  },
+
+  async acceptNomineeWithoutDocuments(nomineeId: string): Promise<void> {
+    await api.post(`/admin/documents/accept-entity/${nomineeId}`, {
+      entityType: 'nominee',
+    });
+  },
+
+  async rejectNomineeWithoutDocuments(nomineeId: string): Promise<void> {
+    await api.post(`/admin/documents/reject-entity/${nomineeId}`, {
+      entityType: 'nominee',
     });
   },
 

@@ -289,6 +289,7 @@ export interface KycUserDocument {
   isVerified: boolean;
   uploadedAt: string;
   verifiedAt?: string | null;
+  rejectedAt?: string | null;
 }
 
 export interface KycUser {

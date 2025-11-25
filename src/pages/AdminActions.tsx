@@ -37,8 +37,8 @@ export default function AdminActions() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-3xl font-bold text-gray-900">Admin Actions</h1>
+      <div className="flex items-center justify-between mb-4 sm:mb-6">
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Admin Actions</h1>
       </div>
 
       {error && (
@@ -53,7 +53,8 @@ export default function AdminActions() {
         </div>
       ) : (
         <>
-          <div className="bg-white rounded-lg shadow overflow-hidden">
+          {/* Desktop Table View */}
+          <div className="hidden md:block bg-white rounded-lg shadow overflow-hidden">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
@@ -125,8 +126,8 @@ export default function AdminActions() {
 
           {/* Pagination */}
           {actions && actions.pagination.totalPages > 1 && (
-            <div className="mt-6 flex items-center justify-between">
-              <div className="text-sm text-gray-700">
+            <div className="mt-4 sm:mt-6 flex flex-col sm:flex-row items-center justify-between gap-3">
+              <div className="text-xs sm:text-sm text-gray-700 text-center sm:text-left">
                 Showing {((page - 1) * limit) + 1} to {Math.min(page * limit, actions.pagination.total)} of{' '}
                 {actions.pagination.total} results
               </div>
@@ -134,20 +135,54 @@ export default function AdminActions() {
                 <button
                   onClick={() => setPage(page - 1)}
                   disabled={page === 1}
-                  className="px-4 py-2 border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+                  className="px-3 sm:px-4 py-2 border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
                 >
-                  <ChevronLeft className="w-5 h-5" />
+                  <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" />
                 </button>
                 <button
                   onClick={() => setPage(page + 1)}
                   disabled={page >= actions.pagination.totalPages}
-                  className="px-4 py-2 border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+                  className="px-3 sm:px-4 py-2 border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
                 >
-                  <ChevronRight className="w-5 h-5" />
+                  <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
                 </button>
               </div>
             </div>
           )}
+
+          {/* Mobile Card View */}
+          <div className="md:hidden space-y-4">
+          {actions?.data && actions.data.length > 0 ? (
+            actions.data.map((action) => (
+              <div key={action.id} className="bg-white rounded-lg shadow border border-gray-200 p-4">
+                <div className="flex items-start space-x-2 mb-3">
+                  <History className="w-5 h-5 text-gray-400 flex-shrink-0 mt-0.5" />
+                  <div className="flex-1 min-w-0">
+                    <div className="text-sm font-medium text-gray-900">{action.actionType}</div>
+                    {action.notes && (
+                      <div className="text-xs text-gray-500 mt-1 break-words">{action.notes}</div>
+                    )}
+                  </div>
+                </div>
+                <div className="text-xs text-gray-600 space-y-1 pt-3 border-t border-gray-100">
+                  <div>
+                    <span className="font-medium">Admin:</span> {action.admin?.email || 'N/A'}
+                  </div>
+                  <div>
+                    <span className="font-medium">User:</span> {action.user?.name || 'N/A'} ({action.user?.email || 'N/A'})
+                  </div>
+                  <div>
+                    <span className="font-medium">Date:</span> {format(new Date(action.createdAt), 'MMM dd, yyyy hh:mm a')}
+                  </div>
+                </div>
+              </div>
+            ))
+          ) : (
+            <div className="bg-white rounded-lg shadow border border-gray-200 p-8 text-center">
+              <p className="text-sm text-gray-500">No admin actions found</p>
+            </div>
+          )}
+        </div>
         </>
       )}
     </div>

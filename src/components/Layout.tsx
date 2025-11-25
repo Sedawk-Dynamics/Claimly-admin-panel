@@ -113,7 +113,7 @@ export default function Layout() {
       <div className="lg:pl-64">
         {/* Top bar */}
         <header className="sticky top-0 z-10 bg-white border-b border-gray-200">
-          <div className="flex items-center justify-between h-16 px-6">
+          <div className="flex items-center justify-between h-16 px-4 sm:px-6">
             <button
               onClick={() => setSidebarOpen(true)}
               className="lg:hidden text-gray-500 hover:text-gray-700"
@@ -125,7 +125,7 @@ export default function Layout() {
         </header>
 
         {/* Page content */}
-        <main className="p-6">
+        <main className="p-4 sm:p-6">
           <Outlet />
         </main>
       </div>

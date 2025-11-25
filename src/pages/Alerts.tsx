@@ -238,9 +238,9 @@ export default function Alerts() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-3xl font-bold text-gray-900">Alerts</h1>
-        <div className="flex space-x-2">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4 sm:mb-6">
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Alerts</h1>
+        <div className="flex flex-wrap gap-2 sm:space-x-2">
           {selectedAlerts.size > 0 && (
             <button
               onClick={handleBulkVerify}
@@ -261,7 +261,7 @@ export default function Alerts() {
 
       {/* Statistics Dashboard */}
       {stats && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-4 sm:mb-6">
           <div className="bg-white rounded-lg shadow p-4">
             <div className="text-sm text-gray-500">Total Alerts</div>
             <div className="text-2xl font-bold text-gray-900">{stats.total}</div>
@@ -373,7 +373,7 @@ export default function Alerts() {
       </div>
 
       {/* Status Filters */}
-      <div className="mb-6 flex space-x-4">
+      <div className="mb-4 sm:mb-6 flex flex-wrap gap-2 sm:space-x-4">
         <button
           onClick={() => {
             setStatusFilter(undefined);
@@ -541,8 +541,8 @@ export default function Alerts() {
 
           {/* Pagination */}
           {alerts && alerts.pagination.totalPages > 1 && (
-            <div className="mt-6 flex items-center justify-between">
-              <div className="text-sm text-gray-700">
+            <div className="mt-4 sm:mt-6 flex flex-col sm:flex-row items-center justify-between gap-3">
+              <div className="text-xs sm:text-sm text-gray-700 text-center sm:text-left">
                 Showing {((page - 1) * limit) + 1} to {Math.min(page * limit, alerts.pagination.total)} of{' '}
                 {alerts.pagination.total} results
               </div>
@@ -550,16 +550,16 @@ export default function Alerts() {
                 <button
                   onClick={() => setPage(page - 1)}
                   disabled={page === 1}
-                  className="px-4 py-2 border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+                  className="px-3 sm:px-4 py-2 border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
                 >
-                  <ChevronLeft className="w-5 h-5" />
+                  <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" />
                 </button>
                 <button
                   onClick={() => setPage(page + 1)}
                   disabled={page >= alerts.pagination.totalPages}
-                  className="px-4 py-2 border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+                  className="px-3 sm:px-4 py-2 border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
                 >
-                  <ChevronRight className="w-5 h-5" />
+                  <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
                 </button>
               </div>
             </div>
@@ -569,9 +569,9 @@ export default function Alerts() {
 
       {/* Verify Modal */}
       {showVerifyModal && selectedAlert && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
-            <h3 className="text-lg font-bold text-gray-900 mb-4">
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 p-4">
+          <div className="relative top-4 sm:top-20 mx-auto p-4 sm:p-5 border w-full max-w-md shadow-lg rounded-md bg-white">
+            <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-4">
               {selectedAlert.verificationStatus === 'PENDING' ? 'Verify Alert' : 'Edit Alert Verification'}
             </h3>
             <div className="mb-4">

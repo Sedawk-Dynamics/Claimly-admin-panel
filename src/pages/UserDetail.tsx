@@ -232,12 +232,12 @@ export default function UserDetail() {
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 sm:space-y-8">
       <button
         onClick={() => navigate('/users')}
-        className="inline-flex items-center text-sm font-medium text-primary-600 hover:text-primary-700"
+        className="inline-flex items-center text-xs sm:text-sm font-medium text-primary-600 hover:text-primary-700"
       >
-        <ArrowLeft className="mr-2 h-4 w-4" />
+        <ArrowLeft className="mr-2 h-3 w-3 sm:h-4 sm:w-4" />
         Back to Users
       </button>
 
@@ -248,11 +248,11 @@ export default function UserDetail() {
       ) : error ? (
         <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{error}</div>
       ) : user ? (
-        <div className="space-y-10">
-          <section className="rounded-lg bg-white p-6 shadow">
-            <h1 className="text-2xl font-bold text-gray-900">{user.name}</h1>
-            <p className="mt-1 text-sm text-gray-500">User ID: {user.id}</p>
-            <div className="mt-6 grid gap-4 sm:grid-cols-2">
+        <div className="space-y-6 sm:space-y-10">
+          <section className="rounded-lg bg-white p-4 sm:p-6 shadow">
+            <h1 className="text-xl sm:text-2xl font-bold text-gray-900">{user.name}</h1>
+            <p className="mt-1 text-xs sm:text-sm text-gray-500 break-all">User ID: {user.id}</p>
+            <div className="mt-4 sm:mt-6 grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2">
               <div>
                 <p className="text-xs font-medium uppercase tracking-wide text-gray-500">Email</p>
                 <p className="mt-1 break-all text-sm text-gray-900">{user.email || '-'}</p>
@@ -288,9 +288,9 @@ export default function UserDetail() {
             </div>
           </section>
 
-          <section className="rounded-lg bg-white p-6 shadow">
-            <h2 className="text-xl font-semibold text-gray-900">Usage Summary</h2>
-            <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+          <section className="rounded-lg bg-white p-4 sm:p-6 shadow">
+            <h2 className="text-lg sm:text-xl font-semibold text-gray-900">Usage Summary</h2>
+            <div className="mt-4 sm:mt-6 grid gap-3 sm:gap-4 grid-cols-2 sm:grid-cols-3 lg:grid-cols-5">
               <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
                 <p className="text-xs font-medium uppercase tracking-wide text-gray-500">Policies</p>
                 <p className="mt-2 text-2xl font-semibold text-gray-900">{user.stats.policiesCount}</p>
@@ -314,14 +314,14 @@ export default function UserDetail() {
             </div>
           </section>
 
-          <section className="rounded-lg bg-white p-6 shadow">
+          <section className="rounded-lg bg-white p-4 sm:p-6 shadow">
             <div className="flex items-center justify-between">
-              <h2 className="text-xl font-semibold text-gray-900">Nominees ({user.nominees.length})</h2>
+              <h2 className="text-lg sm:text-xl font-semibold text-gray-900">Nominees ({user.nominees.length})</h2>
             </div>
             {user.nominees.length > 0 ? (
-              <div className="mt-6 space-y-5">
+              <div className="mt-4 sm:mt-6 space-y-4 sm:space-y-5">
                 {user.nominees.map((nominee) => (
-                  <div key={nominee.id} className="rounded-lg border border-gray-200 p-5">
+                  <div key={nominee.id} className="rounded-lg border border-gray-200 p-4 sm:p-5">
                     <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
                       <div className="space-y-3">
                         <h3 className="text-lg font-semibold text-gray-900">{nominee.name}</h3>
@@ -356,22 +356,22 @@ export default function UserDetail() {
                       )}
                     </div>
 
-                    {nominee.documents.length > 0 && (
-                      <div className="mt-4 rounded-lg border border-gray-100 bg-gray-50 p-3">
-                        <p className="text-sm font-medium text-gray-700">Documents</p>
+                    <div className="mt-3 sm:mt-4 rounded-lg border border-gray-100 bg-gray-50 p-3">
+                      <p className="text-xs sm:text-sm font-medium text-gray-700">Documents</p>
+                      {nominee.documents.length > 0 ? (
                         <div className="mt-2 space-y-2">
                           {nominee.documents.map((document) => (
                             <div
                               key={document.id}
                               className="flex flex-col gap-2 rounded-md bg-white p-3 shadow-sm sm:flex-row sm:items-center sm:justify-between"
                             >
-                              <div>
-                                <p className="text-sm font-medium text-gray-900">{document.documentName}</p>
+                              <div className="min-w-0 flex-1">
+                                <p className="text-xs sm:text-sm font-medium text-gray-900 break-words">{document.documentName}</p>
                                 <p className="text-xs text-gray-500">
                                   {formatEnumLabel(document.documentType)} • Uploaded {formatDate(document.uploadedAt)}
                                 </p>
                               </div>
-                              <div className="flex items-center gap-3 flex-wrap">
+                              <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
                                 {getDocumentStatusBadge(document.isVerified, document.verifiedAt)}
                                 <a
                                   href={document.documentUrl}
@@ -415,8 +415,53 @@ export default function UserDetail() {
                             </div>
                           ))}
                         </div>
-                      </div>
-                    )}
+                      ) : (
+                        <div className="mt-2 flex items-center justify-between p-3 bg-white rounded-md shadow-sm">
+                          <div className="text-sm text-gray-600">No documents uploaded</div>
+                          <div className="flex items-center gap-3">
+                            <button
+                              onClick={async () => {
+                                try {
+                                  setVerifying(nominee.id);
+                                  await adminService.acceptNomineeWithoutDocuments(nominee.id);
+                                  await fetchUser();
+                                } catch (err: any) {
+                                  alert(err.response?.data?.error || 'Failed to accept nominee');
+                                } finally {
+                                  setVerifying(null);
+                                }
+                              }}
+                              disabled={verifying === nominee.id}
+                              className="inline-flex items-center text-sm text-green-600 hover:text-green-700 font-medium disabled:opacity-50"
+                            >
+                              <CheckCircle className="w-4 h-4 mr-1" />
+                              Accept
+                            </button>
+                            <button
+                              onClick={async () => {
+                                if (!confirm('Are you sure you want to reject this nominee without documents?')) {
+                                  return;
+                                }
+                                try {
+                                  setVerifying(nominee.id);
+                                  await adminService.rejectNomineeWithoutDocuments(nominee.id);
+                                  await fetchUser();
+                                } catch (err: any) {
+                                  alert(err.response?.data?.error || 'Failed to reject nominee');
+                                } finally {
+                                  setVerifying(null);
+                                }
+                              }}
+                              disabled={verifying === nominee.id}
+                              className="inline-flex items-center text-sm text-red-600 hover:text-red-700 font-medium disabled:opacity-50"
+                            >
+                              <XCircle className="w-4 h-4 mr-1" />
+                              Reject
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 ))}
               </div>
@@ -425,12 +470,12 @@ export default function UserDetail() {
             )}
           </section>
 
-          <section className="rounded-lg bg-white p-6 shadow">
-            <h2 className="text-xl font-semibold text-gray-900">Policies</h2>
+          <section className="rounded-lg bg-white p-4 sm:p-6 shadow">
+            <h2 className="text-lg sm:text-xl font-semibold text-gray-900">Policies</h2>
             {user.recentPolicies.length > 0 ? (
-              <div className="mt-6 space-y-5">
+              <div className="mt-4 sm:mt-6 space-y-4 sm:space-y-5">
                 {user.recentPolicies.map((policy) => (
-                  <div key={policy.id} className="rounded-lg border border-gray-200 p-4">
+                  <div key={policy.id} className="rounded-lg border border-gray-200 p-3 sm:p-4">
                     <div className="mb-4">
                       <p className="text-sm font-semibold text-gray-900">Policy #{policy.policyNumber}</p>
                       <p className="mt-2 text-sm text-gray-700">Sum Assured: {formatCurrency(policy.sumAssured)}</p>
@@ -506,10 +551,10 @@ export default function UserDetail() {
             )}
           </section>
 
-          <section className="rounded-lg bg-white p-6 shadow">
-            <h2 className="text-xl font-semibold text-gray-900">Recent Subscriptions</h2>
+          <section className="rounded-lg bg-white p-4 sm:p-6 shadow">
+            <h2 className="text-lg sm:text-xl font-semibold text-gray-900">Recent Subscriptions</h2>
             {user.recentSubscriptions.length > 0 ? (
-              <div className="mt-6 space-y-3">
+              <div className="mt-4 sm:mt-6 space-y-3">
                 {user.recentSubscriptions.map((subscription) => (
                   <div key={subscription.id} className="rounded-lg border border-gray-200 p-4">
                     <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
@@ -530,10 +575,10 @@ export default function UserDetail() {
             )}
           </section>
 
-          <section className="rounded-lg bg-white p-6 shadow">
-            <h2 className="text-xl font-semibold text-gray-900">Recent Alerts</h2>
+          <section className="rounded-lg bg-white p-4 sm:p-6 shadow">
+            <h2 className="text-lg sm:text-xl font-semibold text-gray-900">Recent Alerts</h2>
             {user.recentAlerts.length > 0 ? (
-              <div className="mt-6 space-y-3">
+              <div className="mt-4 sm:mt-6 space-y-3">
                 {user.recentAlerts.map((alert) => (
                   <div key={alert.id} className="rounded-lg border border-gray-200 p-4">
                     <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
@@ -556,10 +601,10 @@ export default function UserDetail() {
             )}
           </section>
 
-          <section className="rounded-lg bg-white p-6 shadow">
-            <h2 className="text-xl font-semibold text-gray-900">User Documents</h2>
+          <section className="rounded-lg bg-white p-4 sm:p-6 shadow">
+            <h2 className="text-lg sm:text-xl font-semibold text-gray-900">User Documents</h2>
             {user.documents.length > 0 ? (
-              <div className="mt-6 space-y-3">
+              <div className="mt-4 sm:mt-6 space-y-3">
                 {user.documents.map((document) => (
                   <div
                     key={document.id}
@@ -596,14 +641,14 @@ export default function UserDetail() {
             )}
           </section>
 
-          <section className="rounded-lg bg-white p-6 shadow">
-            <div className="flex items-center justify-between mb-6">
+          <section className="rounded-lg bg-white p-4 sm:p-6 shadow">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4 sm:mb-6">
               <div>
-                <h2 className="text-xl font-semibold text-gray-900">Activity Log</h2>
-                <p className="text-sm text-gray-500 mt-1">Track all user activities and changes</p>
+                <h2 className="text-lg sm:text-xl font-semibold text-gray-900">Activity Log</h2>
+                <p className="text-xs sm:text-sm text-gray-500 mt-1">Track all user activities and changes</p>
               </div>
               {activityLogs && activityLogs.pagination.total > 0 && (
-                <div className="px-3 py-1 bg-primary-100 text-primary-700 rounded-full text-sm font-medium">
+                <div className="px-3 py-1 bg-primary-100 text-primary-700 rounded-full text-xs sm:text-sm font-medium">
                   {activityLogs.pagination.total} {activityLogs.pagination.total === 1 ? 'Activity' : 'Activities'}
                 </div>
               )}
@@ -642,10 +687,10 @@ export default function UserDetail() {
                             )}
                             {log.metadata && Object.keys(log.metadata).length > 0 && (
                               <div className="mt-3 pt-3 border-t-2 border-gray-300 border-opacity-30">
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
                                   {Object.entries(log.metadata).map(([key, value]) => (
-                                    <div key={key} className="flex items-start gap-2">
-                                      <span className="text-xs font-bold text-gray-700 uppercase tracking-wide min-w-[120px]">
+                                    <div key={key} className="flex flex-col sm:flex-row sm:items-start gap-1 sm:gap-2">
+                                      <span className="text-xs font-bold text-gray-700 uppercase tracking-wide sm:min-w-[120px]">
                                         {formatEnumLabel(key)}:
                                       </span>
                                       <span className="text-xs font-semibold text-gray-900 break-words">
@@ -657,11 +702,11 @@ export default function UserDetail() {
                               </div>
                             )}
                           </div>
-                          <div className="flex-shrink-0 text-right">
+                          <div className="flex-shrink-0 text-left sm:text-right mt-2 sm:mt-0">
                             <div className="text-xs font-bold text-gray-700 uppercase tracking-wide mb-1">
                               Time
                             </div>
-                            <div className="text-sm font-bold text-gray-900 whitespace-nowrap">
+                            <div className="text-xs sm:text-sm font-bold text-gray-900 break-words sm:whitespace-nowrap">
                               {formatDate(log.createdAt)}
                             </div>
                           </div>
@@ -671,26 +716,26 @@ export default function UserDetail() {
                   );
                 })}
                 {activityLogs.pagination.totalPages > 1 && (
-                  <div className="flex items-center justify-between mt-6 pt-4 border-t-2 border-gray-200">
-                    <p className="text-sm font-medium text-gray-600">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mt-4 sm:mt-6 pt-4 border-t-2 border-gray-200">
+                    <p className="text-xs sm:text-sm font-medium text-gray-600 text-center sm:text-left">
                       Showing <span className="font-bold text-gray-900">{((activityLogsPage - 1) * 50) + 1}</span> to{' '}
                       <span className="font-bold text-gray-900">
                         {Math.min(activityLogsPage * 50, activityLogs.pagination.total)}
                       </span>{' '}
                       of <span className="font-bold text-gray-900">{activityLogs.pagination.total}</span> activities
                     </p>
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 justify-center sm:justify-end">
                       <button
                         onClick={() => setActivityLogsPage((p) => Math.max(1, p - 1))}
                         disabled={activityLogsPage === 1}
-                        className="px-4 py-2 text-sm font-medium border-2 border-gray-300 rounded-lg hover:bg-gray-50 hover:border-gray-400 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                        className="px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium border-2 border-gray-300 rounded-lg hover:bg-gray-50 hover:border-gray-400 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                       >
                         Previous
                       </button>
                       <button
                         onClick={() => setActivityLogsPage((p) => p + 1)}
                         disabled={activityLogsPage >= activityLogs.pagination.totalPages}
-                        className="px-4 py-2 text-sm font-medium border-2 border-gray-300 rounded-lg hover:bg-gray-50 hover:border-gray-400 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                        className="px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium border-2 border-gray-300 rounded-lg hover:bg-gray-50 hover:border-gray-400 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                       >
                         Next
                       </button>

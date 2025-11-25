@@ -15,7 +15,7 @@ import {
   Search,
 } from 'lucide-react';
 
-type ReviewStatus = 'pending' | 'verified' | 're-verification';
+type ReviewStatus = 'pending' | 'verified' | 're-verification' | 'rejected';
 
 const REQUIRED_DOCUMENT_TYPES: Array<'AADHAAR' | 'PAN'> = ['AADHAAR', 'PAN'];
 
@@ -94,9 +94,45 @@ export default function KycReview() {
     }
   };
 
+  const handleAcceptUserWithoutDocuments = async (userId: string) => {
+    if (!confirm('Are you sure you want to accept this user without documents?')) {
+      return;
+    }
+    try {
+      await adminService.acceptUserWithoutDocuments(userId);
+      loadDocuments();
+    } catch (err: any) {
+      alert(err.response?.data?.error || 'Failed to accept user');
+    }
+  };
+
+  const handleRejectUserWithoutDocuments = async (userId: string) => {
+    if (!confirm('Are you sure you want to reject this user without documents?')) {
+      return;
+    }
+    try {
+      await adminService.rejectUserWithoutDocuments(userId);
+      loadDocuments();
+    } catch (err: any) {
+      alert(err.response?.data?.error || 'Failed to reject user');
+    }
+  };
+
   const renderStatusBadge = (user: KycUser) => {
     const totalDocs = user.documents.length;
     const verifiedDocs = user.documents.filter((doc) => doc.isVerified).length;
+    const rejectedDocs = user.documents.filter((doc) => doc.rejectedAt !== null && doc.rejectedAt !== undefined).length;
+    
+    // If there are rejected documents, show rejected status
+    if (rejectedDocs > 0) {
+      return (
+        <span className="inline-flex items-center px-3 py-1 rounded-full bg-red-100 text-red-700 text-xs font-medium">
+          <XCircle className="w-4 h-4 mr-1" />
+          Rejected
+        </span>
+      );
+    }
+    
     if (verifiedDocs === totalDocs && totalDocs > 0) {
       return (
         <span className="inline-flex items-center px-3 py-1 rounded-full bg-green-100 text-green-700 text-xs font-medium">
@@ -125,17 +161,17 @@ export default function KycReview() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900 flex items-center">
-            <ShieldCheck className="w-7 h-7 mr-3 text-primary-600" />
+      <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4 mb-4 sm:mb-6">
+        <div className="flex-1">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 flex items-center">
+            <ShieldCheck className="w-5 h-5 sm:w-7 sm:h-7 mr-2 sm:mr-3 text-primary-600" />
             KYC Review
           </h1>
-          <p className="text-sm text-gray-600 mt-1">
+          <p className="text-xs sm:text-sm text-gray-600 mt-1">
             Review and verify Aadhaar and PAN documents submitted by users. Re-verification includes users who were previously verified but uploaded new documents.
           </p>
         </div>
-        <div className="flex items-center space-x-3">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:space-x-3">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
             <input
@@ -143,7 +179,7 @@ export default function KycReview() {
               placeholder="Search by name, email, or phone..."
               value={searchQuery}
               onChange={(e) => handleSearchChange(e.target.value)}
-              className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent w-64"
+              className="w-full sm:w-64 pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent"
             />
           </div>
           <select
@@ -157,10 +193,11 @@ export default function KycReview() {
             <option value="pending">Pending Verification</option>
             <option value="re-verification">Re-verification</option>
             <option value="verified">Verified</option>
+            <option value="rejected">Rejected</option>
           </select>
           <button
             onClick={loadDocuments}
-            className="inline-flex items-center px-3 py-2 border border-gray-300 text-sm rounded-lg hover:bg-gray-100 transition"
+            className="inline-flex items-center justify-center px-3 py-2 border border-gray-300 text-sm rounded-lg hover:bg-gray-100 transition"
           >
             <RefreshCcw className="w-4 h-4 mr-2" />
             Refresh
@@ -180,31 +217,34 @@ export default function KycReview() {
           Loading KYC documents...
         </div>
       ) : (
-        <div className="bg-white rounded-lg shadow overflow-hidden">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  User
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Uploaded
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Status
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Actions
-                </th>
-              </tr>
-            </thead>
+        <>
+          {/* Desktop Table View */}
+          <div className="hidden md:block bg-white rounded-lg shadow overflow-hidden">
+            <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    User
+                  </th>
+                  <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Uploaded
+                  </th>
+                  <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Status
+                  </th>
+                  <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Actions
+                  </th>
+                </tr>
+              </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {records?.data && records.data.length > 0 ? (
                 records.data.map((user) => (
                   <tr key={user.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-gray-900">{user.name}</div>
-                      <div className="text-sm text-gray-500">{user.email || 'No email'}</div>
+                    <td className="px-4 sm:px-6 py-4">
+                      <div className="text-sm font-medium text-gray-900 break-words">{user.name}</div>
+                      <div className="text-sm text-gray-500 break-words">{user.email || 'No email'}</div>
                       <div className="text-xs text-gray-400">{user.mobileNumber}</div>
                       {user.pendingDocuments.length > 0 && (
                         <div className="mt-1 text-xs text-yellow-700">
@@ -232,13 +272,13 @@ export default function KycReview() {
                         </div>
                       )}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <td className="px-4 sm:px-6 py-4 text-sm text-gray-500">
                       {user.documents.length > 0
                         ? new Date(user.documents[0].uploadedAt).toLocaleString()
                         : '—'}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">{renderStatusBadge(user)}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                    <td className="px-4 sm:px-6 py-4">{renderStatusBadge(user)}</td>
+                    <td className="px-4 sm:px-6 py-4 text-sm text-gray-700">
                       <div className="space-y-2">
                         {user.documents.map((doc) => {
                           // When filter is 're-verification', all documents shown are re-verification documents
@@ -247,7 +287,9 @@ export default function KycReview() {
                           // 2. New documents from users who already have all required documents verified
                           const isReverification = statusFilter === 're-verification';
                           const isVerified = statusFilter === 'verified';
+                          const isRejected = statusFilter === 'rejected';
                           const hasVerifiedAt = doc.verifiedAt !== null && doc.verifiedAt !== undefined;
+                          const isActuallyRejected = doc.rejectedAt !== null && doc.rejectedAt !== undefined;
                           const userHasAllVerified = user.verifiedDocuments && user.verifiedDocuments.length >= REQUIRED_DOCUMENT_TYPES.length;
                           
                           return (
@@ -261,11 +303,28 @@ export default function KycReview() {
                                       Re-verification
                                     </span>
                                   )}
+                                  {isActuallyRejected && (
+                                    <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800">
+                                      <XCircle className="w-3 h-3 mr-1" />
+                                      Rejected
+                                    </span>
+                                  )}
                                 </div>
                                 <div className="text-xs uppercase text-gray-500">{doc.documentType}</div>
                                 {isVerified && doc.isVerified && hasVerifiedAt && doc.verifiedAt && (
                                   <div className="text-xs text-green-600 mt-1">
                                     Verified on: {new Date(doc.verifiedAt).toLocaleDateString('en-US', { 
+                                      year: 'numeric', 
+                                      month: 'short', 
+                                      day: 'numeric',
+                                      hour: '2-digit',
+                                      minute: '2-digit'
+                                    })}
+                                  </div>
+                                )}
+                                {isRejected && isActuallyRejected && doc.rejectedAt && (
+                                  <div className="text-xs text-red-600 mt-1">
+                                    Rejected on: {new Date(doc.rejectedAt).toLocaleDateString('en-US', { 
                                       year: 'numeric', 
                                       month: 'short', 
                                       day: 'numeric',
@@ -325,6 +384,27 @@ export default function KycReview() {
                             </div>
                           );
                         })}
+                        {user.documents.length === 0 && (
+                          <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200">
+                            <div className="text-sm text-gray-600">No documents uploaded</div>
+                            <div className="flex items-center space-x-3">
+                              <button
+                                onClick={() => handleAcceptUserWithoutDocuments(user.id)}
+                                className="inline-flex items-center text-green-600 hover:text-green-700 font-medium"
+                              >
+                                <CheckCircle className="w-4 h-4 mr-1" />
+                                Accept
+                              </button>
+                              <button
+                                onClick={() => handleRejectUserWithoutDocuments(user.id)}
+                                className="inline-flex items-center text-red-600 hover:text-red-700 font-medium"
+                              >
+                                <XCircle className="w-4 h-4 mr-1" />
+                                Reject
+                              </button>
+                            </div>
+                          </div>
+                        )}
                       </div>
                     </td>
                   </tr>
@@ -341,11 +421,12 @@ export default function KycReview() {
               )}
             </tbody>
           </table>
+            </div>
 
           {/* Pagination */}
           {records && records.pagination.totalPages > 1 && (
-            <div className="flex items-center justify-between px-6 py-4 border-t border-gray-200">
-              <div className="text-sm text-gray-600">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-4 sm:px-6 py-3 sm:py-4 border-t border-gray-200">
+              <div className="text-xs sm:text-sm text-gray-600 text-center sm:text-left">
                 Showing {((page - 1) * limit) + 1} to{' '}
                 {Math.min(page * limit, records.pagination.total)} of{' '}
                 {records.pagination.total} users
@@ -369,6 +450,125 @@ export default function KycReview() {
             </div>
           )}
         </div>
+
+        {/* Mobile Card View */}
+        <div className="md:hidden space-y-4 mt-4">
+          {records?.data && records.data.length > 0 ? (
+            records.data.map((user) => (
+              <div key={user.id} className="bg-white rounded-lg shadow border border-gray-200 p-4">
+                <div className="mb-3">
+                  <div className="text-sm font-medium text-gray-900">{user.name}</div>
+                  <div className="text-xs text-gray-500 mt-1">{user.email || 'No email'}</div>
+                  <div className="text-xs text-gray-400 mt-1">{user.mobileNumber}</div>
+                  {user.pendingDocuments.length > 0 && (
+                    <div className="mt-2 text-xs text-yellow-700">
+                      Missing: {user.pendingDocuments.join(', ')}
+                    </div>
+                  )}
+                  <div className="mt-2">{renderStatusBadge(user)}</div>
+                </div>
+                {user.documents.length > 0 ? (
+                  <div className="space-y-2 border-t border-gray-100 pt-3">
+                    {user.documents.map((doc) => {
+                      const isReverification = statusFilter === 're-verification';
+                      const isVerified = statusFilter === 'verified';
+                      const isRejected = statusFilter === 'rejected';
+                      const hasVerifiedAt = doc.verifiedAt !== null && doc.verifiedAt !== undefined;
+                      const isActuallyRejected = doc.rejectedAt !== null && doc.rejectedAt !== undefined;
+                      
+                      return (
+                        <div key={doc.id} className="bg-gray-50 rounded-lg p-3 space-y-2">
+                          <div className="flex items-start justify-between">
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <div className="text-xs font-medium text-gray-900 break-words">{doc.documentName}</div>
+                                {isReverification && (
+                                  <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-orange-100 text-orange-800">
+                                    <RotateCcw className="w-3 h-3 mr-1" />
+                                    Re-verification
+                                  </span>
+                                )}
+                                {isActuallyRejected && (
+                                  <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800">
+                                    <XCircle className="w-3 h-3 mr-1" />
+                                    Rejected
+                                  </span>
+                                )}
+                              </div>
+                              <div className="text-xs uppercase text-gray-500 mt-1">{doc.documentType}</div>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <a
+                              href={doc.documentUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center text-xs text-primary-600 hover:text-primary-700"
+                            >
+                              <ExternalLink className="w-3 h-3 mr-1" />
+                              View
+                            </a>
+                            {!doc.isVerified ? (
+                              <>
+                                <button
+                                  onClick={() => handleVerify(doc.id)}
+                                  className="inline-flex items-center text-xs text-green-600 hover:text-green-700 font-medium"
+                                >
+                                  <CheckCircle className="w-3 h-3 mr-1" />
+                                  Accept
+                                </button>
+                                <button
+                                  onClick={() => handleReject(doc.id)}
+                                  className="inline-flex items-center text-xs text-red-600 hover:text-red-700 font-medium"
+                                >
+                                  <XCircle className="w-3 h-3 mr-1" />
+                                  Reject
+                                </button>
+                              </>
+                            ) : (
+                              <button
+                                onClick={() => handleRemoveVerification(doc.id)}
+                                className="inline-flex items-center text-xs text-orange-600 hover:text-orange-700 font-medium"
+                              >
+                                <RotateCcw className="w-3 h-3 mr-1" />
+                                Remove Verification
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                    <div className="text-xs text-gray-600">No documents uploaded</div>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => handleAcceptUserWithoutDocuments(user.id)}
+                        className="inline-flex items-center text-xs text-green-600 hover:text-green-700 font-medium"
+                      >
+                        <CheckCircle className="w-3 h-3 mr-1" />
+                        Accept
+                      </button>
+                      <button
+                        onClick={() => handleRejectUserWithoutDocuments(user.id)}
+                        className="inline-flex items-center text-xs text-red-600 hover:text-red-700 font-medium"
+                      >
+                        <XCircle className="w-3 h-3 mr-1" />
+                        Reject
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            ))
+          ) : (
+            <div className="bg-white rounded-lg shadow border border-gray-200 p-8 text-center">
+              <p className="text-sm text-gray-500">No documents found.</p>
+            </div>
+          )}
+        </div>
+      </>
       )}
     </div>
   );

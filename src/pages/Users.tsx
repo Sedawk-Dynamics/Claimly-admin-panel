@@ -65,17 +65,17 @@ export default function Users() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div className="flex items-center space-x-3">
           <div className="p-2 bg-primary-100 rounded-lg">
-            <UsersIcon className="w-6 h-6 text-primary-600" />
+            <UsersIcon className="w-5 h-5 sm:w-6 sm:h-6 text-primary-600" />
           </div>
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Users</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Users</h1>
             {users && (
-              <p className="text-sm text-gray-500 mt-1">
+              <p className="text-xs sm:text-sm text-gray-500 mt-1">
                 {users.pagination.total} {users.pagination.total === 1 ? 'user' : 'users'} total
               </p>
             )}
@@ -120,7 +120,8 @@ export default function Users() {
         </div>
       ) : (
         <>
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+          {/* Desktop Table View */}
+          <div className="hidden md:block bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
             <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gradient-to-r from-gray-50 to-gray-100">
@@ -224,10 +225,80 @@ export default function Users() {
             </div>
           </div>
 
+          {/* Mobile Card View */}
+          <div className="md:hidden space-y-4">
+            {users?.data && users.data.length > 0 ? (
+              users.data.map((user) => (
+                <div key={user.id} className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="flex items-center space-x-3 flex-1 min-w-0">
+                      <div className="flex-shrink-0 h-10 w-10 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center text-white font-semibold text-sm">
+                        {user.name.charAt(0).toUpperCase()}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="text-sm font-semibold text-gray-900 truncate">{user.name}</div>
+                        <div className="text-xs text-gray-500 truncate mt-1">{user.email}</div>
+                      </div>
+                    </div>
+                    <span
+                      className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full flex-shrink-0 ml-2 ${getStatusColor(
+                        user.subscriptionStatus
+                      )}`}
+                    >
+                      {user.subscriptionStatus}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between pt-3 border-t border-gray-100">
+                    <div className="text-xs text-gray-600">
+                      {user.mobileNumber || 'No phone'}
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <button
+                        onClick={() => handleViewDetails(user.id)}
+                        className="p-2 text-primary-600 hover:text-primary-700 hover:bg-primary-50 rounded-lg transition-all"
+                        title="View details"
+                      >
+                        <Eye className="w-4 h-4" />
+                      </button>
+                      {user.subscriptionStatus !== 'ACTIVE' && (
+                        <button
+                          onClick={() => handleStatusChange(user.id, 'ACTIVE')}
+                          className="p-2 text-green-600 hover:text-green-700 hover:bg-green-50 rounded-lg transition-all"
+                          title="Activate"
+                        >
+                          <UserCheck className="w-4 h-4" />
+                        </button>
+                      )}
+                      {user.subscriptionStatus !== 'INACTIVE' && (
+                        <button
+                          onClick={() => handleStatusChange(user.id, 'INACTIVE')}
+                          className="p-2 text-gray-600 hover:text-gray-700 hover:bg-gray-50 rounded-lg transition-all"
+                          title="Deactivate"
+                        >
+                          <UserX className="w-4 h-4" />
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8 text-center">
+                <UsersIcon className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+                <p className="text-sm font-medium text-gray-900">No users found</p>
+                {searchQuery && (
+                  <p className="text-sm text-gray-500 mt-1">
+                    Try adjusting your search criteria
+                  </p>
+                )}
+              </div>
+            )}
+          </div>
+
           {/* Pagination */}
           {users && users.pagination.totalPages > 1 && (
-            <div className="mt-6 flex flex-col sm:flex-row items-center justify-between space-y-4 sm:space-y-0 bg-white px-6 py-4 rounded-xl border border-gray-200 shadow-sm">
-              <div className="text-sm text-gray-700">
+            <div className="mt-4 sm:mt-6 flex flex-col sm:flex-row items-center justify-between space-y-3 sm:space-y-0 bg-white px-4 sm:px-6 py-3 sm:py-4 rounded-xl border border-gray-200 shadow-sm">
+              <div className="text-xs sm:text-sm text-gray-700 text-center sm:text-left">
                 Showing <span className="font-semibold text-gray-900">{((page - 1) * limit) + 1}</span> to{' '}
                 <span className="font-semibold text-gray-900">{Math.min(page * limit, users.pagination.total)}</span> of{' '}
                 <span className="font-semibold text-gray-900">{users.pagination.total}</span> results
@@ -236,19 +307,19 @@ export default function Users() {
                 <button
                   onClick={() => setPage(page - 1)}
                   disabled={page === 1}
-                  className="px-4 py-2 border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 hover:border-gray-400 transition-all font-medium text-gray-700 disabled:hover:bg-white"
+                  className="px-3 sm:px-4 py-2 border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 hover:border-gray-400 transition-all font-medium text-gray-700 disabled:hover:bg-white"
                 >
-                  <ChevronLeft className="w-5 h-5" />
+                  <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" />
                 </button>
-                <div className="px-4 py-2 text-sm font-medium text-gray-700">
+                <div className="px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium text-gray-700">
                   Page {page} of {users.pagination.totalPages}
                 </div>
                 <button
                   onClick={() => setPage(page + 1)}
                   disabled={page >= users.pagination.totalPages}
-                  className="px-4 py-2 border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 hover:border-gray-400 transition-all font-medium text-gray-700 disabled:hover:bg-white"
+                  className="px-3 sm:px-4 py-2 border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 hover:border-gray-400 transition-all font-medium text-gray-700 disabled:hover:bg-white"
                 >
-                  <ChevronRight className="w-5 h-5" />
+                  <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
                 </button>
               </div>
             </div>
