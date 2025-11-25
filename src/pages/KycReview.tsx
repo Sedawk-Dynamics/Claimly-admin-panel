@@ -471,9 +471,6 @@ export default function KycReview() {
                   <div className="space-y-2 border-t border-gray-100 pt-3">
                     {user.documents.map((doc) => {
                       const isReverification = statusFilter === 're-verification';
-                      const isVerified = statusFilter === 'verified';
-                      const isRejected = statusFilter === 'rejected';
-                      const hasVerifiedAt = doc.verifiedAt !== null && doc.verifiedAt !== undefined;
                       const isActuallyRejected = doc.rejectedAt !== null && doc.rejectedAt !== undefined;
                       
                       return (

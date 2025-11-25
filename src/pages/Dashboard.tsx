@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { adminService } from '../services/admin.service';
-import { AlertStats, Alert, PaginatedResponse, User, Company, Policy } from '../types';
+import { AlertStats, Alert } from '../types';
 import { 
   Users, Building2, FileText, Bell, AlertCircle, CheckCircle, XCircle, 
-  ShieldCheck, Clock, TrendingUp, Activity, Eye, ArrowRight 
+  ShieldCheck, Clock, ArrowRight 
 } from 'lucide-react';
 import { format } from 'date-fns';
 

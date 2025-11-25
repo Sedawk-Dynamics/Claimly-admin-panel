@@ -527,7 +527,6 @@ export default function PolicyReview() {
                     {policy.documents.map((doc) => {
                       const isReverification = statusFilter === 're-verification';
                       const isRejected = statusFilter === 'rejected';
-                      const hasVerifiedAt = doc.verifiedAt !== null && doc.verifiedAt !== undefined;
                       const isActuallyRejected = doc.rejectedAt !== null && doc.rejectedAt !== undefined;
                       
                       return (
