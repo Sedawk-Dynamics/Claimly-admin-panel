@@ -2,9 +2,9 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { adminService } from '../services/admin.service';
 import { AlertStats, Alert } from '../types';
-import { 
-  Users, Building2, FileText, Bell, AlertCircle, CheckCircle, XCircle, 
-  ShieldCheck, Clock, ArrowRight 
+import {
+  Users, Building2, FileText, Bell, AlertCircle, CheckCircle, XCircle,
+  ShieldCheck, Clock, ArrowRight, TrendingUp
 } from 'lucide-react';
 import { format } from 'date-fns';
 
@@ -40,7 +40,6 @@ export default function Dashboard() {
       setLoading(true);
       setError('');
 
-      // Fetch all statistics in parallel
       const [
         alertStats,
         usersData,
@@ -77,62 +76,77 @@ export default function Dashboard() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
+      <div className="flex flex-col items-center justify-center h-64 space-y-4">
+        <div className="relative">
+          <div className="animate-spin rounded-full h-16 w-16 border-4 border-cyan-200 dark:border-cyan-900 border-t-brand-500 dark:border-t-cyan-400"></div>
+          <div className="absolute inset-0 rounded-full bg-gradient-brand opacity-20 blur-xl animate-pulse-glow"></div>
+        </div>
+        <p className="text-gray-600 dark:text-gray-400 font-medium animate-pulse">Loading dashboard...</p>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
-        {error}
+      <div className="bg-gradient-to-r from-orange-50 to-yellow-50 dark:from-orange-950/30 dark:to-yellow-950/30 border-2 border-orange-400 dark:border-orange-500 text-orange-700 dark:text-orange-400 px-6 py-4 rounded-xl shadow-glow-orange">
+        <div className="flex items-center space-x-3">
+          <AlertCircle className="w-6 h-6 animate-pulse" />
+          <p className="font-semibold">{error}</p>
+        </div>
       </div>
     );
   }
 
   return (
     <div className="space-y-6 sm:space-y-8">
+      {/* Header */}
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Dashboard</h1>
+        <div>
+          <h1 className="text-3xl sm:text-4xl font-bold text-gradient-brand mb-2">Dashboard</h1>
+          <p className="text-gray-600 dark:text-gray-400">Welcome back! Here's what's happening today.</p>
+        </div>
         <button
           onClick={loadAllStats}
-          className="text-sm text-primary-600 hover:text-primary-700 font-medium"
+          className="btn-cyan flex items-center space-x-2 text-sm"
         >
-          Refresh
+          <TrendingUp className="w-4 h-4 animate-pulse" />
+          <span>Refresh</span>
         </button>
       </div>
 
       {/* Overview Statistics */}
       <div>
-        <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4">Overview</h2>
-        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+        <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-4 flex items-center">
+          <div className="w-1 h-6 bg-gradient-brand rounded-full mr-3"></div>
+          Overview
+        </h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
           <StatCard
             title="Total Users"
             value={stats.totalUsers}
             icon={Users}
-            color="blue"
+            gradient="brand"
             href="/users"
           />
           <StatCard
             title="Companies"
             value={stats.totalCompanies}
             icon={Building2}
-            color="purple"
+            gradient="cyan"
             href="/companies"
           />
           <StatCard
             title="Total Policies"
             value={stats.totalPolicies}
             icon={FileText}
-            color="indigo"
+            gradient="sunset"
             href="/policies"
           />
           <StatCard
             title="Total Alerts"
             value={stats.alertStats?.total || 0}
             icon={Bell}
-            color="orange"
+            gradient="fire"
             href="/alerts"
           />
         </div>
@@ -141,34 +155,37 @@ export default function Dashboard() {
       {/* Alert Statistics */}
       {stats.alertStats && (
         <div>
-          <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4">Alert Statistics</h2>
-          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-4 flex items-center">
+            <div className="w-1 h-6 bg-gradient-sunset rounded-full mr-3"></div>
+            Alert Statistics
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
             <StatCard
               title="Pending Alerts"
               value={stats.alertStats.pending}
               icon={AlertCircle}
-              color="yellow"
+              gradient="yellow"
               href="/alerts?status=PENDING"
             />
             <StatCard
               title="Verified Alerts"
               value={stats.alertStats.verified}
               icon={CheckCircle}
-              color="green"
+              gradient="cyan"
               href="/alerts?status=VERIFIED"
             />
             <StatCard
               title="False Alerts"
               value={stats.alertStats.falseAlerts}
               icon={XCircle}
-              color="red"
+              gradient="fire"
               href="/alerts?status=FALSE_ALERT"
             />
             <StatCard
               title="SMS Alerts"
               value={stats.alertStats.smsAlerts || 0}
               icon={Bell}
-              color="blue"
+              gradient="brand"
             />
           </div>
         </div>
@@ -176,14 +193,17 @@ export default function Dashboard() {
 
       {/* Pending Reviews */}
       <div>
-        <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4">Pending Reviews</h2>
+        <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-4 flex items-center">
+          <div className="w-1 h-6 bg-gradient-glow rounded-full mr-3"></div>
+          Pending Reviews
+        </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
           <ReviewCard
             title="KYC Documents"
             count={stats.pendingKyc}
             icon={ShieldCheck}
             href="/kyc-review"
-            color="yellow"
+            gradient="yellow"
             description="Documents awaiting verification"
           />
           <ReviewCard
@@ -191,7 +211,7 @@ export default function Dashboard() {
             count={stats.pendingPolicyDocs}
             icon={FileText}
             href="/policy-review"
-            color="orange"
+            gradient="sunset"
             description="Policy documents pending review"
           />
         </div>
@@ -201,46 +221,51 @@ export default function Dashboard() {
       {stats.recentAlerts.length > 0 && (
         <div>
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg sm:text-xl font-semibold text-gray-900">Recent Pending Alerts</h2>
+            <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white flex items-center">
+              <div className="w-1 h-6 bg-gradient-fire rounded-full mr-3"></div>
+              Recent Pending Alerts
+            </h2>
             <Link
               to="/alerts"
-              className="text-sm text-primary-600 hover:text-primary-700 font-medium flex items-center"
+              className="text-sm text-brand-600 dark:text-cyan-400 hover:text-brand-700 dark:hover:text-cyan-300 font-semibold flex items-center space-x-1 transition-colors group"
             >
-              View All
-              <ArrowRight className="w-4 h-4 ml-1" />
+              <span>View All</span>
+              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </Link>
           </div>
-          <div className="bg-white rounded-lg shadow overflow-hidden">
-            <div className="divide-y divide-gray-200">
+          <div className="card elevated overflow-hidden border border-yellow-400/20 dark:border-yellow-500/20">
+            <div className="divide-y divide-gray-200 dark:divide-navy-700">
               {stats.recentAlerts.map((alert) => (
                 <Link
                   key={alert.id}
                   to="/alerts"
-                  className="block p-4 hover:bg-gray-50 transition-colors"
+                  className="block p-4 hover:bg-yellow-50 dark:hover:bg-yellow-950/10 transition-all duration-200 group"
                 >
                   <div className="flex items-start justify-between">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center space-x-2 mb-1">
-                        <Bell className="w-4 h-4 text-yellow-600 flex-shrink-0" />
-                        <p className="text-sm font-medium text-gray-900 truncate">
+                        <div className="p-1.5 bg-gradient-sunset rounded-lg shadow-glow-orange">
+                          <Bell className="w-3.5 h-3.5 text-white" />
+                        </div>
+                        <p className="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">
                           {alert.user?.name || 'Unknown User'}
                         </p>
-                        <span className="px-2 py-0.5 text-xs font-medium rounded-full bg-yellow-100 text-yellow-800">
+                        <span className="badge badge-yellow">
                           {alert.alertType || 'ALERT'}
                         </span>
                       </div>
-                      <p className="text-xs text-gray-500">
+                      <p className="text-xs text-gray-500 dark:text-gray-400 ml-7">
                         {alert.user?.email || 'No email'} • {alert.user?.mobileNumber || 'No phone'}
                       </p>
                       {alert.remarks && (
-                        <p className="text-xs text-gray-600 mt-1 truncate">{alert.remarks}</p>
+                        <p className="text-xs text-gray-600 dark:text-gray-400 mt-1 ml-7 truncate">{alert.remarks}</p>
                       )}
                     </div>
                     <div className="ml-4 flex-shrink-0 text-right">
-                      <p className="text-xs text-gray-500">
+                      <p className="text-xs font-medium text-gray-700 dark:text-gray-300">
                         {format(new Date(alert.createdAt), 'MMM dd, yyyy')}
                       </p>
-                      <p className="text-xs text-gray-400">
+                      <p className="text-xs text-gray-500 dark:text-gray-500">
                         {format(new Date(alert.createdAt), 'hh:mm a')}
                       </p>
                     </div>
@@ -254,43 +279,52 @@ export default function Dashboard() {
 
       {/* Quick Actions */}
       <div>
-        <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4">Quick Actions</h2>
+        <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-4 flex items-center">
+          <div className="w-1 h-6 bg-gradient-ocean rounded-full mr-3"></div>
+          Quick Actions
+        </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           <QuickLinkCard
             title="Users"
             description="Manage user accounts and subscriptions"
             icon={Users}
             href="/users"
+            gradient="brand"
           />
           <QuickLinkCard
             title="KYC Review"
             description="Review and verify user documents"
             icon={ShieldCheck}
             href="/kyc-review"
+            gradient="yellow"
           />
           <QuickLinkCard
             title="Policy Review"
             description="Review and verify policy documents"
             icon={FileText}
             href="/policy-review"
+            gradient="sunset"
           />
           <QuickLinkCard
             title="Companies"
             description="Manage insurance companies"
             icon={Building2}
             href="/companies"
+            gradient="cyan"
           />
           <QuickLinkCard
             title="Policies"
             description="View and manage policies"
             icon={FileText}
             href="/policies"
+            gradient="glow"
           />
           <QuickLinkCard
             title="Alerts"
             description="View and manage alerts"
             icon={Bell}
             href="/alerts"
+            gradient="fire"
           />
         </div>
       </div>
@@ -302,34 +336,44 @@ function StatCard({
   title,
   value,
   icon: Icon,
-  color,
+  gradient,
   href,
 }: {
   title: string;
   value: number;
   icon: any;
-  color: 'blue' | 'yellow' | 'green' | 'red' | 'purple' | 'indigo' | 'orange';
+  gradient: 'brand' | 'cyan' | 'sunset' | 'fire' | 'yellow';
   href?: string;
 }) {
-  const colorClasses = {
-    blue: 'bg-blue-100 text-blue-600',
-    yellow: 'bg-yellow-100 text-yellow-600',
-    green: 'bg-green-100 text-green-600',
-    red: 'bg-red-100 text-red-600',
-    purple: 'bg-purple-100 text-purple-600',
-    indigo: 'bg-indigo-100 text-indigo-600',
-    orange: 'bg-orange-100 text-orange-600',
+  const gradientClasses = {
+    brand: 'from-brand-500 to-cyan-400',
+    cyan: 'from-cyan-400 to-brand-500',
+    sunset: 'from-orange-400 to-yellow-400',
+    fire: 'from-orange-500 to-orange-600',
+    yellow: 'from-yellow-400 to-yellow-500',
+  };
+
+  const glowClasses = {
+    brand: 'shadow-glow-brand',
+    cyan: 'shadow-glow-cyan',
+    sunset: 'shadow-glow-orange',
+    fire: 'shadow-glow-orange',
+    yellow: 'shadow-glow-yellow',
   };
 
   const content = (
-    <div className="bg-white rounded-lg shadow p-4 sm:p-6 hover:shadow-md transition-shadow">
-      <div className="flex items-center justify-between">
+    <div className="card card-hover p-5 sm:p-6 border border-transparent hover:border-opacity-50 group relative overflow-hidden">
+      {/* Background gradient effect */}
+      <div className={`absolute inset-0 bg-gradient-to-br ${gradientClasses[gradient]} opacity-0 group-hover:opacity-5 transition-opacity duration-300`}></div>
+
+      <div className="relative flex items-center justify-between">
         <div className="flex-1 min-w-0">
-          <p className="text-xs sm:text-sm font-medium text-gray-600 truncate">{title}</p>
-          <p className="text-2xl sm:text-3xl font-bold text-gray-900 mt-2">{value.toLocaleString()}</p>
+          <p className="text-xs sm:text-sm font-semibold text-gray-600 dark:text-gray-400 truncate mb-2">{title}</p>
+          <p className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white">{value.toLocaleString()}</p>
         </div>
-        <div className={`p-2 sm:p-3 rounded-full flex-shrink-0 ml-2 ${colorClasses[color]}`}>
-          <Icon className="w-5 h-5 sm:w-6 sm:h-6" />
+        <div className={`relative p-3 sm:p-4 bg-gradient-to-br ${gradientClasses[gradient]} rounded-xl ${glowClasses[gradient]} group-hover:scale-110 transition-all duration-300 flex-shrink-0 ml-3`}>
+          <Icon className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
+          <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-20 rounded-xl transition-opacity duration-300"></div>
         </div>
       </div>
     </div>
@@ -347,43 +391,54 @@ function ReviewCard({
   count,
   icon: Icon,
   href,
-  color,
+  gradient,
   description,
 }: {
   title: string;
   count: number;
   icon: any;
   href: string;
-  color: 'yellow' | 'orange' | 'red';
+  gradient: 'yellow' | 'sunset';
   description: string;
 }) {
-  const colorClasses = {
-    yellow: 'bg-yellow-100 text-yellow-600 border-yellow-200',
-    orange: 'bg-orange-100 text-orange-600 border-orange-200',
-    red: 'bg-red-100 text-red-600 border-red-200',
+  const gradientClasses = {
+    yellow: 'from-yellow-400 to-yellow-500',
+    sunset: 'from-orange-400 to-yellow-400',
+  };
+
+  const borderClasses = {
+    yellow: 'border-yellow-400/30 hover:border-yellow-400',
+    sunset: 'border-orange-400/30 hover:border-orange-400',
+  };
+
+  const glowClasses = {
+    yellow: 'hover:shadow-glow-yellow-lg',
+    sunset: 'hover:shadow-glow-orange-lg',
   };
 
   return (
     <Link
       to={href}
-      className="block bg-white rounded-lg shadow p-4 sm:p-6 hover:shadow-lg transition-shadow border-l-4"
-      style={{ borderLeftColor: color === 'yellow' ? '#fbbf24' : color === 'orange' ? '#fb923c' : '#ef4444' }}
+      className={`block card p-5 sm:p-6 border-2 ${borderClasses[gradient]} ${glowClasses[gradient]} transition-all duration-300 hover:-translate-y-2 group relative overflow-hidden`}
     >
-      <div className="flex items-start justify-between">
+      {/* Decorative left bar */}
+      <div className={`absolute left-0 top-0 bottom-0 w-1.5 bg-gradient-to-b ${gradientClasses[gradient]} transform scale-y-0 group-hover:scale-y-100 transition-transform duration-300 origin-top`}></div>
+
+      <div className="relative flex items-start justify-between">
         <div className="flex-1">
           <div className="flex items-center space-x-2 mb-2">
-            <Icon className="w-5 h-5 text-gray-600" />
-            <h3 className="text-base sm:text-lg font-semibold text-gray-900">{title}</h3>
+            <Icon className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+            <h3 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white">{title}</h3>
           </div>
-          <p className="text-xs sm:text-sm text-gray-600 mb-3">{description}</p>
+          <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mb-4">{description}</p>
           <div className="flex items-center space-x-2">
-            <Clock className="w-4 h-4 text-gray-400" />
-            <span className="text-2xl sm:text-3xl font-bold text-gray-900">{count.toLocaleString()}</span>
-            <span className="text-sm text-gray-500">pending</span>
+            <Clock className="w-4 h-4 text-gray-400 dark:text-gray-500" />
+            <span className="text-3xl sm:text-4xl font-bold text-gradient-ocean">{count.toLocaleString()}</span>
+            <span className="text-sm font-medium text-gray-500 dark:text-gray-400">pending</span>
           </div>
         </div>
-        <div className={`p-3 rounded-lg ${colorClasses[color]}`}>
-          <Icon className="w-6 h-6" />
+        <div className={`relative p-3 sm:p-4 bg-gradient-to-br ${gradientClasses[gradient]} rounded-xl shadow-lg group-hover:scale-110 group-hover:rotate-6 transition-all duration-300`}>
+          <Icon className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
         </div>
       </div>
     </Link>
@@ -395,27 +450,41 @@ function QuickLinkCard({
   description,
   icon: Icon,
   href,
+  gradient,
 }: {
   title: string;
   description: string;
   icon: any;
   href: string;
+  gradient: 'brand' | 'cyan' | 'sunset' | 'yellow' | 'fire' | 'glow';
 }) {
+  const gradientClasses = {
+    brand: 'from-brand-500 to-cyan-400',
+    cyan: 'from-cyan-400 to-brand-500',
+    sunset: 'from-orange-400 to-yellow-400',
+    fire: 'from-orange-500 to-orange-600',
+    yellow: 'from-yellow-400 to-yellow-500',
+    glow: 'from-cyan-400 to-brand-600',
+  };
+
   return (
     <Link
       to={href}
-      className="block bg-white rounded-lg shadow p-4 sm:p-6 hover:shadow-lg transition-shadow"
+      className="block card card-hover p-5 sm:p-6 group relative overflow-hidden border border-transparent hover:border-cyan-400/30"
     >
-      <div className="flex items-start">
-        <div className="p-2 sm:p-3 bg-primary-100 rounded-lg">
-          <Icon className="w-5 h-5 sm:w-6 sm:h-6 text-primary-600" />
+      <div className="relative flex items-start space-x-4">
+        <div className={`relative p-3 bg-gradient-to-br ${gradientClasses[gradient]} rounded-xl shadow-lg group-hover:scale-110 group-hover:rotate-3 transition-all duration-300 flex-shrink-0`}>
+          <Icon className="w-6 h-6 text-white" />
+          <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-20 rounded-xl transition-opacity duration-300"></div>
         </div>
-        <div className="ml-3 sm:ml-4 flex-1">
-          <h3 className="text-base sm:text-lg font-semibold text-gray-900">{title}</h3>
-          <p className="text-xs sm:text-sm text-gray-600 mt-1">{description}</p>
+        <div className="flex-1 min-w-0">
+          <h3 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white mb-1 group-hover:text-gradient-brand transition-all">
+            {title}
+          </h3>
+          <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">{description}</p>
         </div>
+        <ArrowRight className="w-5 h-5 text-gray-400 group-hover:text-brand-500 dark:group-hover:text-cyan-400 group-hover:translate-x-1 transition-all flex-shrink-0" />
       </div>
     </Link>
   );
 }
-

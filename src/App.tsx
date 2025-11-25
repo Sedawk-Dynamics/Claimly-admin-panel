@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { ThemeProvider } from './contexts/ThemeContext';
 import { authService } from './services/auth.service';
 import Login from './pages/Login';
 import Layout from './components/Layout';
@@ -18,29 +19,31 @@ function PrivateRoute({ children }: { children: React.ReactNode }) {
 
 function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/login" element={<Login />} />
-        <Route
-          path="/"
-          element={
-            <PrivateRoute>
-              <Layout />
-            </PrivateRoute>
-          }
-        >
-          <Route index element={<Dashboard />} />
-          <Route path="users" element={<Users />} />
-          <Route path="users/:id" element={<UserDetail />} />
-          <Route path="kyc-review" element={<KycReview />} />
-          <Route path="policy-review" element={<PolicyReview />} />
-          <Route path="companies" element={<Companies />} />
-          <Route path="policies" element={<Policies />} />
-          <Route path="alerts" element={<Alerts />} />
-          <Route path="actions" element={<AdminActions />} />
-        </Route>
-      </Routes>
-    </BrowserRouter>
+    <ThemeProvider>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route
+            path="/"
+            element={
+              <PrivateRoute>
+                <Layout />
+              </PrivateRoute>
+            }
+          >
+            <Route index element={<Dashboard />} />
+            <Route path="users" element={<Users />} />
+            <Route path="users/:id" element={<UserDetail />} />
+            <Route path="kyc-review" element={<KycReview />} />
+            <Route path="policy-review" element={<PolicyReview />} />
+            <Route path="companies" element={<Companies />} />
+            <Route path="policies" element={<Policies />} />
+            <Route path="alerts" element={<Alerts />} />
+            <Route path="actions" element={<AdminActions />} />
+          </Route>
+        </Routes>
+      </BrowserRouter>
+    </ThemeProvider>
   );
 }
 

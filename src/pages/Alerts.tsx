@@ -17,6 +17,7 @@ import {
   Download,
   CheckSquare,
   Square,
+  Zap,
 } from 'lucide-react';
 import { format } from 'date-fns';
 
@@ -59,7 +60,6 @@ export default function Alerts() {
         endDate || undefined
       );
       if (data && data.data && Array.isArray(data.data)) {
-        // Filter by alert type on frontend if needed
         if (alertTypeFilter) {
           const filtered = data.data.filter((alert) => alert.alertType === alertTypeFilter);
           setAlerts({ ...data, data: filtered, pagination: { ...data.pagination, total: filtered.length } });
@@ -159,39 +159,39 @@ export default function Alerts() {
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'VERIFIED':
-        return <CheckCircle className="w-5 h-5 text-green-600" />;
+        return <CheckCircle className="w-5 h-5 text-cyan-500 dark:text-cyan-400" />;
       case 'FALSE_ALERT':
-        return <XCircle className="w-5 h-5 text-red-600" />;
+        return <XCircle className="w-5 h-5 text-orange-500 dark:text-orange-400" />;
       default:
-        return <AlertCircle className="w-5 h-5 text-yellow-600" />;
+        return <AlertCircle className="w-5 h-5 text-yellow-500 dark:text-yellow-400" />;
     }
   };
 
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'VERIFIED':
-        return 'bg-green-100 text-green-800';
+        return 'status-active';
       case 'FALSE_ALERT':
-        return 'bg-red-100 text-red-800';
+        return 'status-expired';
       case 'PENDING':
-        return 'bg-yellow-100 text-yellow-800';
+        return 'status-inactive';
       default:
-        return 'bg-gray-100 text-gray-800';
+        return 'badge';
     }
   };
 
   const getAlertTypeIcon = (type?: string) => {
     switch (type) {
       case 'NEW_USER':
-        return <UserPlus className="w-4 h-4 text-blue-500" />;
+        return <UserPlus className="w-4 h-4 text-brand-500 dark:text-brand-400" />;
       case 'NEW_POLICY':
-        return <FileText className="w-4 h-4 text-green-500" />;
+        return <FileText className="w-4 h-4 text-cyan-500 dark:text-cyan-400" />;
       case 'NEW_NOMINEE':
-        return <Users className="w-4 h-4 text-purple-500" />;
+        return <Users className="w-4 h-4 text-orange-500 dark:text-orange-400" />;
       case 'SUBSCRIPTION':
-        return <CreditCard className="w-4 h-4 text-orange-500" />;
+        return <CreditCard className="w-4 h-4 text-yellow-500 dark:text-yellow-400" />;
       default:
-        return <Bell className="w-4 h-4 text-gray-500" />;
+        return <Bell className="w-4 h-4 text-gray-500 dark:text-gray-400" />;
     }
   };
 
@@ -237,21 +237,34 @@ export default function Alerts() {
   };
 
   return (
-    <div>
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4 sm:mb-6">
-        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Alerts</h1>
-        <div className="flex flex-wrap gap-2 sm:space-x-2">
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="flex items-center space-x-4">
+          <div className="relative">
+            <div className="absolute inset-0 bg-gradient-fire rounded-xl blur-lg opacity-60 animate-pulse-glow-orange"></div>
+            <div className="relative p-3 bg-gradient-to-br from-yellow-500 to-orange-500 rounded-xl shadow-glow-yellow">
+              <Zap className="w-7 h-7 text-white" />
+            </div>
+          </div>
+          <div>
+            <h1 className="text-3xl sm:text-4xl font-bold text-gradient-fire">Alerts</h1>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Monitor and verify system alerts</p>
+          </div>
+        </div>
+        <div className="flex flex-wrap gap-2">
           {selectedAlerts.size > 0 && (
             <button
               onClick={handleBulkVerify}
-              className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
+              className="btn-brand flex items-center space-x-2"
             >
-              Bulk Verify ({selectedAlerts.size})
+              <CheckSquare className="w-4 h-4" />
+              <span>Bulk Verify ({selectedAlerts.size})</span>
             </button>
           )}
           <button
             onClick={exportToCSV}
-            className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 flex items-center space-x-2"
+            className="btn-outline-orange flex items-center space-x-2"
           >
             <Download className="w-4 h-4" />
             <span>Export CSV</span>
@@ -261,49 +274,65 @@ export default function Alerts() {
 
       {/* Statistics Dashboard */}
       {stats && (
-        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-4 sm:mb-6">
-          <div className="bg-white rounded-lg shadow p-4">
-            <div className="text-sm text-gray-500">Total Alerts</div>
-            <div className="text-2xl font-bold text-gray-900">{stats.total}</div>
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="card elevated border border-brand-400/20 bg-gradient-to-br from-white to-brand-50 dark:from-navy-900 dark:to-brand-950/30">
+            <div className="text-sm font-semibold text-gray-600 dark:text-gray-400">Total Alerts</div>
+            <div className="text-3xl font-bold text-gradient-brand mt-2">{stats.total}</div>
+            <div className="mt-2 flex items-center text-xs text-gray-500 dark:text-gray-400">
+              <Bell className="w-3 h-3 mr-1" />
+              All time
+            </div>
           </div>
-          <div className="bg-yellow-50 rounded-lg shadow p-4">
-            <div className="text-sm text-gray-500">Pending</div>
-            <div className="text-2xl font-bold text-yellow-600">{stats.pending}</div>
+          <div className="card elevated border border-yellow-400/20 bg-gradient-to-br from-white to-yellow-50 dark:from-navy-900 dark:to-yellow-950/30">
+            <div className="text-sm font-semibold text-gray-600 dark:text-gray-400">Pending</div>
+            <div className="text-3xl font-bold text-yellow-500 dark:text-yellow-400 mt-2">{stats.pending}</div>
+            <div className="mt-2 flex items-center text-xs text-yellow-600 dark:text-yellow-400">
+              <AlertCircle className="w-3 h-3 mr-1" />
+              Needs review
+            </div>
           </div>
-          <div className="bg-green-50 rounded-lg shadow p-4">
-            <div className="text-sm text-gray-500">Verified</div>
-            <div className="text-2xl font-bold text-green-600">{stats.verified}</div>
+          <div className="card elevated border border-cyan-400/20 bg-gradient-to-br from-white to-cyan-50 dark:from-navy-900 dark:to-cyan-950/30">
+            <div className="text-sm font-semibold text-gray-600 dark:text-gray-400">Verified</div>
+            <div className="text-3xl font-bold text-cyan-500 dark:text-cyan-400 mt-2">{stats.verified}</div>
+            <div className="mt-2 flex items-center text-xs text-cyan-600 dark:text-cyan-400">
+              <CheckCircle className="w-3 h-3 mr-1" />
+              Confirmed
+            </div>
           </div>
-          <div className="bg-red-50 rounded-lg shadow p-4">
-            <div className="text-sm text-gray-500">False Alerts</div>
-            <div className="text-2xl font-bold text-red-600">{stats.falseAlerts}</div>
+          <div className="card elevated border border-orange-400/20 bg-gradient-to-br from-white to-orange-50 dark:from-navy-900 dark:to-orange-950/30">
+            <div className="text-sm font-semibold text-gray-600 dark:text-gray-400">False Alerts</div>
+            <div className="text-3xl font-bold text-orange-500 dark:text-orange-400 mt-2">{stats.falseAlerts}</div>
+            <div className="mt-2 flex items-center text-xs text-orange-600 dark:text-orange-400">
+              <XCircle className="w-3 h-3 mr-1" />
+              Dismissed
+            </div>
           </div>
         </div>
       )}
 
       {/* Search and Filters */}
-      <div className="bg-white rounded-lg shadow p-4 mb-6">
+      <div className="card p-5 border border-cyan-400/20">
         <div className="flex flex-col md:flex-row gap-4">
-          <div className="flex-1 flex items-center space-x-2">
-            <Search className="w-5 h-5 text-gray-400" />
+          <div className="flex-1 relative">
+            <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-cyan-500 dark:text-cyan-400 w-5 h-5" />
             <input
               type="text"
               placeholder="Search by user name, email, mobile, or remarks..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-              className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+              className="w-full pl-12 pr-4 py-3 border-2 border-cyan-400/30 dark:border-cyan-500/30 rounded-xl bg-white dark:bg-navy-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-cyan-400 dark:focus:ring-cyan-500 focus:border-cyan-400 dark:focus:border-cyan-500 transition-all duration-300 placeholder:text-gray-400"
             />
-            <button
-              onClick={handleSearch}
-              className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
-            >
-              Search
-            </button>
           </div>
           <button
+            onClick={handleSearch}
+            className="btn-cyan"
+          >
+            Search
+          </button>
+          <button
             onClick={() => setShowFilters(!showFilters)}
-            className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 flex items-center space-x-2"
+            className="btn-outline-brand flex items-center space-x-2"
           >
             <Filter className="w-4 h-4" />
             <span>Filters</span>
@@ -311,16 +340,16 @@ export default function Alerts() {
         </div>
 
         {showFilters && (
-          <div className="mt-4 pt-4 border-t border-gray-200 grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="mt-4 pt-4 border-t border-gray-200 dark:border-navy-700 grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Detection Method</label>
+              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Detection Method</label>
               <select
                 value={detectedViaFilter || ''}
                 onChange={(e) => {
                   setDetectedViaFilter((e.target.value as 'SMS' | 'MANUAL' | '') || undefined);
                   setPage(1);
                 }}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                className="input-elegant w-full"
               >
                 <option value="">All</option>
                 <option value="SMS">SMS</option>
@@ -328,14 +357,14 @@ export default function Alerts() {
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Alert Type</label>
+              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Alert Type</label>
               <select
                 value={alertTypeFilter || ''}
                 onChange={(e) => {
                   setAlertTypeFilter(e.target.value || undefined);
                   setPage(1);
                 }}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                className="input-elegant w-full"
               >
                 <option value="">All Types</option>
                 <option value="NEW_USER">New User</option>
@@ -346,7 +375,7 @@ export default function Alerts() {
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Date Range</label>
+              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Date Range</label>
               <div className="flex space-x-2">
                 <input
                   type="date"
@@ -355,7 +384,7 @@ export default function Alerts() {
                     setStartDate(e.target.value);
                     setPage(1);
                   }}
-                  className="flex-1 px-3 py-2 border border-gray-300 rounded-lg"
+                  className="input-elegant flex-1"
                 />
                 <input
                   type="date"
@@ -364,7 +393,7 @@ export default function Alerts() {
                     setEndDate(e.target.value);
                     setPage(1);
                   }}
-                  className="flex-1 px-3 py-2 border border-gray-300 rounded-lg"
+                  className="input-elegant flex-1"
                 />
               </div>
             </div>
@@ -373,15 +402,16 @@ export default function Alerts() {
       </div>
 
       {/* Status Filters */}
-      <div className="mb-4 sm:mb-6 flex flex-wrap gap-2 sm:space-x-4">
+      <div className="flex flex-wrap gap-3">
         <button
           onClick={() => {
             setStatusFilter(undefined);
             setPage(1);
           }}
-          className={`px-4 py-2 rounded-lg ${
-            statusFilter === undefined ? 'bg-primary-600 text-white' : 'bg-white text-gray-700'
-          }`}
+          className={`px-5 py-2.5 rounded-xl font-semibold transition-all ${statusFilter === undefined
+              ? 'bg-gradient-brand text-white shadow-glow-brand'
+              : 'bg-white dark:bg-navy-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-navy-700 hover:border-brand-400 dark:hover:border-brand-500'
+            }`}
         >
           All
         </button>
@@ -390,9 +420,10 @@ export default function Alerts() {
             setStatusFilter('PENDING');
             setPage(1);
           }}
-          className={`px-4 py-2 rounded-lg ${
-            statusFilter === 'PENDING' ? 'bg-primary-600 text-white' : 'bg-white text-gray-700'
-          }`}
+          className={`px-5 py-2.5 rounded-xl font-semibold transition-all ${statusFilter === 'PENDING'
+              ? 'bg-gradient-to-r from-yellow-400 to-yellow-500 text-white shadow-glow-yellow'
+              : 'bg-white dark:bg-navy-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-navy-700 hover:border-yellow-400 dark:hover:border-yellow-500'
+            }`}
         >
           Pending
         </button>
@@ -401,9 +432,10 @@ export default function Alerts() {
             setStatusFilter('VERIFIED');
             setPage(1);
           }}
-          className={`px-4 py-2 rounded-lg ${
-            statusFilter === 'VERIFIED' ? 'bg-primary-600 text-white' : 'bg-white text-gray-700'
-          }`}
+          className={`px-5 py-2.5 rounded-xl font-semibold transition-all ${statusFilter === 'VERIFIED'
+              ? 'bg-gradient-to-r from-cyan-400 to-cyan-500 text-white shadow-glow-cyan'
+              : 'bg-white dark:bg-navy-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-navy-700 hover:border-cyan-400 dark:hover:border-cyan-500'
+            }`}
         >
           Verified
         </button>
@@ -412,116 +444,115 @@ export default function Alerts() {
             setStatusFilter('FALSE_ALERT');
             setPage(1);
           }}
-          className={`px-4 py-2 rounded-lg ${
-            statusFilter === 'FALSE_ALERT' ? 'bg-primary-600 text-white' : 'bg-white text-gray-700'
-          }`}
+          className={`px-5 py-2.5 rounded-xl font-semibold transition-all ${statusFilter === 'FALSE_ALERT'
+              ? 'bg-gradient-sunset text-white shadow-glow-orange'
+              : 'bg-white dark:bg-navy-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-navy-700 hover:border-orange-400 dark:hover:border-orange-500'
+            }`}
         >
           False Alerts
         </button>
       </div>
 
       {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6">
+        <div className="bg-gradient-to-r from-orange-50 to-yellow-50 dark:from-orange-950/30 dark:to-yellow-950/30 border-2 border-orange-400 dark:border-orange-500 text-orange-700 dark:text-orange-400 px-5 py-4 rounded-xl shadow-glow-orange">
           {error}
         </div>
       )}
 
       {loading ? (
-        <div className="flex items-center justify-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
+        <div className="flex flex-col items-center justify-center h-64 space-y-4">
+          <div className="relative">
+            <div className="animate-spin rounded-full h-16 w-16 border-4 border-yellow-200 dark:border-yellow-900 border-t-orange-500 dark:border-t-orange-400"></div>
+            <div className="absolute inset-0 rounded-full bg-gradient-fire opacity-20 blur-xl animate-pulse-glow-orange"></div>
+          </div>
+          <p className="text-gray-600 dark:text-gray-400 font-medium animate-pulse">Loading alerts...</p>
         </div>
       ) : (
         <>
-          <div className="bg-white rounded-lg shadow overflow-hidden">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
+          <div className="card elevated overflow-hidden border border-yellow-400/20">
+            <table className="min-w-full divide-y divide-gray-200 dark:divide-navy-700">
+              <thead className="bg-gradient-to-r from-navy-900 via-yellow-900/50 to-navy-900 dark:from-navy-950 dark:via-yellow-950/50 dark:to-navy-950">
                 <tr>
-                  <th className="px-6 py-3 text-left">
+                  <th className="px-6 py-4 text-left">
                     <button onClick={toggleSelectAll} className="flex items-center">
                       {selectedAlerts.size === alerts?.data.length && alerts.data.length > 0 ? (
-                        <CheckSquare className="w-5 h-5 text-primary-600" />
+                        <CheckSquare className="w-5 h-5 text-yellow-400" />
                       ) : (
                         <Square className="w-5 h-5 text-gray-400" />
                       )}
                     </button>
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-4 text-left text-xs font-bold text-yellow-400 uppercase tracking-wider">
                     Alert
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-4 text-left text-xs font-bold text-yellow-400 uppercase tracking-wider">
                     User
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-4 text-left text-xs font-bold text-yellow-400 uppercase tracking-wider">
                     Status
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-4 text-left text-xs font-bold text-yellow-400 uppercase tracking-wider">
                     Date
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-4 text-left text-xs font-bold text-yellow-400 uppercase tracking-wider">
                     Actions
                   </th>
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
+              <tbody className="bg-white dark:bg-navy-900 divide-y divide-gray-200 dark:divide-navy-700">
                 {alerts?.data && alerts.data.length > 0 ? (
                   alerts.data.map((alert) => (
-                    <tr key={alert.id} className="hover:bg-gray-50">
+                    <tr key={alert.id} className="hover:bg-yellow-50 dark:hover:bg-yellow-950/10 transition-all duration-200 group">
                       <td className="px-6 py-4">
                         <button onClick={() => toggleSelectAlert(alert.id)}>
                           {selectedAlerts.has(alert.id) ? (
-                            <CheckSquare className="w-5 h-5 text-primary-600" />
+                            <CheckSquare className="w-5 h-5 text-yellow-500 dark:text-yellow-400" />
                           ) : (
                             <Square className="w-5 h-5 text-gray-400" />
                           )}
                         </button>
                       </td>
                       <td className="px-6 py-4">
-                        <div className="flex items-start">
-                          {getAlertTypeIcon(alert.alertType)}
-                          <div className="ml-2">
-                            <div className="text-sm font-medium text-gray-900">
+                        <div className="flex items-start space-x-3">
+                          <div className="p-2 bg-gradient-to-br from-yellow-100 to-orange-100 dark:from-yellow-900/30 dark:to-orange-900/30 rounded-lg group-hover:scale-110 transition-transform">
+                            {getAlertTypeIcon(alert.alertType)}
+                          </div>
+                          <div>
+                            <div className="text-sm font-bold text-gray-900 dark:text-white">
                               {getAlertTypeLabel(alert.alertType)}
                             </div>
-                            <div className="text-xs text-gray-500 mt-1">{alert.detectedVia}</div>
+                            <div className="text-xs text-gray-600 dark:text-gray-400 mt-1">{alert.detectedVia}</div>
                             {alert.remarks && (
-                              <div className="text-xs text-gray-400 mt-1 line-clamp-1">{alert.remarks}</div>
+                              <div className="text-xs text-gray-500 dark:text-gray-500 mt-1 line-clamp-1">{alert.remarks}</div>
                             )}
                           </div>
                         </div>
                       </td>
                       <td className="px-6 py-4">
-                        <div className="text-sm text-gray-900">{alert.user?.name || 'N/A'}</div>
-                        <div className="text-sm text-gray-500">{alert.user?.email || 'N/A'}</div>
-                        <div className="text-xs text-gray-400">{alert.user?.mobileNumber || 'N/A'}</div>
+                        <div className="text-sm font-medium text-gray-900 dark:text-white">{alert.user?.name || 'N/A'}</div>
+                        <div className="text-sm text-gray-600 dark:text-gray-400">{alert.user?.email || 'N/A'}</div>
+                        <div className="text-xs text-gray-500 dark:text-gray-500">{alert.user?.mobileNumber || 'N/A'}</div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center">
+                        <div className="flex items-center space-x-2">
                           {getStatusIcon(alert.verificationStatus)}
-                          <span
-                            className={`ml-2 px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(
-                              alert.verificationStatus
-                            )}`}
-                          >
+                          <span className={getStatusColor(alert.verificationStatus)}>
                             {alert.verificationStatus}
                           </span>
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-900">
+                        <div className="text-sm font-semibold text-gray-900 dark:text-white">
                           {format(new Date(alert.createdAt), 'MMM dd, yyyy')}
                         </div>
-                        <div className="text-sm text-gray-500">
+                        <div className="text-sm text-gray-600 dark:text-gray-400">
                           {format(new Date(alert.createdAt), 'hh:mm a')}
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                         <button
                           onClick={() => handleVerify(alert)}
-                          className={`${
-                            alert.verificationStatus === 'PENDING'
-                              ? 'text-primary-600 hover:text-primary-900'
-                              : 'text-blue-600 hover:text-blue-900'
-                          }`}
+                          className="text-brand-600 dark:text-cyan-400 hover:text-white dark:hover:text-white hover:bg-gradient-brand dark:hover:bg-gradient-cyan px-3 py-1.5 rounded-lg transition-all font-semibold"
                         >
                           {alert.verificationStatus === 'PENDING' ? 'Verify' : 'Edit'}
                         </button>
@@ -530,8 +561,13 @@ export default function Alerts() {
                   ))
                 ) : (
                   <tr>
-                    <td colSpan={6} className="px-6 py-8 text-center text-sm text-gray-500">
-                      No alerts found
+                    <td colSpan={6} className="px-6 py-16 text-center">
+                      <div className="flex flex-col items-center space-y-4">
+                        <div className="p-4 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-navy-800 dark:to-navy-900 rounded-2xl">
+                          <Bell className="w-16 h-16 text-gray-400 dark:text-gray-600" />
+                        </div>
+                        <p className="text-sm font-semibold text-gray-900 dark:text-white">No alerts found</p>
+                      </div>
                     </td>
                   </tr>
                 )}
@@ -541,25 +577,26 @@ export default function Alerts() {
 
           {/* Pagination */}
           {alerts && alerts.pagination.totalPages > 1 && (
-            <div className="mt-4 sm:mt-6 flex flex-col sm:flex-row items-center justify-between gap-3">
-              <div className="text-xs sm:text-sm text-gray-700 text-center sm:text-left">
-                Showing {((page - 1) * limit) + 1} to {Math.min(page * limit, alerts.pagination.total)} of{' '}
-                {alerts.pagination.total} results
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-3 card p-4 sm:p-5 border border-yellow-400/20">
+              <div className="text-sm text-gray-700 dark:text-gray-300 text-center sm:text-left">
+                Showing <span className="font-bold text-yellow-500 dark:text-yellow-400">{((page - 1) * limit) + 1}</span> to{' '}
+                <span className="font-bold text-yellow-500 dark:text-yellow-400">{Math.min(page * limit, alerts.pagination.total)}</span> of{' '}
+                <span className="font-bold text-yellow-500 dark:text-yellow-400">{alerts.pagination.total}</span> results
               </div>
               <div className="flex space-x-2">
                 <button
                   onClick={() => setPage(page - 1)}
                   disabled={page === 1}
-                  className="px-3 sm:px-4 py-2 border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+                  className="px-4 py-2.5 border-2 border-yellow-400 dark:border-yellow-500 text-yellow-500 dark:text-yellow-400 rounded-lg disabled:opacity-30 disabled:cursor-not-allowed hover:bg-gradient-to-r hover:from-yellow-400 hover:to-orange-500 hover:text-white hover:border-transparent transition-all font-semibold disabled:hover:bg-transparent disabled:hover:text-yellow-500 dark:disabled:hover:text-yellow-400 hover:scale-105"
                 >
-                  <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" />
+                  <ChevronLeft className="w-5 h-5" />
                 </button>
                 <button
                   onClick={() => setPage(page + 1)}
                   disabled={page >= alerts.pagination.totalPages}
-                  className="px-3 sm:px-4 py-2 border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+                  className="px-4 py-2.5 border-2 border-yellow-400 dark:border-yellow-500 text-yellow-500 dark:text-yellow-400 rounded-lg disabled:opacity-30 disabled:cursor-not-allowed hover:bg-gradient-to-r hover:from-yellow-400 hover:to-orange-500 hover:text-white hover:border-transparent transition-all font-semibold disabled:hover:bg-transparent disabled:hover:text-yellow-500 dark:disabled:hover:text-yellow-400 hover:scale-105"
                 >
-                  <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
+                  <ChevronRight className="w-5 h-5" />
                 </button>
               </div>
             </div>
@@ -569,63 +606,71 @@ export default function Alerts() {
 
       {/* Verify Modal */}
       {showVerifyModal && selectedAlert && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 p-4">
-          <div className="relative top-4 sm:top-20 mx-auto p-4 sm:p-5 border w-full max-w-md shadow-lg rounded-md bg-white">
-            <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-4">
+        <div className="fixed inset-0 bg-black/50 dark:bg-black/70 backdrop-blur-sm overflow-y-auto h-full w-full z-50 p-4 flex items-center justify-center">
+          <div className="relative card border-2 border-yellow-400/30 dark:border-yellow-500/30 w-full max-w-md shadow-2xl shadow-yellow-500/20">
+            <h3 className="text-xl font-bold text-gradient-fire mb-4">
               {selectedAlert.verificationStatus === 'PENDING' ? 'Verify Alert' : 'Edit Alert Verification'}
             </h3>
-            <div className="mb-4">
-              <p className="text-sm text-gray-600 mb-2">
-                <strong>Type:</strong> {getAlertTypeLabel(selectedAlert.alertType)}
-              </p>
-              <p className="text-sm text-gray-600 mb-2">
-                <strong>Detected Via:</strong> {selectedAlert.detectedVia}
-              </p>
-              <p className="text-sm text-gray-600 mb-2">
-                <strong>Detection Date:</strong> {format(new Date(selectedAlert.detectionDate), 'MMM dd, yyyy')}
-              </p>
+            <div className="mb-4 space-y-3 p-4 bg-gray-50 dark:bg-navy-800 rounded-xl border border-gray-200 dark:border-navy-700">
+              <div className="flex items-start space-x-2">
+                <span className="text-sm font-semibold text-gray-700 dark:text-gray-300 min-w-[100px]">Type:</span>
+                <span className="text-sm text-gray-900 dark:text-white">{getAlertTypeLabel(selectedAlert.alertType)}</span>
+              </div>
+              <div className="flex items-start space-x-2">
+                <span className="text-sm font-semibold text-gray-700 dark:text-gray-300 min-w-[100px]">Detected Via:</span>
+                <span className="text-sm text-gray-900 dark:text-white">{selectedAlert.detectedVia}</span>
+              </div>
+              <div className="flex items-start space-x-2">
+                <span className="text-sm font-semibold text-gray-700 dark:text-gray-300 min-w-[100px]">Date:</span>
+                <span className="text-sm text-gray-900 dark:text-white">{format(new Date(selectedAlert.detectionDate), 'MMM dd, yyyy')}</span>
+              </div>
               {selectedAlert.user && (
                 <>
-                  <p className="text-sm text-gray-600 mb-2">
-                    <strong>User:</strong> {selectedAlert.user.name}
-                  </p>
-                  <p className="text-sm text-gray-600 mb-2">
-                    <strong>Email:</strong> {selectedAlert.user.email}
-                  </p>
-                  <p className="text-sm text-gray-600 mb-2">
-                    <strong>Mobile:</strong> {selectedAlert.user.mobileNumber}
-                  </p>
+                  <div className="flex items-start space-x-2">
+                    <span className="text-sm font-semibold text-gray-700 dark:text-gray-300 min-w-[100px]">User:</span>
+                    <span className="text-sm text-gray-900 dark:text-white">{selectedAlert.user.name}</span>
+                  </div>
+                  <div className="flex items-start space-x-2">
+                    <span className="text-sm font-semibold text-gray-700 dark:text-gray-300 min-w-[100px]">Email:</span>
+                    <span className="text-sm text-gray-900 dark:text-white">{selectedAlert.user.email}</span>
+                  </div>
+                  <div className="flex items-start space-x-2">
+                    <span className="text-sm font-semibold text-gray-700 dark:text-gray-300 min-w-[100px]">Mobile:</span>
+                    <span className="text-sm text-gray-900 dark:text-white">{selectedAlert.user.mobileNumber}</span>
+                  </div>
                 </>
               )}
               {selectedAlert.remarks && (
-                <p className="text-sm text-gray-600 mb-2">
-                  <strong>Current Remarks:</strong> {selectedAlert.remarks}
-                </p>
+                <div className="flex items-start space-x-2">
+                  <span className="text-sm font-semibold text-gray-700 dark:text-gray-300 min-w-[100px]">Remarks:</span>
+                  <span className="text-sm text-gray-900 dark:text-white">{selectedAlert.remarks}</span>
+                </div>
               )}
               {selectedAlert.verificationStatus !== 'PENDING' && (
-                <p className="text-sm text-gray-600 mb-2">
-                  <strong>Current Status:</strong> {selectedAlert.verificationStatus}
-                </p>
+                <div className="flex items-start space-x-2">
+                  <span className="text-sm font-semibold text-gray-700 dark:text-gray-300 min-w-[100px]">Status:</span>
+                  <span className={getStatusColor(selectedAlert.verificationStatus)}>{selectedAlert.verificationStatus}</span>
+                </div>
               )}
             </div>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Verification Status</label>
+                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Verification Status</label>
                 <select
                   value={verificationStatus}
                   onChange={(e) => setVerificationStatus(e.target.value as 'VERIFIED' | 'FALSE_ALERT')}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                  className="input-elegant w-full"
                 >
                   <option value="VERIFIED">Verified</option>
                   <option value="FALSE_ALERT">False Alert</option>
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Remarks</label>
+                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Remarks</label>
                 <textarea
                   value={remarks}
                   onChange={(e) => setRemarks(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                  className="input-elegant w-full"
                   rows={3}
                   placeholder="Add remarks (optional)"
                 />
@@ -633,7 +678,7 @@ export default function Alerts() {
               <div className="flex space-x-3">
                 <button
                   onClick={handleSubmitVerification}
-                  className="flex-1 bg-primary-600 text-white py-2 rounded-lg hover:bg-primary-700"
+                  className="flex-1 btn-brand"
                 >
                   Submit
                 </button>
@@ -642,7 +687,7 @@ export default function Alerts() {
                     setShowVerifyModal(false);
                     setSelectedAlert(null);
                   }}
-                  className="flex-1 bg-gray-200 text-gray-700 py-2 rounded-lg hover:bg-gray-300"
+                  className="flex-1 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 py-2.5 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-all font-semibold"
                 >
                   Cancel
                 </button>
