@@ -146,8 +146,8 @@ export default function Companies() {
           <button
             onClick={() => setStatusFilter(undefined)}
             className={`px-5 py-2.5 rounded-xl font-semibold transition-all ${statusFilter === undefined
-                ? 'bg-gradient-sunset text-white shadow-glow-orange'
-                : 'bg-white dark:bg-navy-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-navy-700 hover:border-orange-400 dark:hover:border-orange-500'
+              ? 'bg-gradient-sunset text-white shadow-glow-orange'
+              : 'bg-white dark:bg-navy-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-navy-700 hover:border-orange-400 dark:hover:border-orange-500'
               }`}
           >
             All
@@ -155,8 +155,8 @@ export default function Companies() {
           <button
             onClick={() => setStatusFilter('ACTIVE')}
             className={`px-5 py-2.5 rounded-xl font-semibold transition-all ${statusFilter === 'ACTIVE'
-                ? 'bg-gradient-to-r from-cyan-400 to-cyan-500 text-white shadow-glow-cyan'
-                : 'bg-white dark:bg-navy-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-navy-700 hover:border-cyan-400 dark:hover:border-cyan-500'
+              ? 'bg-gradient-to-r from-cyan-400 to-cyan-500 text-white shadow-glow-cyan'
+              : 'bg-white dark:bg-navy-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-navy-700 hover:border-cyan-400 dark:hover:border-cyan-500'
               }`}
           >
             Active
@@ -164,8 +164,8 @@ export default function Companies() {
           <button
             onClick={() => setStatusFilter('INACTIVE')}
             className={`px-5 py-2.5 rounded-xl font-semibold transition-all ${statusFilter === 'INACTIVE'
-                ? 'bg-gradient-to-r from-gray-500 to-gray-600 text-white shadow-md'
-                : 'bg-white dark:bg-navy-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-navy-700 hover:border-gray-400 dark:hover:border-gray-500'
+              ? 'bg-gradient-to-r from-gray-500 to-gray-600 text-white shadow-md'
+              : 'bg-white dark:bg-navy-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-navy-700 hover:border-gray-400 dark:hover:border-gray-500'
               }`}
           >
             Inactive
@@ -238,15 +238,17 @@ export default function Companies() {
                         <div className="flex space-x-3">
                           <button
                             onClick={() => handleEdit(company)}
-                            className="p-2 text-brand-600 dark:text-cyan-400 hover:bg-gradient-brand hover:text-white rounded-lg transition-all"
+                            className="flex items-center px-3 py-2 text-sm font-medium text-brand-600 dark:text-cyan-400 hover:bg-brand-50 dark:hover:bg-navy-800 rounded-lg transition-all border border-transparent hover:border-brand-200 dark:hover:border-navy-600"
                           >
-                            <Edit className="w-5 h-5" />
+                            <Edit className="w-4 h-4 mr-2" />
+                            Edit
                           </button>
                           <button
                             onClick={() => handleDelete(company.id)}
-                            className="p-2 text-orange-600 dark:text-orange-400 hover:bg-gradient-sunset hover:text-white rounded-lg transition-all"
+                            className="flex items-center px-3 py-2 text-sm font-medium text-orange-600 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-navy-800 rounded-lg transition-all border border-transparent hover:border-orange-200 dark:hover:border-navy-600"
                           >
-                            <Trash2 className="w-5 h-5" />
+                            <Trash2 className="w-4 h-4 mr-2" />
+                            Delete
                           </button>
                         </div>
                       </td>

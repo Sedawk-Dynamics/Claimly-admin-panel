@@ -133,6 +133,8 @@ export default {
         'glow-yellow-lg': '0 0 30px rgba(240, 213, 9, 0.5), 0 0 60px rgba(240, 213, 9, 0.3)',
         'glow-cyan': '0 0 20px rgba(29, 206, 255, 0.4), 0 0 40px rgba(29, 206, 255, 0.2)',
         'glow-cyan-lg': '0 0 30px rgba(29, 206, 255, 0.5), 0 0 60px rgba(29, 206, 255, 0.3)',
+        'glow-purple': '0 0 20px rgba(168, 85, 247, 0.4), 0 0 40px rgba(168, 85, 247, 0.2)',
+        'glow-purple-lg': '0 0 30px rgba(168, 85, 247, 0.5), 0 0 60px rgba(168, 85, 247, 0.3)',
 
         // 3D Card Shadows
         'card-3d': '0 10px 30px -5px rgba(0, 0, 0, 0.1), 0 20px 40px -10px rgba(0, 0, 0, 0.15)',

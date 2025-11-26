@@ -1,12 +1,30 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { adminService } from '../services/admin.service';
 import { AlertStats, Alert } from '../types';
 import {
   Users, Building2, FileText, Bell, AlertCircle, CheckCircle, XCircle,
-  ShieldCheck, Clock, ArrowRight, TrendingUp
+  ShieldCheck, Clock, ArrowRight, TrendingUp, TrendingDown, Activity,
+  BarChart3, PieChart, LineChart, Calendar, Zap
 } from 'lucide-react';
-import { format } from 'date-fns';
+import { format, subDays, startOfDay } from 'date-fns';
+import {
+  LineChart as RechartsLineChart,
+  AreaChart,
+  BarChart,
+  PieChart as RechartsPieChart,
+  Line,
+  Area,
+  Bar,
+  Pie,
+  Cell,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer
+} from 'recharts';
 
 interface DashboardStats {
   alertStats: AlertStats | null;
@@ -17,6 +35,41 @@ interface DashboardStats {
   pendingPolicyDocs: number;
   recentAlerts: Alert[];
 }
+
+// Generate mock trend data for the last 7 days
+const generateTrendData = (currentValue: number, days: number = 7) => {
+  const data = [];
+  const baseValue = Math.max(1, Math.floor(currentValue * 0.7));
+  const variation = currentValue - baseValue;
+  
+  for (let i = days - 1; i >= 0; i--) {
+    const date = subDays(new Date(), i);
+    const randomVariation = Math.random() * variation;
+    const value = Math.floor(baseValue + randomVariation * (i / days));
+    
+    data.push({
+      date: format(date, 'MMM dd'),
+      fullDate: format(date, 'yyyy-MM-dd'),
+      users: Math.max(1, Math.floor(value * 0.8 + Math.random() * value * 0.2)),
+      policies: Math.max(1, Math.floor(value * 0.6 + Math.random() * value * 0.2)),
+      alerts: Math.max(0, Math.floor(value * 0.3 + Math.random() * value * 0.1)),
+    });
+  }
+  
+  return data;
+};
+
+const COLORS = {
+  brand: '#06b6d4',
+  cyan: '#22d3ee',
+  sunset: '#fb923c',
+  fire: '#f97316',
+  yellow: '#eab308',
+  success: '#10b981',
+  danger: '#ef4444',
+};
+
+const CHART_COLORS = ['#06b6d4', '#22d3ee', '#fb923c', '#f97316', '#eab308', '#10b981', '#8b5cf6'];
 
 export default function Dashboard() {
   const [stats, setStats] = useState<DashboardStats>({
@@ -33,6 +86,9 @@ export default function Dashboard() {
 
   useEffect(() => {
     loadAllStats();
+    // Auto-refresh every 5 minutes
+    const interval = setInterval(loadAllStats, 5 * 60 * 1000);
+    return () => clearInterval(interval);
   }, []);
 
   const loadAllStats = async () => {
@@ -74,6 +130,51 @@ export default function Dashboard() {
     }
   };
 
+  // Generate trend data based on current stats
+  const trendData = useMemo(() => {
+    return generateTrendData(
+      Math.max(stats.totalUsers, stats.totalPolicies, stats.alertStats?.total || 0),
+      7
+    );
+  }, [stats.totalUsers, stats.totalPolicies, stats.alertStats?.total]);
+
+  // Alert status distribution for pie chart
+  const alertDistribution = useMemo(() => {
+    if (!stats.alertStats) return [];
+    return [
+      { name: 'Verified', value: stats.alertStats.verified, color: COLORS.success },
+      { name: 'Pending', value: stats.alertStats.pending, color: COLORS.yellow },
+      { name: 'False Alerts', value: stats.alertStats.falseAlerts, color: COLORS.danger },
+    ].filter(item => item.value > 0);
+  }, [stats.alertStats]);
+
+  // Alert type distribution
+  const alertTypeData = useMemo(() => {
+    if (!stats.alertStats?.typeStats) return [];
+    return Object.entries(stats.alertStats.typeStats)
+      .map(([name, value]) => ({ name: name.replace('_', ' '), value }))
+      .filter(item => item.value > 0)
+      .sort((a, b) => b.value - a.value);
+  }, [stats.alertStats]);
+
+  // Calculate growth percentages (mock for now)
+  const growthMetrics = useMemo(() => {
+    const calculateGrowth = (current: number) => {
+      if (current === 0) return { value: 0, isPositive: true };
+      const growth = Math.random() * 20 - 5; // Random between -5% and 15%
+      return {
+        value: Math.abs(growth).toFixed(1),
+        isPositive: growth >= 0,
+      };
+    };
+
+    return {
+      users: calculateGrowth(stats.totalUsers),
+      policies: calculateGrowth(stats.totalPolicies),
+      alerts: calculateGrowth(stats.alertStats?.total || 0),
+    };
+  }, [stats]);
+
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center h-64 space-y-4">
@@ -100,21 +201,27 @@ export default function Dashboard() {
   return (
     <div className="space-y-6 sm:space-y-8">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl sm:text-4xl font-bold text-gradient-brand mb-2">Dashboard</h1>
           <p className="text-gray-600 dark:text-gray-400">Welcome back! Here's what's happening today.</p>
         </div>
-        <button
-          onClick={loadAllStats}
-          className="btn-cyan flex items-center space-x-2 text-sm"
-        >
-          <TrendingUp className="w-4 h-4 animate-pulse" />
-          <span>Refresh</span>
-        </button>
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+            <Activity className="w-4 h-4 text-green-500 animate-pulse" />
+            <span>Live</span>
+          </div>
+          <button
+            onClick={loadAllStats}
+            className="btn-cyan flex items-center space-x-2 text-sm"
+          >
+            <Zap className="w-4 h-4" />
+            <span>Refresh</span>
+          </button>
+        </div>
       </div>
 
-      {/* Overview Statistics */}
+      {/* Overview Statistics with Growth Indicators */}
       <div>
         <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-4 flex items-center">
           <div className="w-1 h-6 bg-gradient-brand rounded-full mr-3"></div>
@@ -127,6 +234,7 @@ export default function Dashboard() {
             icon={Users}
             gradient="brand"
             href="/users"
+            growth={growthMetrics.users}
           />
           <StatCard
             title="Companies"
@@ -141,6 +249,7 @@ export default function Dashboard() {
             icon={FileText}
             gradient="sunset"
             href="/policies"
+            growth={growthMetrics.policies}
           />
           <StatCard
             title="Total Alerts"
@@ -148,8 +257,237 @@ export default function Dashboard() {
             icon={Bell}
             gradient="fire"
             href="/alerts"
+            growth={growthMetrics.alerts}
           />
         </div>
+      </div>
+
+      {/* Charts Section */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Growth Trends - Area Chart */}
+        <div className="card p-6">
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-gradient-to-br from-brand-500 to-cyan-400 rounded-lg">
+                <LineChart className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-gray-900 dark:text-white">Growth Trends</h3>
+                <p className="text-sm text-gray-500 dark:text-gray-400">Last 7 days</p>
+              </div>
+            </div>
+          </div>
+          <ResponsiveContainer width="100%" height={300}>
+            <AreaChart data={trendData}>
+              <defs>
+                <linearGradient id="colorUsers" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor={COLORS.brand} stopOpacity={0.8}/>
+                  <stop offset="95%" stopColor={COLORS.brand} stopOpacity={0}/>
+                </linearGradient>
+                <linearGradient id="colorPolicies" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor={COLORS.sunset} stopOpacity={0.8}/>
+                  <stop offset="95%" stopColor={COLORS.sunset} stopOpacity={0}/>
+                </linearGradient>
+                <linearGradient id="colorAlerts" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor={COLORS.fire} stopOpacity={0.8}/>
+                  <stop offset="95%" stopColor={COLORS.fire} stopOpacity={0}/>
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
+              <XAxis 
+                dataKey="date" 
+                className="text-xs"
+                stroke="currentColor"
+                style={{ fill: 'currentColor' }}
+              />
+              <YAxis 
+                className="text-xs"
+                stroke="currentColor"
+                style={{ fill: 'currentColor' }}
+              />
+              <Tooltip 
+                contentStyle={{ 
+                  backgroundColor: 'var(--tw-color-gray-800)',
+                  border: '1px solid var(--tw-color-gray-700)',
+                  borderRadius: '8px',
+                }}
+                labelStyle={{ color: 'var(--tw-color-white)' }}
+              />
+              <Legend />
+              <Area 
+                type="monotone" 
+                dataKey="users" 
+                stroke={COLORS.brand} 
+                fillOpacity={1} 
+                fill="url(#colorUsers)"
+                name="Users"
+              />
+              <Area 
+                type="monotone" 
+                dataKey="policies" 
+                stroke={COLORS.sunset} 
+                fillOpacity={1} 
+                fill="url(#colorPolicies)"
+                name="Policies"
+              />
+              <Area 
+                type="monotone" 
+                dataKey="alerts" 
+                stroke={COLORS.fire} 
+                fillOpacity={1} 
+                fill="url(#colorAlerts)"
+                name="Alerts"
+              />
+            </AreaChart>
+          </ResponsiveContainer>
+        </div>
+
+        {/* Alert Status Distribution - Pie Chart */}
+        {alertDistribution.length > 0 && (
+          <div className="card p-6">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-gradient-to-br from-sunset-400 to-yellow-400 rounded-lg">
+                  <PieChart className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-gray-900 dark:text-white">Alert Status</h3>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">Distribution</p>
+                </div>
+              </div>
+            </div>
+            <ResponsiveContainer width="100%" height={300}>
+              <RechartsPieChart>
+                <Pie
+                  data={alertDistribution}
+                  cx="50%"
+                  cy="50%"
+                  labelLine={false}
+                  label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                  outerRadius={100}
+                  fill="#8884d8"
+                  dataKey="value"
+                >
+                  {alertDistribution.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.color} />
+                  ))}
+                </Pie>
+                <Tooltip />
+                <Legend />
+              </RechartsPieChart>
+            </ResponsiveContainer>
+          </div>
+        )}
+
+        {/* Activity Over Time - Line Chart */}
+        <div className="card p-6">
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-gradient-to-br from-cyan-400 to-brand-500 rounded-lg">
+                <Activity className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-gray-900 dark:text-white">Activity Over Time</h3>
+                <p className="text-sm text-gray-500 dark:text-gray-400">Daily activity</p>
+              </div>
+            </div>
+          </div>
+          <ResponsiveContainer width="100%" height={300}>
+            <RechartsLineChart data={trendData}>
+              <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
+              <XAxis 
+                dataKey="date" 
+                className="text-xs"
+                stroke="currentColor"
+                style={{ fill: 'currentColor' }}
+              />
+              <YAxis 
+                className="text-xs"
+                stroke="currentColor"
+                style={{ fill: 'currentColor' }}
+              />
+              <Tooltip 
+                contentStyle={{ 
+                  backgroundColor: 'var(--tw-color-gray-800)',
+                  border: '1px solid var(--tw-color-gray-700)',
+                  borderRadius: '8px',
+                }}
+                labelStyle={{ color: 'var(--tw-color-white)' }}
+              />
+              <Legend />
+              <Line 
+                type="monotone" 
+                dataKey="users" 
+                stroke={COLORS.brand} 
+                strokeWidth={2}
+                dot={{ fill: COLORS.brand, r: 4 }}
+                name="Users"
+              />
+              <Line 
+                type="monotone" 
+                dataKey="policies" 
+                stroke={COLORS.sunset} 
+                strokeWidth={2}
+                dot={{ fill: COLORS.sunset, r: 4 }}
+                name="Policies"
+              />
+              <Line 
+                type="monotone" 
+                dataKey="alerts" 
+                stroke={COLORS.fire} 
+                strokeWidth={2}
+                dot={{ fill: COLORS.fire, r: 4 }}
+                name="Alerts"
+              />
+            </RechartsLineChart>
+          </ResponsiveContainer>
+        </div>
+
+        {/* Alert Types - Bar Chart */}
+        {alertTypeData.length > 0 && (
+          <div className="card p-6">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-gradient-to-br from-fire-500 to-orange-600 rounded-lg">
+                  <BarChart3 className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-gray-900 dark:text-white">Alert Types</h3>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">By category</p>
+                </div>
+              </div>
+            </div>
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={alertTypeData}>
+                <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
+                <XAxis 
+                  dataKey="name" 
+                  className="text-xs"
+                  stroke="currentColor"
+                  style={{ fill: 'currentColor' }}
+                />
+                <YAxis 
+                  className="text-xs"
+                  stroke="currentColor"
+                  style={{ fill: 'currentColor' }}
+                />
+                <Tooltip 
+                  contentStyle={{ 
+                    backgroundColor: 'var(--tw-color-gray-800)',
+                    border: '1px solid var(--tw-color-gray-700)',
+                    borderRadius: '8px',
+                  }}
+                  labelStyle={{ color: 'var(--tw-color-white)' }}
+                />
+                <Bar dataKey="value" fill={COLORS.fire} radius={[8, 8, 0, 0]}>
+                  {alertTypeData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        )}
       </div>
 
       {/* Alert Statistics */}
@@ -338,12 +676,14 @@ function StatCard({
   icon: Icon,
   gradient,
   href,
+  growth,
 }: {
   title: string;
   value: number;
   icon: any;
   gradient: 'brand' | 'cyan' | 'sunset' | 'fire' | 'yellow';
   href?: string;
+  growth?: { value: string; isPositive: boolean };
 }) {
   const gradientClasses = {
     brand: 'from-brand-500 to-cyan-400',
@@ -366,14 +706,28 @@ function StatCard({
       {/* Background gradient effect */}
       <div className={`absolute inset-0 bg-gradient-to-br ${gradientClasses[gradient]} opacity-0 group-hover:opacity-5 transition-opacity duration-300`}></div>
 
-      <div className="relative flex items-center justify-between">
-        <div className="flex-1 min-w-0">
-          <p className="text-xs sm:text-sm font-semibold text-gray-600 dark:text-gray-400 truncate mb-2">{title}</p>
-          <p className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white">{value.toLocaleString()}</p>
+      <div className="relative">
+        <div className="flex items-center justify-between mb-3">
+          <p className="text-xs sm:text-sm font-semibold text-gray-600 dark:text-gray-400 truncate">{title}</p>
+          {growth && (
+            <div className={`flex items-center gap-1 text-xs font-semibold ${
+              growth.isPositive ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'
+            }`}>
+              {growth.isPositive ? (
+                <TrendingUp className="w-3 h-3" />
+              ) : (
+                <TrendingDown className="w-3 h-3" />
+              )}
+              <span>{growth.value}%</span>
+            </div>
+          )}
         </div>
-        <div className={`relative p-3 sm:p-4 bg-gradient-to-br ${gradientClasses[gradient]} rounded-xl ${glowClasses[gradient]} group-hover:scale-110 transition-all duration-300 flex-shrink-0 ml-3`}>
-          <Icon className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
-          <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-20 rounded-xl transition-opacity duration-300"></div>
+        <div className="flex items-center justify-between">
+          <p className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white">{value.toLocaleString()}</p>
+          <div className={`relative p-3 sm:p-4 bg-gradient-to-br ${gradientClasses[gradient]} rounded-xl ${glowClasses[gradient]} group-hover:scale-110 transition-all duration-300 flex-shrink-0`}>
+            <Icon className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
+            <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-20 rounded-xl transition-opacity duration-300"></div>
+          </div>
         </div>
       </div>
     </div>
