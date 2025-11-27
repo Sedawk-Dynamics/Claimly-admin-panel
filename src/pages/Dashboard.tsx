@@ -5,9 +5,9 @@ import { AlertStats, Alert } from '../types';
 import {
   Users, Building2, FileText, Bell, AlertCircle, CheckCircle, XCircle,
   ShieldCheck, Clock, ArrowRight, TrendingUp, TrendingDown, Activity,
-  BarChart3, PieChart, LineChart, Calendar, Zap
+  BarChart3, PieChart, LineChart, Zap
 } from 'lucide-react';
-import { format, subDays, startOfDay } from 'date-fns';
+import { format, subDays } from 'date-fns';
 import {
   LineChart as RechartsLineChart,
   AreaChart,
@@ -159,8 +159,8 @@ export default function Dashboard() {
 
   // Calculate growth percentages (mock for now)
   const growthMetrics = useMemo(() => {
-    const calculateGrowth = (current: number) => {
-      if (current === 0) return { value: 0, isPositive: true };
+    const calculateGrowth = (current: number): { value: string; isPositive: boolean } => {
+      if (current === 0) return { value: '0.0', isPositive: true };
       const growth = Math.random() * 20 - 5; // Random between -5% and 15%
       return {
         value: Math.abs(growth).toFixed(1),
@@ -363,7 +363,7 @@ export default function Dashboard() {
                   cx="50%"
                   cy="50%"
                   labelLine={false}
-                  label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                  label={({ name, percent }) => `${name}: ${percent ? (percent * 100).toFixed(0) : 0}%`}
                   outerRadius={100}
                   fill="#8884d8"
                   dataKey="value"
@@ -480,7 +480,7 @@ export default function Dashboard() {
                   labelStyle={{ color: 'var(--tw-color-white)' }}
                 />
                 <Bar dataKey="value" fill={COLORS.fire} radius={[8, 8, 0, 0]}>
-                  {alertTypeData.map((entry, index) => (
+                  {alertTypeData.map((_, index) => (
                     <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />
                   ))}
                 </Bar>

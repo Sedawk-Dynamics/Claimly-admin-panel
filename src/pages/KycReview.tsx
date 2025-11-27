@@ -12,7 +12,6 @@ import {
   XCircle,
   RotateCcw,
   Search,
-  Filter,
 } from 'lucide-react';
 
 type ReviewStatus = 'pending' | 'verified' | 're-verification' | 'rejected';

@@ -13,7 +13,6 @@ import {
   RotateCcw,
   Search,
   Building2,
-  Filter,
 } from 'lucide-react';
 
 type ReviewStatus = 'pending' | 'verified' | 're-verification' | 'rejected';
