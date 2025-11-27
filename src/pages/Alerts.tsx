@@ -274,39 +274,35 @@ export default function Alerts() {
 
       {/* Statistics Dashboard */}
       {stats && (
-        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="card elevated border border-brand-400/20 bg-gradient-to-br from-white to-brand-50 dark:from-navy-900 dark:to-brand-950/30">
-            <div className="text-sm font-semibold text-gray-600 dark:text-gray-400">Total Alerts</div>
-            <div className="text-3xl font-bold text-gradient-brand mt-2">{stats.total}</div>
-            <div className="mt-2 flex items-center text-xs text-gray-500 dark:text-gray-400">
-              <Bell className="w-3 h-3 mr-1" />
-              All time
-            </div>
-          </div>
-          <div className="card elevated border border-yellow-400/20 bg-gradient-to-br from-white to-yellow-50 dark:from-navy-900 dark:to-yellow-950/30">
-            <div className="text-sm font-semibold text-gray-600 dark:text-gray-400">Pending</div>
-            <div className="text-3xl font-bold text-yellow-500 dark:text-yellow-400 mt-2">{stats.pending}</div>
-            <div className="mt-2 flex items-center text-xs text-yellow-600 dark:text-yellow-400">
-              <AlertCircle className="w-3 h-3 mr-1" />
-              Needs review
-            </div>
-          </div>
-          <div className="card elevated border border-cyan-400/20 bg-gradient-to-br from-white to-cyan-50 dark:from-navy-900 dark:to-cyan-950/30">
-            <div className="text-sm font-semibold text-gray-600 dark:text-gray-400">Verified</div>
-            <div className="text-3xl font-bold text-cyan-500 dark:text-cyan-400 mt-2">{stats.verified}</div>
-            <div className="mt-2 flex items-center text-xs text-cyan-600 dark:text-cyan-400">
-              <CheckCircle className="w-3 h-3 mr-1" />
-              Confirmed
-            </div>
-          </div>
-          <div className="card elevated border border-orange-400/20 bg-gradient-to-br from-white to-orange-50 dark:from-navy-900 dark:to-orange-950/30">
-            <div className="text-sm font-semibold text-gray-600 dark:text-gray-400">False Alerts</div>
-            <div className="text-3xl font-bold text-orange-500 dark:text-orange-400 mt-2">{stats.falseAlerts}</div>
-            <div className="mt-2 flex items-center text-xs text-orange-600 dark:text-orange-400">
-              <XCircle className="w-3 h-3 mr-1" />
-              Dismissed
-            </div>
-          </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+          <StatCard
+            title="Total Alerts"
+            value={stats.total}
+            icon={Bell}
+            gradient="brand"
+            description="All time"
+          />
+          <StatCard
+            title="Pending"
+            value={stats.pending}
+            icon={AlertCircle}
+            gradient="yellow"
+            description="Needs review"
+          />
+          <StatCard
+            title="Verified"
+            value={stats.verified}
+            icon={CheckCircle}
+            gradient="cyan"
+            description="Confirmed"
+          />
+          <StatCard
+            title="False Alerts"
+            value={stats.falseAlerts}
+            icon={XCircle}
+            gradient="fire"
+            description="Dismissed"
+          />
         </div>
       )}
 
@@ -409,8 +405,8 @@ export default function Alerts() {
             setPage(1);
           }}
           className={`px-5 py-2.5 rounded-xl font-semibold transition-all ${statusFilter === undefined
-              ? 'bg-gradient-brand text-white shadow-glow-brand'
-              : 'bg-white dark:bg-navy-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-navy-700 hover:border-brand-400 dark:hover:border-brand-500'
+            ? 'bg-gradient-brand text-white shadow-glow-brand'
+            : 'bg-white dark:bg-navy-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-navy-700 hover:border-brand-400 dark:hover:border-brand-500'
             }`}
         >
           All
@@ -421,8 +417,8 @@ export default function Alerts() {
             setPage(1);
           }}
           className={`px-5 py-2.5 rounded-xl font-semibold transition-all ${statusFilter === 'PENDING'
-              ? 'bg-gradient-to-r from-yellow-400 to-yellow-500 text-white shadow-glow-yellow'
-              : 'bg-white dark:bg-navy-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-navy-700 hover:border-yellow-400 dark:hover:border-yellow-500'
+            ? 'bg-gradient-to-r from-yellow-400 to-yellow-500 text-white shadow-glow-yellow'
+            : 'bg-white dark:bg-navy-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-navy-700 hover:border-yellow-400 dark:hover:border-yellow-500'
             }`}
         >
           Pending
@@ -433,8 +429,8 @@ export default function Alerts() {
             setPage(1);
           }}
           className={`px-5 py-2.5 rounded-xl font-semibold transition-all ${statusFilter === 'VERIFIED'
-              ? 'bg-gradient-to-r from-cyan-400 to-cyan-500 text-white shadow-glow-cyan'
-              : 'bg-white dark:bg-navy-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-navy-700 hover:border-cyan-400 dark:hover:border-cyan-500'
+            ? 'bg-gradient-to-r from-cyan-400 to-cyan-500 text-white shadow-glow-cyan'
+            : 'bg-white dark:bg-navy-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-navy-700 hover:border-cyan-400 dark:hover:border-cyan-500'
             }`}
         >
           Verified
@@ -445,8 +441,8 @@ export default function Alerts() {
             setPage(1);
           }}
           className={`px-5 py-2.5 rounded-xl font-semibold transition-all ${statusFilter === 'FALSE_ALERT'
-              ? 'bg-gradient-sunset text-white shadow-glow-orange'
-              : 'bg-white dark:bg-navy-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-navy-700 hover:border-orange-400 dark:hover:border-orange-500'
+            ? 'bg-gradient-sunset text-white shadow-glow-orange'
+            : 'bg-white dark:bg-navy-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-navy-700 hover:border-orange-400 dark:hover:border-orange-500'
             }`}
         >
           False Alerts
@@ -696,6 +692,79 @@ export default function Alerts() {
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+function StatCard({
+  title,
+  value,
+  icon: Icon,
+  gradient,
+  description,
+}: {
+  title: string;
+  value: number;
+  icon: any;
+  gradient: 'brand' | 'cyan' | 'sunset' | 'fire' | 'yellow';
+  description?: string;
+}) {
+  const getGradientColor = (type: string) => {
+    switch (type) {
+      case 'brand': return 'from-brand-500 to-cyan-400';
+      case 'cyan': return 'from-cyan-400 to-blue-500';
+      case 'sunset': return 'from-orange-400 to-pink-500';
+      case 'fire': return 'from-red-500 to-orange-500';
+      case 'yellow': return 'from-yellow-400 to-orange-400';
+      default: return 'from-brand-500 to-cyan-400';
+    }
+  };
+
+  const getShadowColor = (type: string) => {
+    switch (type) {
+      case 'brand': return 'shadow-brand-500/20';
+      case 'cyan': return 'shadow-cyan-500/20';
+      case 'sunset': return 'shadow-orange-500/20';
+      case 'fire': return 'shadow-red-500/20';
+      case 'yellow': return 'shadow-yellow-500/20';
+      default: return 'shadow-brand-500/20';
+    }
+  };
+
+  const getTextColor = (type: string) => {
+    switch (type) {
+      case 'brand': return 'text-brand-600 dark:text-brand-400';
+      case 'cyan': return 'text-cyan-600 dark:text-cyan-400';
+      case 'sunset': return 'text-orange-600 dark:text-orange-400';
+      case 'fire': return 'text-red-600 dark:text-red-400';
+      case 'yellow': return 'text-yellow-600 dark:text-yellow-400';
+      default: return 'text-brand-600 dark:text-brand-400';
+    }
+  };
+
+  return (
+    <div className={`card p-6 border-l-4 ${gradient === 'brand' ? 'border-brand-500' :
+        gradient === 'cyan' ? 'border-cyan-500' :
+          gradient === 'sunset' ? 'border-orange-500' :
+            gradient === 'fire' ? 'border-red-500' :
+              'border-yellow-500'
+      } hover:translate-y-[-2px] transition-all duration-300`}>
+      <div className="flex items-start justify-between">
+        <div>
+          <p className="text-sm font-medium text-gray-500 dark:text-gray-400">{title}</p>
+          <h3 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mt-1">
+            {value.toLocaleString()}
+          </h3>
+          {description && (
+            <p className={`text-xs mt-1 ${getTextColor(gradient)} font-medium flex items-center`}>
+              {description}
+            </p>
+          )}
+        </div>
+        <div className={`p-3 rounded-xl bg-gradient-to-br ${getGradientColor(gradient)} shadow-lg ${getShadowColor(gradient)} text-white`}>
+          <Icon className="w-6 h-6" />
+        </div>
+      </div>
     </div>
   );
 }

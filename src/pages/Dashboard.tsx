@@ -1,11 +1,12 @@
 import { useEffect, useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { adminService } from '../services/admin.service';
-import { AlertStats, Alert } from '../types';
+import { AlertStats, Alert, AdminAction, User } from '../types';
 import {
   Users, Building2, FileText, Bell, AlertCircle, CheckCircle, XCircle,
   ShieldCheck, Clock, ArrowRight, TrendingUp, TrendingDown, Activity,
-  BarChart3, PieChart, LineChart, Zap
+  BarChart3, PieChart, LineChart, Zap, History, UserPlus,
+  PlusCircle, Edit, Trash2
 } from 'lucide-react';
 import { format, subDays } from 'date-fns';
 import {
@@ -34,28 +35,37 @@ interface DashboardStats {
   pendingKyc: number;
   pendingPolicyDocs: number;
   recentAlerts: Alert[];
+  recentActions: AdminAction[];
+  recentUsers: User[];
+  trendData: any[];
+  subscriptionStats: any[];
+  companyStats: any[];
+  documentStats: any[];
+  alertDetectionStats: any[];
 }
 
-// Generate mock trend data for the last 7 days
-const generateTrendData = (currentValue: number, days: number = 7) => {
-  const data = [];
-  const baseValue = Math.max(1, Math.floor(currentValue * 0.7));
-  const variation = currentValue - baseValue;
-  
-  for (let i = days - 1; i >= 0; i--) {
-    const date = subDays(new Date(), i);
-    const randomVariation = Math.random() * variation;
-    const value = Math.floor(baseValue + randomVariation * (i / days));
-    
-    data.push({
-      date: format(date, 'MMM dd'),
-      fullDate: format(date, 'yyyy-MM-dd'),
-      users: Math.max(1, Math.floor(value * 0.8 + Math.random() * value * 0.2)),
-      policies: Math.max(1, Math.floor(value * 0.6 + Math.random() * value * 0.2)),
-      alerts: Math.max(0, Math.floor(value * 0.3 + Math.random() * value * 0.1)),
-    });
+// Helper to aggregate data by date
+const aggregateByDate = (items: any[], dateField: string, days: number = 7) => {
+  const data: Record<string, number> = {};
+  const today = new Date();
+
+  // Initialize all days with 0
+  for (let i = 0; i < days; i++) {
+    const date = subDays(today, i);
+    const dateStr = format(date, 'yyyy-MM-dd');
+    data[dateStr] = 0;
   }
-  
+
+  // Count items per day
+  items.forEach(item => {
+    if (item[dateField]) {
+      const dateStr = format(new Date(item[dateField]), 'yyyy-MM-dd');
+      if (data[dateStr] !== undefined) {
+        data[dateStr]++;
+      }
+    }
+  });
+
   return data;
 };
 
@@ -80,6 +90,13 @@ export default function Dashboard() {
     pendingKyc: 0,
     pendingPolicyDocs: 0,
     recentAlerts: [],
+    recentActions: [],
+    recentUsers: [],
+    trendData: [],
+    subscriptionStats: [],
+    companyStats: [],
+    documentStats: [],
+    alertDetectionStats: [],
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -104,6 +121,11 @@ export default function Dashboard() {
         kycData,
         policyDocsData,
         recentAlertsData,
+        actionsData,
+        recentUsersData,
+        trendUsersData,
+        trendPoliciesData,
+        trendAlertsData,
       ] = await Promise.all([
         adminService.getAlertStats().catch(() => null),
         adminService.getUsers(1, 1).catch(() => ({ data: [], pagination: { total: 0, page: 1, limit: 1, totalPages: 0 } })),
@@ -112,7 +134,87 @@ export default function Dashboard() {
         adminService.getKycDocuments(1, 1, 'pending').catch(() => ({ data: [], pagination: { total: 0, page: 1, limit: 1, totalPages: 0 } })),
         adminService.getPolicyDocuments(1, 1, 'pending').catch(() => ({ data: [], pagination: { total: 0, page: 1, limit: 1, totalPages: 0 } })),
         adminService.getAlerts(1, 5, 'PENDING').catch(() => ({ data: [], pagination: { total: 0, page: 1, limit: 5, totalPages: 0 } })),
+        adminService.getAdminActions(1, 5).catch(() => ({ data: [], pagination: { total: 0, page: 1, limit: 5, totalPages: 0 } })),
+        adminService.getUsers(1, 5).catch(() => ({ data: [], pagination: { total: 0, page: 1, limit: 5, totalPages: 0 } })),
+        // Fetch more data for trends (last 100 items)
+        adminService.getUsers(1, 100).catch(() => ({ data: [], pagination: { total: 0, page: 1, limit: 100, totalPages: 0 } })),
+        adminService.getPolicies(1, 100).catch(() => ({ data: [], pagination: { total: 0, page: 1, limit: 100, totalPages: 0 } })),
+        adminService.getAlerts(1, 100).catch(() => ({ data: [], pagination: { total: 0, page: 1, limit: 100, totalPages: 0 } })),
       ]);
+
+      // Calculate trends
+      const days = 7;
+      const userTrends = aggregateByDate(trendUsersData?.data || [], 'createdAt', days);
+      const policyTrends = aggregateByDate(trendPoliciesData?.data || [], 'uploadedAt', days);
+      const alertTrends = aggregateByDate(trendAlertsData?.data || [], 'createdAt', days);
+
+      const trendData = [];
+      for (let i = days - 1; i >= 0; i--) {
+        const date = subDays(new Date(), i);
+        const dateStr = format(date, 'yyyy-MM-dd');
+        trendData.push({
+          date: format(date, 'MMM dd'),
+          fullDate: dateStr,
+          users: userTrends[dateStr] || 0,
+          policies: policyTrends[dateStr] || 0,
+          alerts: alertTrends[dateStr] || 0,
+        });
+      }
+
+      // Calculate Subscription Stats
+      const subStats = { ACTIVE: 0, INACTIVE: 0, EXPIRED: 0 };
+      (trendUsersData?.data || []).forEach((user: User) => {
+        if (user.subscriptionStatus && subStats[user.subscriptionStatus] !== undefined) {
+          subStats[user.subscriptionStatus]++;
+        }
+      });
+      const subscriptionStats = Object.entries(subStats).map(([name, value]) => ({
+        name,
+        value,
+        color: name === 'ACTIVE' ? COLORS.success : name === 'INACTIVE' ? COLORS.yellow : COLORS.danger
+      })).filter(item => item.value > 0);
+
+      // Calculate Company Stats
+      const compStats: Record<string, number> = {};
+      (trendPoliciesData?.data || []).forEach((policy: any) => {
+        const companyName = policy.insuranceCompany?.name || 'Unknown';
+        compStats[companyName] = (compStats[companyName] || 0) + 1;
+      });
+      const companyStats = Object.entries(compStats)
+        .map(([name, value]) => ({ name, value }))
+        .sort((a, b) => b.value - a.value)
+        .slice(0, 5); // Top 5 companies
+
+      // Calculate Document Stats
+      let verifiedDocs = 0;
+      let pendingDocs = 0;
+
+      // Check KYC docs
+      (kycData?.data || []).forEach((user: any) => {
+        user.documents.forEach((doc: any) => {
+          if (doc.isVerified) verifiedDocs++;
+          else pendingDocs++;
+        });
+      });
+
+      // Check Policy docs
+      (policyDocsData?.data || []).forEach((policy: any) => {
+        policy.documents.forEach((doc: any) => {
+          if (doc.isVerified) verifiedDocs++;
+          else pendingDocs++;
+        });
+      });
+
+      const documentStats = [
+        { name: 'Verified', value: verifiedDocs, color: COLORS.success },
+        { name: 'Pending', value: pendingDocs, color: COLORS.yellow },
+      ];
+
+      // Calculate Alert Detection Stats
+      const alertDetectionStats = [
+        { name: 'SMS', value: alertStats?.smsAlerts || 0, color: COLORS.brand },
+        { name: 'Manual', value: alertStats?.manualAlerts || 0, color: COLORS.fire },
+      ].filter(item => item.value > 0);
 
       setStats({
         alertStats,
@@ -122,6 +224,13 @@ export default function Dashboard() {
         pendingKyc: kycData.pagination.total,
         pendingPolicyDocs: policyDocsData.pagination.total,
         recentAlerts: recentAlertsData.data || [],
+        recentActions: actionsData?.data || [],
+        recentUsers: recentUsersData?.data || [],
+        trendData,
+        subscriptionStats,
+        companyStats,
+        documentStats,
+        alertDetectionStats,
       });
     } catch (err: any) {
       setError(err.response?.data?.error || 'Failed to load dashboard statistics');
@@ -131,12 +240,7 @@ export default function Dashboard() {
   };
 
   // Generate trend data based on current stats
-  const trendData = useMemo(() => {
-    return generateTrendData(
-      Math.max(stats.totalUsers, stats.totalPolicies, stats.alertStats?.total || 0),
-      7
-    );
-  }, [stats.totalUsers, stats.totalPolicies, stats.alertStats?.total]);
+  const trendData = stats.trendData;
 
   // Alert status distribution for pie chart
   const alertDistribution = useMemo(() => {
@@ -281,32 +385,32 @@ export default function Dashboard() {
             <AreaChart data={trendData}>
               <defs>
                 <linearGradient id="colorUsers" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor={COLORS.brand} stopOpacity={0.8}/>
-                  <stop offset="95%" stopColor={COLORS.brand} stopOpacity={0}/>
+                  <stop offset="5%" stopColor={COLORS.brand} stopOpacity={0.8} />
+                  <stop offset="95%" stopColor={COLORS.brand} stopOpacity={0} />
                 </linearGradient>
                 <linearGradient id="colorPolicies" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor={COLORS.sunset} stopOpacity={0.8}/>
-                  <stop offset="95%" stopColor={COLORS.sunset} stopOpacity={0}/>
+                  <stop offset="5%" stopColor={COLORS.sunset} stopOpacity={0.8} />
+                  <stop offset="95%" stopColor={COLORS.sunset} stopOpacity={0} />
                 </linearGradient>
                 <linearGradient id="colorAlerts" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor={COLORS.fire} stopOpacity={0.8}/>
-                  <stop offset="95%" stopColor={COLORS.fire} stopOpacity={0}/>
+                  <stop offset="5%" stopColor={COLORS.fire} stopOpacity={0.8} />
+                  <stop offset="95%" stopColor={COLORS.fire} stopOpacity={0} />
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
-              <XAxis 
-                dataKey="date" 
+              <XAxis
+                dataKey="date"
                 className="text-xs"
                 stroke="currentColor"
                 style={{ fill: 'currentColor' }}
               />
-              <YAxis 
+              <YAxis
                 className="text-xs"
                 stroke="currentColor"
                 style={{ fill: 'currentColor' }}
               />
-              <Tooltip 
-                contentStyle={{ 
+              <Tooltip
+                contentStyle={{
                   backgroundColor: 'var(--tw-color-gray-800)',
                   border: '1px solid var(--tw-color-gray-700)',
                   borderRadius: '8px',
@@ -314,27 +418,27 @@ export default function Dashboard() {
                 labelStyle={{ color: 'var(--tw-color-white)' }}
               />
               <Legend />
-              <Area 
-                type="monotone" 
-                dataKey="users" 
-                stroke={COLORS.brand} 
-                fillOpacity={1} 
+              <Area
+                type="monotone"
+                dataKey="users"
+                stroke={COLORS.brand}
+                fillOpacity={1}
                 fill="url(#colorUsers)"
                 name="Users"
               />
-              <Area 
-                type="monotone" 
-                dataKey="policies" 
-                stroke={COLORS.sunset} 
-                fillOpacity={1} 
+              <Area
+                type="monotone"
+                dataKey="policies"
+                stroke={COLORS.sunset}
+                fillOpacity={1}
                 fill="url(#colorPolicies)"
                 name="Policies"
               />
-              <Area 
-                type="monotone" 
-                dataKey="alerts" 
-                stroke={COLORS.fire} 
-                fillOpacity={1} 
+              <Area
+                type="monotone"
+                dataKey="alerts"
+                stroke={COLORS.fire}
+                fillOpacity={1}
                 fill="url(#colorAlerts)"
                 name="Alerts"
               />
@@ -395,19 +499,19 @@ export default function Dashboard() {
           <ResponsiveContainer width="100%" height={300}>
             <RechartsLineChart data={trendData}>
               <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
-              <XAxis 
-                dataKey="date" 
+              <XAxis
+                dataKey="date"
                 className="text-xs"
                 stroke="currentColor"
                 style={{ fill: 'currentColor' }}
               />
-              <YAxis 
+              <YAxis
                 className="text-xs"
                 stroke="currentColor"
                 style={{ fill: 'currentColor' }}
               />
-              <Tooltip 
-                contentStyle={{ 
+              <Tooltip
+                contentStyle={{
                   backgroundColor: 'var(--tw-color-gray-800)',
                   border: '1px solid var(--tw-color-gray-700)',
                   borderRadius: '8px',
@@ -415,26 +519,26 @@ export default function Dashboard() {
                 labelStyle={{ color: 'var(--tw-color-white)' }}
               />
               <Legend />
-              <Line 
-                type="monotone" 
-                dataKey="users" 
-                stroke={COLORS.brand} 
+              <Line
+                type="monotone"
+                dataKey="users"
+                stroke={COLORS.brand}
                 strokeWidth={2}
                 dot={{ fill: COLORS.brand, r: 4 }}
                 name="Users"
               />
-              <Line 
-                type="monotone" 
-                dataKey="policies" 
-                stroke={COLORS.sunset} 
+              <Line
+                type="monotone"
+                dataKey="policies"
+                stroke={COLORS.sunset}
                 strokeWidth={2}
                 dot={{ fill: COLORS.sunset, r: 4 }}
                 name="Policies"
               />
-              <Line 
-                type="monotone" 
-                dataKey="alerts" 
-                stroke={COLORS.fire} 
+              <Line
+                type="monotone"
+                dataKey="alerts"
+                stroke={COLORS.fire}
                 strokeWidth={2}
                 dot={{ fill: COLORS.fire, r: 4 }}
                 name="Alerts"
@@ -460,19 +564,19 @@ export default function Dashboard() {
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={alertTypeData}>
                 <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
-                <XAxis 
-                  dataKey="name" 
+                <XAxis
+                  dataKey="name"
                   className="text-xs"
                   stroke="currentColor"
                   style={{ fill: 'currentColor' }}
                 />
-                <YAxis 
+                <YAxis
                   className="text-xs"
                   stroke="currentColor"
                   style={{ fill: 'currentColor' }}
                 />
-                <Tooltip 
-                  contentStyle={{ 
+                <Tooltip
+                  contentStyle={{
                     backgroundColor: 'var(--tw-color-gray-800)',
                     border: '1px solid var(--tw-color-gray-700)',
                     borderRadius: '8px',
@@ -485,6 +589,159 @@ export default function Dashboard() {
                   ))}
                 </Bar>
               </BarChart>
+            </ResponsiveContainer>
+          </div>
+        )}
+
+        {/* Subscription Distribution - Pie Chart */}
+        {stats.subscriptionStats.length > 0 && (
+          <div className="card p-6">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-gradient-to-br from-green-500 to-emerald-600 rounded-lg">
+                  <Users className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-gray-900 dark:text-white">Subscriptions</h3>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">User status</p>
+                </div>
+              </div>
+            </div>
+            <ResponsiveContainer width="100%" height={300}>
+              <RechartsPieChart>
+                <Pie
+                  data={stats.subscriptionStats}
+                  cx="50%"
+                  cy="50%"
+                  labelLine={false}
+                  label={({ name, percent }) => `${name} ${((percent || 0) * 100).toFixed(0)}%`}
+                  outerRadius={100}
+                  fill="#8884d8"
+                  dataKey="value"
+                >
+                  {stats.subscriptionStats.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.color} />
+                  ))}
+                </Pie>
+                <Tooltip />
+                <Legend />
+              </RechartsPieChart>
+            </ResponsiveContainer>
+          </div>
+        )}
+
+        {/* Policies by Company - Bar Chart */}
+        {stats.companyStats.length > 0 && (
+          <div className="card p-6">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-gradient-to-br from-blue-500 to-cyan-600 rounded-lg">
+                  <Building2 className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-gray-900 dark:text-white">Top Companies</h3>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">By policy count</p>
+                </div>
+              </div>
+            </div>
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={stats.companyStats} layout="vertical">
+                <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
+                <XAxis type="number" className="text-xs" stroke="currentColor" />
+                <YAxis
+                  dataKey="name"
+                  type="category"
+                  width={100}
+                  className="text-xs"
+                  stroke="currentColor"
+                />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: 'var(--tw-color-gray-800)',
+                    border: '1px solid var(--tw-color-gray-700)',
+                    borderRadius: '8px',
+                  }}
+                  labelStyle={{ color: 'var(--tw-color-white)' }}
+                />
+                <Bar dataKey="value" fill={COLORS.cyan} radius={[0, 8, 8, 0]}>
+                  {stats.companyStats.map((_, index) => (
+                    <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        )}
+
+        {/* Document Verification Status - Donut Chart */}
+        <div className="card p-6">
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-gradient-to-br from-yellow-500 to-orange-600 rounded-lg">
+                <FileText className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-gray-900 dark:text-white">Documents</h3>
+                <p className="text-sm text-gray-500 dark:text-gray-400">Verification status</p>
+              </div>
+            </div>
+          </div>
+          <ResponsiveContainer width="100%" height={300}>
+            <RechartsPieChart>
+              <Pie
+                data={stats.documentStats}
+                cx="50%"
+                cy="50%"
+                innerRadius={60}
+                outerRadius={100}
+                fill="#8884d8"
+                paddingAngle={5}
+                dataKey="value"
+                label={({ name, value }) => `${name}: ${value}`}
+              >
+                {stats.documentStats.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={entry.color} />
+                ))}
+              </Pie>
+              <Tooltip />
+              <Legend />
+            </RechartsPieChart>
+          </ResponsiveContainer>
+        </div>
+
+        {/* Alert Detection Method - Pie Chart (8th Graph) */}
+        {stats.alertDetectionStats.length > 0 && (
+          <div className="card p-6">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-gradient-to-br from-indigo-500 to-violet-600 rounded-lg">
+                  <Bell className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-gray-900 dark:text-white">Detection Method</h3>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">SMS vs Manual</p>
+                </div>
+              </div>
+            </div>
+            <ResponsiveContainer width="100%" height={300}>
+              <RechartsPieChart>
+                <Pie
+                  data={stats.alertDetectionStats}
+                  cx="50%"
+                  cy="50%"
+                  labelLine={false}
+                  label={({ name, percent }) => `${name} ${((percent || 0) * 100).toFixed(0)}%`}
+                  outerRadius={100}
+                  fill="#8884d8"
+                  dataKey="value"
+                >
+                  {stats.alertDetectionStats.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.color} />
+                  ))}
+                </Pie>
+                <Tooltip />
+                <Legend />
+              </RechartsPieChart>
             </ResponsiveContainer>
           </div>
         )}
@@ -615,6 +872,120 @@ export default function Dashboard() {
         </div>
       )}
 
+      {/* Recent Activity & New Users Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Recent Admin Actions */}
+        <div className="card p-6">
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-lg">
+                <History className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-gray-900 dark:text-white">Recent Actions</h3>
+                <p className="text-sm text-gray-500 dark:text-gray-400">Latest admin activities</p>
+              </div>
+            </div>
+            <Link
+              to="/audit-logs"
+              className="text-sm text-brand-600 dark:text-cyan-400 hover:text-brand-700 dark:hover:text-cyan-300 font-medium"
+            >
+              View All
+            </Link>
+          </div>
+
+          <div className="space-y-4">
+            {stats.recentActions.length > 0 ? (
+              stats.recentActions.map((action) => (
+                <div key={action.id} className="flex items-start gap-3 p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-navy-800/50 transition-colors">
+                  <div className={`mt-1 p-1.5 rounded-full ${action.actionType.includes('DELETE') ? 'bg-red-100 text-red-600 dark:bg-red-900/20 dark:text-red-400' :
+                    action.actionType.includes('UPDATE') ? 'bg-blue-100 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400' :
+                      action.actionType.includes('CREATE') ? 'bg-green-100 text-green-600 dark:bg-green-900/20 dark:text-green-400' :
+                        'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400'
+                    }`}>
+                    {action.actionType.includes('DELETE') ? <Trash2 className="w-3 h-3" /> :
+                      action.actionType.includes('UPDATE') ? <Edit className="w-3 h-3" /> :
+                        action.actionType.includes('CREATE') ? <PlusCircle className="w-3 h-3" /> :
+                          <Activity className="w-3 h-3" />}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                      {action.actionType.replace(/_/g, ' ')}
+                    </p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                      by {action.admin?.name || 'System'}
+                    </p>
+                  </div>
+                  <span className="text-xs text-gray-400 whitespace-nowrap">
+                    {format(new Date(action.createdAt), 'MMM dd, HH:mm')}
+                  </span>
+                </div>
+              ))
+            ) : (
+              <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                No recent actions found
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* New Users */}
+        <div className="card p-6">
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-gradient-to-br from-pink-500 to-rose-500 rounded-lg">
+                <UserPlus className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-gray-900 dark:text-white">New Users</h3>
+                <p className="text-sm text-gray-500 dark:text-gray-400">Recently registered</p>
+              </div>
+            </div>
+            <Link
+              to="/users"
+              className="text-sm text-brand-600 dark:text-cyan-400 hover:text-brand-700 dark:hover:text-cyan-300 font-medium"
+            >
+              View All
+            </Link>
+          </div>
+
+          <div className="space-y-4">
+            {stats.recentUsers.length > 0 ? (
+              stats.recentUsers.map((user) => (
+                <div key={user.id} className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-navy-800/50 transition-colors">
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-brand-400 to-cyan-300 flex items-center justify-center text-white font-bold text-sm shadow-sm">
+                    {user.name.charAt(0).toUpperCase()}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                      {user.name}
+                    </p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                      {user.email}
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${user.subscriptionStatus === 'ACTIVE'
+                      ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
+                      : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'
+                      }`}>
+                      {user.subscriptionStatus}
+                    </span>
+                    <p className="text-xs text-gray-400 mt-1">
+                      {format(new Date(user.createdAt), 'MMM dd')}
+                    </p>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                No new users found
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
       {/* Quick Actions */}
       <div>
         <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-4 flex items-center">
@@ -710,9 +1081,8 @@ function StatCard({
         <div className="flex items-center justify-between mb-3">
           <p className="text-xs sm:text-sm font-semibold text-gray-600 dark:text-gray-400 truncate">{title}</p>
           {growth && (
-            <div className={`flex items-center gap-1 text-xs font-semibold ${
-              growth.isPositive ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'
-            }`}>
+            <div className={`flex items-center gap-1 text-xs font-semibold ${growth.isPositive ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'
+              }`}>
               {growth.isPositive ? (
                 <TrendingUp className="w-3 h-3" />
               ) : (

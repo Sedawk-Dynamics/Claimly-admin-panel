@@ -1,6 +1,7 @@
-import { useState, FormEvent } from 'react';
+import { useState, FormEvent, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { authService } from '../services/auth.service';
+import { useTheme } from '../contexts/ThemeContext';
 import logo from '../logo/claimly logo png.png';
 import { Mail, Lock, LogIn } from 'lucide-react';
 
@@ -10,6 +11,16 @@ export default function Login() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { setTheme } = useTheme();
+
+  // Force light mode on login page
+  useEffect(() => {
+    setTheme('light');
+    // Force light mode on document root as well
+    const root = window.document.documentElement;
+    root.classList.remove('dark');
+    root.classList.add('light');
+  }, [setTheme]);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -44,8 +55,7 @@ export default function Login() {
           <div className="text-center mb-8">
             <div className="flex justify-center mb-6">
               <div className="relative">
-                <div className="absolute inset-0 bg-gradient-sunset rounded-2xl blur-xl opacity-60 animate-pulse-glow-orange"></div>
-                <div className="relative p-4 bg-gradient-to-br from-orange-400 to-yellow-400 rounded-2xl shadow-glow-orange-lg">
+                <div className="relative p-4 bg-gray-100 dark:bg-gray-800 rounded-2xl">
                   <img src={logo} alt="Claimly" className="h-14 sm:h-16 w-auto" />
                 </div>
               </div>
@@ -53,7 +63,7 @@ export default function Login() {
             <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-3 animate-slide-in">
               Admin Portal
             </h1>
-            <p className="text-base sm:text-lg text-gray-700 dark:text-gray-300 font-medium animate-slide-in">
+            <p className="text-base sm:text-lg text-gray-700 font-medium animate-slide-in">
               Sign in to manage your platform
             </p>
           </div>
@@ -73,14 +83,14 @@ export default function Login() {
                 Email Address
               </label>
               <div className="relative">
-                <Mail className="absolute left-4 top-1/2 transform -translate-y-1/2 text-cyan-700 dark:text-cyan-300 w-5 h-5 drop-shadow-md" />
+                <Mail className="absolute left-4 top-1/2 transform -translate-y-1/2 text-black w-5 h-5 z-10" />
                 <input
                   id="email"
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  className="w-full pl-12 pr-4 py-3.5 bg-white/10 dark:bg-navy-900/50 border-2 border-cyan-400/30 rounded-xl text-gray-900 placeholder:text-gray-500 focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400 outline-none transition-all duration-300 backdrop-blur-sm hover:border-cyan-400/50"
+                  className="w-full pl-12 pr-4 py-3.5 bg-white/90 border-2 border-cyan-400/30 rounded-xl text-gray-900 placeholder:text-gray-500 focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400 outline-none transition-all duration-300 backdrop-blur-sm hover:border-cyan-400/50"
                   placeholder="Enter your email"
                 />
               </div>
@@ -91,14 +101,14 @@ export default function Login() {
                 Password
               </label>
               <div className="relative">
-                <Lock className="absolute left-4 top-1/2 transform -translate-y-1/2 text-cyan-700 dark:text-cyan-300 w-5 h-5 drop-shadow-md" />
+                <Lock className="absolute left-4 top-1/2 transform -translate-y-1/2 text-black w-5 h-5 z-10" />
                 <input
                   id="password"
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                  className="w-full pl-12 pr-4 py-3.5 bg-white/10 dark:bg-navy-900/50 border-2 border-cyan-400/30 rounded-xl text-gray-900 placeholder:text-gray-500 focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400 outline-none transition-all duration-300 backdrop-blur-sm hover:border-cyan-400/50"
+                  className="w-full pl-12 pr-4 py-3.5 bg-white/90 border-2 border-cyan-400/30 rounded-xl text-gray-900 placeholder:text-gray-500 focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400 outline-none transition-all duration-300 backdrop-blur-sm hover:border-cyan-400/50"
                   placeholder="Enter your password"
                 />
               </div>
