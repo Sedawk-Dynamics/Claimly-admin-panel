@@ -23,7 +23,7 @@ const formatCurrency = (value?: string | number | null) => {
   return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 2 }).format(amount);
 };
 
-const getDocumentStatusBadge = (isVerified: boolean, verifiedAt?: string | null) => {
+const getDocumentStatusBadge = (isVerified: boolean) => {
   if (isVerified) {
     return <span className="badge badge-success"><CheckCircle className="w-3 h-3 mr-1" /> Verified</span>;
   } else {
@@ -323,7 +323,7 @@ export default function UserDetail() {
                                   </p>
                                 </div>
                                 <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
-                                  {getDocumentStatusBadge(document.isVerified, document.verifiedAt)}
+                                  {getDocumentStatusBadge(document.isVerified)}
                                   <a href={document.documentUrl} target="_blank" rel="noopener noreferrer" className="btn-xs btn-outline-primary">
                                     <ExternalLink className="w-3 h-3 mr-1" /> View
                                   </a>
@@ -430,7 +430,7 @@ export default function UserDetail() {
                                   </p>
                                 </div>
                                 <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
-                                  {getDocumentStatusBadge(document.isVerified, document.verifiedAt)}
+                                  {getDocumentStatusBadge(document.isVerified)}
                                   <a href={document.documentUrl} target="_blank" rel="noopener noreferrer" className="btn-xs btn-outline-primary">
                                     <ExternalLink className="w-3 h-3 mr-1" /> View
                                   </a>
