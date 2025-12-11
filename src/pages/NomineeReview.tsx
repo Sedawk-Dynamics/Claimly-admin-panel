@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import { adminService } from '../services/admin.service';
-import { PolicyUser, PaginatedResponse } from '../types';
+import { NomineeUser, PaginatedResponse } from '../types';
 import {
-  FileText,
+  Users,
   ExternalLink,
   CheckCircle,
   Clock,
@@ -12,13 +12,12 @@ import {
   XCircle,
   RotateCcw,
   Search,
-  Building2,
 } from 'lucide-react';
 
 type ReviewStatus = 'pending' | 'verified' | 'rejected';
 
-export default function PolicyReview() {
-  const [records, setRecords] = useState<PaginatedResponse<PolicyUser> | null>(null);
+export default function NomineeReview() {
+  const [records, setRecords] = useState<PaginatedResponse<NomineeUser> | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [page, setPage] = useState(1);
@@ -28,21 +27,21 @@ export default function PolicyReview() {
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      loadPolicies();
+      loadNominees();
     }, searchQuery ? 500 : 0);
     return () => clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page, statusFilter, searchQuery]);
 
-  const loadPolicies = async () => {
+  const loadNominees = async () => {
     try {
       setLoading(true);
       setError('');
       const search = searchQuery.trim() || undefined;
-      const data = await adminService.getPolicyDocuments(page, limit, statusFilter || 'pending', search);
+      const data = await adminService.getNomineeDocuments(page, limit, statusFilter || 'pending', search);
       setRecords(data);
     } catch (err: any) {
-      setError(err.response?.data?.error || err.message || 'Failed to load policy documents');
+      setError(err.response?.data?.error || err.message || 'Failed to load nominee documents');
       setRecords({ data: [], pagination: { page: 1, limit, total: 0, totalPages: 1 } });
     } finally {
       setLoading(false);
@@ -51,13 +50,13 @@ export default function PolicyReview() {
 
   const handleSearch = () => {
     setPage(1);
-    loadPolicies();
+    loadNominees();
   };
 
   const handleVerify = async (documentId: string) => {
     try {
-      await adminService.verifyPolicyDocument(documentId);
-      loadPolicies();
+      await adminService.verifyNomineeDocument(documentId);
+      loadNominees();
     } catch (err: any) {
       alert(err.response?.data?.error || 'Failed to verify document');
     }
@@ -66,8 +65,8 @@ export default function PolicyReview() {
   const handleReject = async (documentId: string) => {
     if (!confirm('Are you sure you want to reject this document?')) return;
     try {
-      await adminService.rejectPolicyDocument(documentId);
-      loadPolicies();
+      await adminService.rejectNomineeDocument(documentId);
+      loadNominees();
     } catch (err: any) {
       alert(err.response?.data?.error || 'Failed to reject document');
     }
@@ -76,60 +75,55 @@ export default function PolicyReview() {
   const handleRemoveVerification = async (documentId: string) => {
     if (!confirm('Are you sure you want to remove verification from this document?')) return;
     try {
-      await adminService.rejectPolicyDocument(documentId);
-      loadPolicies();
+      await adminService.rejectNomineeDocument(documentId);
+      loadNominees();
     } catch (err: any) {
       alert(err.response?.data?.error || 'Failed to remove verification');
     }
   };
 
-  const handleAcceptPolicyWithoutDocuments = async (policyId: string) => {
-    if (!confirm('Are you sure you want to accept this policy without documents?')) return;
+  const handleAcceptNomineeWithoutDocuments = async (nomineeId: string) => {
+    if (!confirm('Are you sure you want to accept this nominee without documents?')) return;
     try {
-      await adminService.acceptPolicyWithoutDocuments(policyId);
-      loadPolicies();
+      await adminService.acceptNomineeWithoutDocuments(nomineeId);
+      loadNominees();
     } catch (err: any) {
-      alert(err.response?.data?.error || 'Failed to accept policy');
+      alert(err.response?.data?.error || 'Failed to accept nominee');
     }
   };
 
-  const handleRejectPolicyWithoutDocuments = async (policyId: string) => {
-    if (!confirm('Are you sure you want to reject this policy without documents?')) return;
+  const handleRejectNomineeWithoutDocuments = async (nomineeId: string) => {
+    if (!confirm('Are you sure you want to reject this nominee without documents?')) return;
     try {
-      await adminService.rejectPolicyWithoutDocuments(policyId);
-      loadPolicies();
+      await adminService.rejectNomineeWithoutDocuments(nomineeId);
+      loadNominees();
     } catch (err: any) {
-      alert(err.response?.data?.error || 'Failed to reject policy');
+      alert(err.response?.data?.error || 'Failed to reject nominee');
     }
   };
 
-  const renderStatusBadge = (policy: PolicyUser) => {
-    const totalDocs = policy.documents.length;
-    const verifiedDocs = policy.documents.filter(d => d.isVerified && d.verifiedAt);
-    const rejectedDocs = policy.documents.filter(d => d.rejectedAt);
-    
+  const formatRelationship = (relationship: string) => {
+    return relationship
+      .split('_')
+      .map((word) => word.charAt(0) + word.slice(1).toLowerCase())
+      .join(' ');
+  };
+
+  const renderStatusBadge = (nominee: NomineeUser) => {
+    const totalDocs = nominee.documents.length;
+    const verifiedDocs = nominee.documents.filter((doc) => doc.isVerified).length;
+    const rejectedDocs = nominee.documents.filter((doc) => doc.rejectedAt).length;
+
     // Show Rejected only if ALL documents are rejected
-    if (rejectedDocs.length === totalDocs && totalDocs > 0) {
-      return (
-        <span className="badge badge-danger">
-          <XCircle className="w-3 h-3 mr-1" /> Rejected
-        </span>
-      );
+    if (rejectedDocs === totalDocs && totalDocs > 0) {
+      return <span className="badge badge-danger"><XCircle className="w-3 h-3 mr-1" /> Rejected</span>;
     }
     // Show Verified only if ALL documents are verified
-    if (verifiedDocs.length === totalDocs && totalDocs > 0) {
-      return (
-        <span className="badge badge-success">
-          <CheckCircle className="w-3 h-3 mr-1" /> Verified
-        </span>
-      );
+    if (verifiedDocs === totalDocs && totalDocs > 0) {
+      return <span className="badge badge-success"><CheckCircle className="w-3 h-3 mr-1" /> Verified</span>;
     }
     // Show Pending if ANY document is not verified (includes partially verified cases)
-    return (
-      <span className="badge badge-warning">
-        <Clock className="w-3 h-3 mr-1" /> Pending
-      </span>
-    );
+    return <span className="badge badge-warning"><Clock className="w-3 h-3 mr-1" /> Pending</span>;
   };
 
   return (
@@ -140,16 +134,16 @@ export default function PolicyReview() {
           <div className="relative">
             <div className="absolute inset-0 bg-gradient-brand rounded-xl blur-lg opacity-60 animate-pulse-glow"></div>
             <div className="relative p-3 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-xl shadow-glow-brand">
-              <FileText className="w-7 h-7 text-white" />
+              <Users className="w-7 h-7 text-white" />
             </div>
           </div>
           <div>
-            <h1 className="text-3xl sm:text-4xl font-bold text-gradient-brand">Policy Review</h1>
-            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Review and verify policy documents</p>
+            <h1 className="text-3xl sm:text-4xl font-bold text-gradient-brand">Nominee Review</h1>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Review and verify nominee documents</p>
           </div>
         </div>
         <button
-          onClick={loadPolicies}
+          onClick={loadNominees}
           disabled={loading}
           className="btn-outline-brand flex items-center justify-center space-x-2 disabled:opacity-50"
         >
@@ -165,7 +159,7 @@ export default function PolicyReview() {
             <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-cyan-500 dark:text-cyan-400 w-5 h-5" />
             <input
               type="text"
-              placeholder="Search by name, email, phone, or policy number..."
+              placeholder="Search by name, email, or phone..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
@@ -233,7 +227,7 @@ export default function PolicyReview() {
             <div className="animate-spin rounded-full h-16 w-16 border-4 border-brand-200 dark:border-brand-900 border-t-cyan-500 dark:border-t-cyan-400"></div>
             <div className="absolute inset-0 rounded-full bg-gradient-brand opacity-20 blur-xl animate-pulse-glow"></div>
           </div>
-          <p className="text-gray-600 dark:text-gray-400 font-medium animate-pulse">Loading policy documents...</p>
+          <p className="text-gray-600 dark:text-gray-400 font-medium animate-pulse">Loading nominee documents...</p>
         </div>
       ) : (
         <div className="card elevated overflow-hidden border border-brand-400/20">
@@ -241,9 +235,8 @@ export default function PolicyReview() {
             <table className="min-w-full divide-y divide-gray-200 dark:divide-navy-700">
               <thead className="bg-gradient-to-r from-navy-900 via-brand-900/50 to-navy-900 dark:from-navy-950 dark:via-brand-950/50 dark:to-navy-950">
                 <tr>
-                  <th className="px-6 py-4 text-left text-xs font-bold text-cyan-400 uppercase tracking-wider">Policy Details</th>
-                  <th className="px-6 py-4 text-left text-xs font-bold text-cyan-400 uppercase tracking-wider">User Information</th>
-                  <th className="px-6 py-4 text-left text-xs font-bold text-cyan-400 uppercase tracking-wider">Sum Assured</th>
+                  <th className="px-6 py-4 text-left text-xs font-bold text-cyan-400 uppercase tracking-wider">Nominee Details</th>
+                  <th className="px-6 py-4 text-left text-xs font-bold text-cyan-400 uppercase tracking-wider">Contact Info</th>
                   <th className="px-6 py-4 text-left text-xs font-bold text-cyan-400 uppercase tracking-wider">Uploaded</th>
                   <th className="px-6 py-4 text-left text-xs font-bold text-cyan-400 uppercase tracking-wider">Status</th>
                   <th className="px-6 py-4 text-left text-xs font-bold text-cyan-400 uppercase tracking-wider">Actions</th>
@@ -251,37 +244,25 @@ export default function PolicyReview() {
               </thead>
               <tbody className="bg-white dark:bg-navy-900 divide-y divide-gray-200 dark:divide-navy-700">
                 {records?.data && records.data.length > 0 ? (
-                  records.data.map(policy => (
-                    <tr key={policy.id} className="hover:bg-brand-50 dark:hover:bg-brand-950/10 transition-all duration-200 group">
+                  records.data.map((nominee) => (
+                    <tr key={nominee.id} className="hover:bg-brand-50 dark:hover:bg-brand-950/10 transition-all duration-200 group">
                       <td className="px-6 py-4">
-                        <div className="flex items-center space-x-3">
-                          <div className="p-2 bg-gradient-to-br from-brand-100 to-cyan-100 dark:from-brand-900/30 dark:to-cyan-900/30 rounded-lg group-hover:scale-110 transition-transform">
-                            <FileText className="w-5 h-5 text-brand-600 dark:text-brand-400" />
-                          </div>
-                          <div className="min-w-0">
-                            <div className="text-sm font-bold text-gray-900 dark:text-white break-words">{policy.policyNumber}</div>
-                            <div className="flex items-center mt-1 text-xs text-gray-500 dark:text-gray-400">
-                              <Building2 className="w-3 h-3 mr-1 flex-shrink-0" />
-                              <span className="break-words">{policy.insuranceCompany.name}</span>
-                            </div>
-                          </div>
-                        </div>
+                        <div className="text-sm font-bold text-gray-900 dark:text-white">{nominee.name}</div>
+                        <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">ID: {nominee.id}</div>
+                        <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">User: {nominee.user.name}</div>
+                        <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Relationship: {formatRelationship(nominee.relationship)}</div>
                       </td>
                       <td className="px-6 py-4">
-                        <div className="text-sm font-bold text-gray-900 dark:text-white break-words">{policy.user.name}</div>
-                        <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{policy.user.email || '-'}</div>
-                        <div className="text-xs text-gray-500 dark:text-gray-400">{policy.user.mobileNumber}</div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="text-sm font-bold text-gray-900 dark:text-white">₹{parseFloat(policy.sumAssured).toLocaleString('en-IN')}</div>
+                        <div className="text-sm text-gray-900 dark:text-white">{nominee.email || '-'}</div>
+                        <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">{nominee.mobileNumber}</div>
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
-                        {policy.documents.length > 0 ? new Date(policy.documents[0].uploadedAt).toLocaleDateString() : '—'}
+                        {nominee.documents.length > 0 ? new Date(nominee.documents[0].uploadedAt).toLocaleDateString() : '—'}
                       </td>
-                      <td className="px-6 py-4">{renderStatusBadge(policy)}</td>
+                      <td className="px-6 py-4">{renderStatusBadge(nominee)}</td>
                       <td className="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">
-                        <div className="space-y-3">
-                          {policy.documents.map(doc => {
+                        <div className="space-y-2">
+                          {nominee.documents.map((doc) => {
                             const isVerified = doc.isVerified;
                             return (
                               <div key={doc.id} className="flex flex-col gap-2 p-3 rounded-lg bg-gray-50 dark:bg-navy-900/50 border border-gray-100 dark:border-navy-700">
@@ -318,14 +299,14 @@ export default function PolicyReview() {
                               </div>
                             );
                           })}
-                          {policy.documents.length === 0 && (
+                          {nominee.documents.length === 0 && (
                             <div className="flex flex-col gap-2 p-3 bg-gray-50 dark:bg-navy-900/50 rounded-lg border border-gray-200 dark:border-navy-600">
                               <div className="text-xs text-gray-500 dark:text-gray-400">No documents uploaded</div>
                               <div className="flex flex-wrap items-center gap-2">
-                                <button onClick={() => handleAcceptPolicyWithoutDocuments(policy.id)} className="flex items-center px-3 py-1.5 text-xs font-medium text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-navy-800 rounded-lg transition-all border border-transparent hover:border-green-200 dark:hover:border-navy-600">
+                                <button onClick={() => handleAcceptNomineeWithoutDocuments(nominee.id)} className="flex items-center px-3 py-1.5 text-xs font-medium text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-navy-800 rounded-lg transition-all border border-transparent hover:border-green-200 dark:hover:border-navy-600">
                                   <CheckCircle className="w-3 h-3 mr-1.5" /> Accept
                                 </button>
-                                <button onClick={() => handleRejectPolicyWithoutDocuments(policy.id)} className="flex items-center px-3 py-1.5 text-xs font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-navy-800 rounded-lg transition-all border border-transparent hover:border-red-200 dark:hover:border-navy-600">
+                                <button onClick={() => handleRejectNomineeWithoutDocuments(nominee.id)} className="flex items-center px-3 py-1.5 text-xs font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-navy-800 rounded-lg transition-all border border-transparent hover:border-red-200 dark:hover:border-navy-600">
                                   <XCircle className="w-3 h-3 mr-1.5" /> Reject
                                 </button>
                               </div>
@@ -337,10 +318,10 @@ export default function PolicyReview() {
                   ))
                 ) : (
                   <tr>
-                    <td colSpan={6} className="px-6 py-12 text-center text-sm text-gray-500 dark:text-gray-400">
+                    <td colSpan={5} className="px-6 py-12 text-center text-sm text-gray-500 dark:text-gray-400">
                       <div className="flex flex-col items-center justify-center">
-                        <FileText className="w-12 h-12 text-gray-300 dark:text-navy-600 mb-3" />
-                        <p>No policies found matching your criteria.</p>
+                        <Users className="w-12 h-12 text-gray-300 dark:text-navy-600 mb-3" />
+                        <p>No nominee records found matching your criteria.</p>
                       </div>
                     </td>
                   </tr>
@@ -353,7 +334,7 @@ export default function PolicyReview() {
           {records && records.pagination.totalPages > 1 && (
             <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-6 py-4 border-t border-gray-200 dark:border-navy-700 bg-gray-50 dark:bg-navy-800/50">
               <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-300">
-                Showing <span className="font-bold">{(page - 1) * limit + 1}</span> to <span className="font-bold">{Math.min(page * limit, records.pagination.total)}</span> of <span className="font-bold">{records.pagination.total}</span> policies
+                Showing <span className="font-bold">{(page - 1) * limit + 1}</span> to <span className="font-bold">{Math.min(page * limit, records.pagination.total)}</span> of <span className="font-bold">{records.pagination.total}</span> records
               </div>
               <div className="flex space-x-2">
                 <button onClick={() => setPage(page - 1)} disabled={page === 1} className="p-2 border border-gray-300 dark:border-navy-600 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-white dark:hover:bg-navy-700 text-gray-700 dark:text-gray-300 transition-colors">
@@ -370,3 +351,4 @@ export default function PolicyReview() {
     </div>
   );
 }
+

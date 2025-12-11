@@ -24,11 +24,8 @@ const formatCurrency = (value?: string | number | null) => {
 };
 
 const getDocumentStatusBadge = (isVerified: boolean, verifiedAt?: string | null) => {
-  const isReverification = !isVerified && verifiedAt;
   if (isVerified) {
     return <span className="badge badge-success"><CheckCircle className="w-3 h-3 mr-1" /> Verified</span>;
-  } else if (isReverification) {
-    return <span className="badge badge-warning"><RotateCcw className="w-3 h-3 mr-1" /> Re-verification</span>;
   } else {
     return <span className="badge badge-warning"><Clock className="w-3 h-3 mr-1" /> Pending</span>;
   }

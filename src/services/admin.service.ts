@@ -15,9 +15,10 @@ import {
   AdminActionsResponse,
   KycUser,
   KycUsersResponse,
-  ReVerificationDocumentsResponse,
   PolicyUser,
   PolicyUsersResponse,
+  NomineeUser,
+  NomineeUsersResponse,
   UserActivityLog,
   UserActivityLogsResponse,
 } from '../types';
@@ -221,7 +222,7 @@ export const adminService = {
   async getKycDocuments(
     page = 1,
     limit = 25,
-    status: 'pending' | 'verified' | 're-verification' | 'rejected' = 'pending',
+    status: 'pending' | 'verified' | 'rejected' = 'pending',
     search?: string
   ): Promise<PaginatedResponse<KycUser>> {
     const params = new URLSearchParams({
@@ -278,7 +279,7 @@ export const adminService = {
   async getPolicyDocuments(
     page = 1,
     limit = 25,
-    status: 'pending' | 'verified' | 're-verification' | 'rejected' = 'pending',
+    status: 'pending' | 'verified' | 'rejected' = 'pending',
     search?: string
   ): Promise<PaginatedResponse<PolicyUser>> {
     const params = new URLSearchParams({
@@ -332,6 +333,37 @@ export const adminService = {
   },
 
   // Nominee Documents
+  async getNomineeDocuments(
+    page = 1,
+    limit = 25,
+    status: 'pending' | 'verified' | 'rejected' = 'pending',
+    search?: string
+  ): Promise<PaginatedResponse<NomineeUser>> {
+    const params = new URLSearchParams({
+      page: page.toString(),
+      limit: limit.toString(),
+      status,
+    });
+    
+    if (search && search.trim()) {
+      params.append('search', search.trim());
+    }
+
+    const response = await api.get<{ success: boolean; data: NomineeUsersResponse }>(
+      `/admin/documents/nominee-documents?${params.toString()}`
+    );
+
+    return {
+      data: response.data.data.nominees.map((nominee) => ({
+        ...nominee,
+        documents: nominee.documents.map((document) => ({
+          ...document,
+          documentUrl: toAbsoluteUrl(document.documentUrl),
+        })),
+      })),
+      pagination: response.data.data.pagination,
+    };
+  },
   async verifyNomineeDocument(documentId: string): Promise<void> {
     await api.patch(`/admin/documents/verify-document/${documentId}`, {
       documentType: 'nominee',
@@ -356,22 +388,6 @@ export const adminService = {
     });
   },
 
-  // Re-verification Documents
-  async getReVerificationDocuments(page: number = 1, limit: number = 20): Promise<ReVerificationDocumentsResponse> {
-    const response = await api.get<{ success: boolean; data: ReVerificationDocumentsResponse }>(
-      `/admin/documents/re-verification`,
-      {
-        params: { page, limit },
-      }
-    );
-    // Convert document URLs to absolute URLs
-    const data = response.data.data;
-    data.documents = data.documents.map((doc) => ({
-      ...doc,
-      documentUrl: toAbsoluteUrl(doc.documentUrl),
-    }));
-    return data;
-  },
 
   // User Activity Logs
   async getUserActivityLogs(userId: string, page: number = 1, limit: number = 50): Promise<PaginatedResponse<UserActivityLog>> {

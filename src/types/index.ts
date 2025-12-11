@@ -312,42 +312,6 @@ export interface KycUsersResponse {
   };
 }
 
-export interface ReVerificationDocument {
-  id: string;
-  documentType: 'USER' | 'POLICY' | 'NOMINEE';
-  documentName: string;
-  documentUrl: string;
-  documentTypeDetail: string;
-  isVerified: boolean;
-  uploadedAt: string;
-  verifiedAt: string | null;
-  user: {
-    id: string;
-    name: string;
-    email: string;
-    mobileNumber: string;
-  };
-  policy: {
-    id: string;
-    policyNumber: string;
-    insuranceCompany: string;
-  } | null;
-  nominee: {
-    id: string;
-    name: string;
-    relationship: string;
-  } | null;
-}
-
-export interface ReVerificationDocumentsResponse {
-  documents: ReVerificationDocument[];
-  pagination: {
-    page: number;
-    limit: number;
-    total: number;
-    totalPages: number;
-  };
-}
 
 export interface PolicyUserDocument {
   id: string;
@@ -382,6 +346,46 @@ export interface PolicyUser {
 
 export interface PolicyUsersResponse {
   policies: PolicyUser[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
+}
+
+export interface NomineeUserDocument {
+  id: string;
+  documentType: string;
+  documentName: string;
+  documentUrl: string;
+  isVerified: boolean;
+  uploadedAt: string;
+  verifiedAt?: string | null;
+  rejectedAt?: string | null;
+}
+
+export interface NomineeUser {
+  id: string;
+  name: string;
+  relationship: string;
+  mobileNumber: string;
+  email?: string | null;
+  address?: string | null;
+  createdAt: string;
+  updatedAt: string;
+  user: {
+    id: string;
+    name: string;
+    email: string | null;
+    mobileNumber: string;
+  };
+  documents: NomineeUserDocument[];
+  verifiedDocuments: string[];
+}
+
+export interface NomineeUsersResponse {
+  nominees: NomineeUser[];
   pagination: {
     page: number;
     limit: number;

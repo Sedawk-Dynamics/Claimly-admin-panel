@@ -21,6 +21,7 @@ const navigation = [
   { name: 'Users', href: '/users', icon: Users },
   { name: 'KYC Review', href: '/kyc-review', icon: ShieldCheck },
   { name: 'Policy Review', href: '/policy-review', icon: FileText },
+  { name: 'Nominee Review', href: '/nominee-review', icon: Users },
   { name: 'Companies', href: '/companies', icon: Building2 },
   { name: 'Policies', href: '/policies', icon: FileText },
   { name: 'Alerts', href: '/alerts', icon: Bell },

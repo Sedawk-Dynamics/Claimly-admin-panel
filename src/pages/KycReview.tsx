@@ -14,7 +14,7 @@ import {
   Search,
 } from 'lucide-react';
 
-type ReviewStatus = 'pending' | 'verified' | 're-verification' | 'rejected';
+type ReviewStatus = 'pending' | 'verified' | 'rejected';
 
 export default function KycReview() {
   const [records, setRecords] = useState<PaginatedResponse<KycUser> | null>(null);
@@ -107,15 +107,15 @@ export default function KycReview() {
     const verifiedDocs = user.documents.filter((doc) => doc.isVerified).length;
     const rejectedDocs = user.documents.filter((doc) => doc.rejectedAt).length;
 
-    if (rejectedDocs > 0) {
+    // Show Rejected only if ALL documents are rejected
+    if (rejectedDocs === totalDocs && totalDocs > 0) {
       return <span className="badge badge-danger"><XCircle className="w-3 h-3 mr-1" /> Rejected</span>;
     }
+    // Show Verified only if ALL documents are verified
     if (verifiedDocs === totalDocs && totalDocs > 0) {
       return <span className="badge badge-success"><CheckCircle className="w-3 h-3 mr-1" /> Verified</span>;
     }
-    if (verifiedDocs > 0) {
-      return <span className="badge badge-warning"><Clock className="w-3 h-3 mr-1" /> Partially Verified</span>;
-    }
+    // Show Pending if ANY document is not verified (includes partially verified cases)
     return <span className="badge badge-warning"><Clock className="w-3 h-3 mr-1" /> Pending</span>;
   };
 
@@ -196,15 +196,6 @@ export default function KycReview() {
             }`}
         >
           Verified
-        </button>
-        <button
-          onClick={() => { setStatusFilter('re-verification'); setPage(1); }}
-          className={`px-5 py-2.5 rounded-xl font-semibold transition-all ${statusFilter === 're-verification'
-            ? 'bg-gradient-to-r from-purple-400 to-purple-500 text-white shadow-glow-purple'
-            : 'bg-white dark:bg-navy-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-navy-700 hover:border-purple-400 dark:hover:border-purple-500'
-            }`}
-        >
-          Re-verification
         </button>
         <button
           onClick={() => { setStatusFilter('rejected'); setPage(1); }}
