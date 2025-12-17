@@ -25,6 +25,7 @@ const navigation = [
   { name: 'Companies', href: '/companies', icon: Building2 },
   { name: 'Policies', href: '/policies', icon: FileText },
   { name: 'Alerts', href: '/alerts', icon: Bell },
+  { name: 'Notifications', href: '/notifications', icon: Bell },
   { name: 'Actions', href: '/actions', icon: History },
 ];
 

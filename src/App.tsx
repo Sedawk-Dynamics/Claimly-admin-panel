@@ -13,6 +13,7 @@ import Companies from './pages/Companies';
 import Policies from './pages/Policies';
 import Alerts from './pages/Alerts';
 import AdminActions from './pages/AdminActions';
+import Notifications from './pages/Notifications';
 
 function PrivateRoute({ children }: { children: React.ReactNode }) {
   return authService.isAuthenticated() ? <>{children}</> : <Navigate to="/login" replace />;
@@ -42,6 +43,7 @@ function App() {
             <Route path="policies" element={<Policies />} />
             <Route path="alerts" element={<Alerts />} />
             <Route path="actions" element={<AdminActions />} />
+            <Route path="notifications" element={<Notifications />} />
           </Route>
         </Routes>
       </BrowserRouter>

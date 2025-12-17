@@ -218,6 +218,15 @@ export const adminService = {
     return response.data.data;
   },
 
+  // Notifications
+  async sendNotification(payload: { userId: string; title: string; message: string }): Promise<void> {
+    await api.post('/admin/notifications', {
+      user_id: payload.userId,
+      title: payload.title,
+      message: payload.message,
+    });
+  },
+
   // KYC Documents
   async getKycDocuments(
     page = 1,
