@@ -11,6 +11,7 @@ import {
   LogOut,
   Menu,
   X,
+  CreditCard,
 } from 'lucide-react';
 import { useState } from 'react';
 import ThemeToggle from './ThemeToggle';
@@ -24,6 +25,7 @@ const navigation = [
   { name: 'Nominee Review', href: '/nominee-review', icon: Users },
   { name: 'Companies', href: '/companies', icon: Building2 },
   { name: 'Policies', href: '/policies', icon: FileText },
+  { name: 'Subscription Plans', href: '/subscription-plans', icon: CreditCard },
   { name: 'Alerts', href: '/alerts', icon: Bell },
   { name: 'Notifications', href: '/notifications', icon: Bell },
   { name: 'Actions', href: '/actions', icon: History },

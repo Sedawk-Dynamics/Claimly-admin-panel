@@ -409,5 +409,42 @@ export const adminService = {
       pagination: response.data.data.pagination,
     };
   },
+
+  // Subscription Plans
+  async getSubscriptionPlans(): Promise<any[]> {
+    const response = await api.get<{ success: boolean; data: any[] }>('/subscription-plan/admin');
+    return response.data.data;
+  },
+
+  async getSubscriptionPlanById(id: string): Promise<any> {
+    const response = await api.get<{ success: boolean; data: any }>(`/subscription-plan/admin/${id}`);
+    return response.data.data;
+  },
+
+  async createSubscriptionPlan(data: {
+    name: string;
+    price: number;
+    features: string[];
+    isPopular?: boolean;
+    status?: 'ACTIVE' | 'INACTIVE';
+  }): Promise<any> {
+    const response = await api.post<{ success: boolean; data: any }>('/subscription-plan/admin', data);
+    return response.data.data;
+  },
+
+  async updateSubscriptionPlan(id: string, data: {
+    name?: string;
+    price?: number;
+    features?: string[];
+    isPopular?: boolean;
+    status?: 'ACTIVE' | 'INACTIVE';
+  }): Promise<any> {
+    const response = await api.put<{ success: boolean; data: any }>(`/subscription-plan/admin/${id}`, data);
+    return response.data.data;
+  },
+
+  async deleteSubscriptionPlan(id: string): Promise<void> {
+    await api.delete(`/subscription-plan/admin/${id}`);
+  },
 };
 
