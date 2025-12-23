@@ -292,6 +292,9 @@ export default function UserDetail() {
                               {nominee.mobileNumber || '-'}
                             </span>
                             <span className="px-2 py-1 rounded-md bg-white dark:bg-navy-800 border border-gray-200 dark:border-navy-600 text-gray-600 dark:text-gray-300">
+                              {nominee.dob ? formatDate(nominee.dob) : 'DOB not provided'}
+                            </span>
+                            <span className="px-2 py-1 rounded-md bg-white dark:bg-navy-800 border border-gray-200 dark:border-navy-600 text-gray-600 dark:text-gray-300">
                               {nominee.email || '-'}
                             </span>
                           </div>

@@ -49,6 +49,7 @@ export interface NomineeDetail {
   name: string;
   relationship: string;
   mobileNumber: string;
+  dob?: string | null;
   email?: string | null;
   address?: string | null;
   createdAt: string;
