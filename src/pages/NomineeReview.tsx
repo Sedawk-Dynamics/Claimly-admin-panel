@@ -110,20 +110,20 @@ export default function NomineeReview() {
   };
 
   const renderStatusBadge = (nominee: NomineeUser) => {
-    const totalDocs = nominee.documents.length;
-    const verifiedDocs = nominee.documents.filter((doc) => doc.isVerified).length;
-    const rejectedDocs = nominee.documents.filter((doc) => doc.rejectedAt).length;
-
-    // Show Rejected only if ALL documents are rejected
-    if (rejectedDocs === totalDocs && totalDocs > 0) {
-      return <span className="badge badge-danger"><XCircle className="w-3 h-3 mr-1" /> Rejected</span>;
-    }
-    // Show Verified only if ALL documents are verified
-    if (verifiedDocs === totalDocs && totalDocs > 0) {
-      return <span className="badge badge-success"><CheckCircle className="w-3 h-3 mr-1" /> Verified</span>;
-    }
-    // Show Pending if ANY document is not verified (includes partially verified cases)
-    return <span className="badge badge-warning"><Clock className="w-3 h-3 mr-1" /> Pending</span>;
+    const statusClass = nominee.status === 'ACCEPTED'
+      ? 'status-active'
+      : nominee.status === 'PENDING'
+      ? 'status-pending'
+      : nominee.status === 'REJECTED'
+      ? 'status-rejected'
+      : nominee.status === 'DRAFT'
+      ? 'status-inactive'
+      : 'status-inactive';
+    return (
+      <span className={statusClass}>
+        {nominee.status}
+      </span>
+    );
   };
 
   return (

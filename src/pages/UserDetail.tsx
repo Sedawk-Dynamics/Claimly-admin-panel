@@ -283,7 +283,25 @@ export default function UserDetail() {
                     <div key={nominee.id} className="rounded-xl border border-gray-200 dark:border-navy-700 p-5 bg-gray-50/50 dark:bg-navy-900/30">
                       <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between mb-4">
                         <div className="space-y-2">
-                          <h3 className="text-lg font-bold text-gray-900 dark:text-white">{nominee.name}</h3>
+                          <div className="flex items-center gap-3">
+                            <h3 className="text-lg font-bold text-gray-900 dark:text-white">{nominee.name}</h3>
+                            {(() => {
+                              const statusClass = nominee.status === 'ACCEPTED'
+                                ? 'status-active'
+                                : nominee.status === 'PENDING'
+                                ? 'status-pending'
+                                : nominee.status === 'REJECTED'
+                                ? 'status-rejected'
+                                : nominee.status === 'DRAFT'
+                                ? 'status-inactive'
+                                : 'status-inactive';
+                              return (
+                                <span className={statusClass}>
+                                  {nominee.status}
+                                </span>
+                              );
+                            })()}
+                          </div>
                           <div className="flex flex-wrap gap-3 text-sm">
                             <span className="px-2 py-1 rounded-md bg-white dark:bg-navy-800 border border-gray-200 dark:border-navy-600 text-gray-600 dark:text-gray-300">
                               {formatEnumLabel(nominee.relationship)}

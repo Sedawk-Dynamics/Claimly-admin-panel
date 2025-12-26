@@ -52,6 +52,7 @@ export interface NomineeDetail {
   dob?: string | null;
   email?: string | null;
   address?: string | null;
+  status: 'DRAFT' | 'PENDING' | 'ACCEPTED' | 'REJECTED';
   createdAt: string;
   updatedAt: string;
   policies: NomineePolicyLink[];
@@ -150,6 +151,8 @@ export interface Policy {
       id: string;
       name: string;
       relationship: string;
+      dob?: string | null;
+      status: 'DRAFT' | 'PENDING' | 'ACCEPTED' | 'REJECTED';
     };
     sharePercentage: string;
   }>;
@@ -374,6 +377,7 @@ export interface NomineeUser {
   mobileNumber: string;
   email?: string | null;
   address?: string | null;
+  status: 'DRAFT' | 'PENDING' | 'ACCEPTED' | 'REJECTED';
   createdAt: string;
   updatedAt: string;
   user: {
