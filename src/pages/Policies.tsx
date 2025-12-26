@@ -165,6 +165,8 @@ export default function Policies() {
                             ? 'status-pending'
                             : policy.status === 'REJECTED'
                             ? 'status-rejected'
+                            : policy.status === 'DRAFT'
+                            ? 'status-inactive'
                             : 'status-inactive';
                           return <span className={cls}>{policy.status}</span>;
                         })()}
@@ -254,10 +256,17 @@ export default function Policies() {
                     <div className="flex justify-between items-center pt-2 border-t border-gray-200 dark:border-navy-700">
                       <span className="text-gray-600 dark:text-gray-400 font-medium">Status:</span>
                       <span
-                        className={`${policy.status === 'ACTIVE'
+                        className={`${
+                          policy.status === 'ACCEPTED'
                             ? 'status-active'
+                            : policy.status === 'PENDING'
+                            ? 'status-pending'
+                            : policy.status === 'REJECTED'
+                            ? 'status-rejected'
+                            : policy.status === 'DRAFT'
+                            ? 'status-inactive'
                             : 'status-inactive'
-                          }`}
+                        }`}
                       >
                         {policy.status}
                       </span>

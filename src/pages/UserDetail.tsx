@@ -412,7 +412,21 @@ export default function UserDetail() {
                         </div>
                         <div>
                           <p className="text-xs font-bold uppercase text-gray-500 dark:text-gray-400">Status</p>
-                          <p className="text-sm font-bold text-gray-900 dark:text-white mt-1">{formatEnumLabel(policy.status)}</p>
+                          <span
+                            className={`${
+                              policy.status === 'ACCEPTED'
+                                ? 'status-active'
+                                : policy.status === 'PENDING'
+                                ? 'status-pending'
+                                : policy.status === 'REJECTED'
+                                ? 'status-rejected'
+                                : policy.status === 'DRAFT'
+                                ? 'status-inactive'
+                                : 'status-inactive'
+                            } text-sm font-bold mt-1 inline-block`}
+                          >
+                            {formatEnumLabel(policy.status)}
+                          </span>
                         </div>
                         <div>
                           <p className="text-xs font-bold uppercase text-gray-500 dark:text-gray-400">Insurer</p>

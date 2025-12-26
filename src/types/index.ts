@@ -130,7 +130,7 @@ export interface Policy {
   policyNumber: string;
   userId: string;
   sumAssured: string;
-  status: string;
+  status: 'DRAFT' | 'PENDING' | 'ACCEPTED' | 'REJECTED';
   uploadedAt: string;
   user?: {
     id: string;
