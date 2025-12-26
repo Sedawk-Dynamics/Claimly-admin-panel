@@ -37,7 +37,7 @@ export interface UserDocument {
   verifiedAt?: string | null;
 }
 
-export interface NomineeDocument extends UserDocument {}
+export interface NomineeDocument extends UserDocument { }
 
 export interface NomineePolicyLink {
   id: string;
@@ -178,6 +178,7 @@ export interface Alert {
   } | null;
   createdAt: string;
   alertType?: string;
+  smsText?: string | null;
   user?: {
     id: string;
     name: string;

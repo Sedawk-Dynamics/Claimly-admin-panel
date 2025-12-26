@@ -18,6 +18,7 @@ import {
   CheckSquare,
   Square,
   Zap,
+  MessageSquare,
 } from 'lucide-react';
 import { format } from 'date-fns';
 
@@ -518,6 +519,12 @@ export default function Alerts() {
                               {getAlertTypeLabel(alert.alertType)}
                             </div>
                             <div className="text-xs text-gray-600 dark:text-gray-400 mt-1">{alert.detectedVia}</div>
+                            {alert.smsText && (
+                              <div className="flex items-start mt-1 space-x-1">
+                                <MessageSquare className="w-3 h-3 text-gray-400 mt-0.5 flex-shrink-0" />
+                                <span className="text-xs text-gray-500 dark:text-gray-500 line-clamp-1 italic">"{alert.smsText}"</span>
+                              </div>
+                            )}
                             {alert.remarks && (
                               <div className="text-xs text-gray-500 dark:text-gray-500 mt-1 line-clamp-1">{alert.remarks}</div>
                             )}
@@ -616,6 +623,14 @@ export default function Alerts() {
                 <span className="text-sm font-semibold text-gray-700 dark:text-gray-300 min-w-[100px]">Detected Via:</span>
                 <span className="text-sm text-gray-900 dark:text-white">{selectedAlert.detectedVia}</span>
               </div>
+              {selectedAlert.smsText && (
+                <div className="flex items-start space-x-2">
+                  <span className="text-sm font-semibold text-gray-700 dark:text-gray-300 min-w-[100px]">SMS Text:</span>
+                  <div className="flex-1 bg-gray-100 dark:bg-navy-900 p-2 rounded-lg">
+                    <span className="text-sm text-gray-800 dark:text-gray-200 italic">"{selectedAlert.smsText}"</span>
+                  </div>
+                </div>
+              )}
               <div className="flex items-start space-x-2">
                 <span className="text-sm font-semibold text-gray-700 dark:text-gray-300 min-w-[100px]">Date:</span>
                 <span className="text-sm text-gray-900 dark:text-white">{format(new Date(selectedAlert.detectionDate), 'MMM dd, yyyy')}</span>
@@ -744,10 +759,10 @@ function StatCard({
 
   return (
     <div className={`card p-6 border-l-4 ${gradient === 'brand' ? 'border-brand-500' :
-        gradient === 'cyan' ? 'border-cyan-500' :
-          gradient === 'sunset' ? 'border-orange-500' :
-            gradient === 'fire' ? 'border-red-500' :
-              'border-yellow-500'
+      gradient === 'cyan' ? 'border-cyan-500' :
+        gradient === 'sunset' ? 'border-orange-500' :
+          gradient === 'fire' ? 'border-red-500' :
+            'border-yellow-500'
       } hover:translate-y-[-2px] transition-all duration-300`}>
       <div className="flex items-start justify-between">
         <div>
