@@ -163,11 +163,8 @@ export default function NomineeReview() {
       : nominee.status === 'DRAFT'
       ? 'status-inactive'
       : 'status-inactive';
-    return (
-      <span className={statusClass}>
-        {nominee.status}
-      </span>
-    );
+    const label = nominee.status === 'ACCEPTED' ? 'VERIFIED' : nominee.status;
+    return <span className={statusClass}>{label}</span>;
   };
 
   return (
