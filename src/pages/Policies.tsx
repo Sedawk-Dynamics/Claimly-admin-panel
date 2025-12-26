@@ -158,14 +158,16 @@ export default function Policies() {
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <span
-                          className={`${policy.status === 'ACTIVE'
-                              ? 'status-active'
-                              : 'status-inactive'
-                            }`}
-                        >
-                          {policy.status}
-                        </span>
+                        {(() => {
+                          const cls = policy.status === 'ACCEPTED'
+                            ? 'status-active'
+                            : policy.status === 'PENDING'
+                            ? 'status-pending'
+                            : policy.status === 'REJECTED'
+                            ? 'status-rejected'
+                            : 'status-inactive';
+                          return <span className={cls}>{policy.status}</span>;
+                        })()}
                       </td>
                     </tr>
                   ))
