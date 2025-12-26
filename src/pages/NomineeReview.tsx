@@ -13,7 +13,7 @@ import {
   Search,
 } from 'lucide-react';
 
-type ReviewStatus = 'pending' | 'verified' | 'rejected';
+type ReviewStatus = 'pending' | 'verified' | 'rejected' | 'draft';
 
 export default function NomineeReview() {
   const [records, setRecords] = useState<PaginatedResponse<NomineeUser> | null>(null);
@@ -37,7 +37,7 @@ export default function NomineeReview() {
       setLoading(true);
       setError('');
       const search = searchQuery.trim() || undefined;
-      const data = await adminService.getNomineeDocuments(page, limit, statusFilter || 'pending', search);
+      const data = await adminService.getNomineeDocuments(page, limit, statusFilter || 'draft', search);
       setRecords(data);
     } catch (err: any) {
       setError(err.response?.data?.error || err.message || 'Failed to load nominee documents');
@@ -184,6 +184,15 @@ export default function NomineeReview() {
             }`}
         >
           All
+        </button>
+        <button
+          onClick={() => { setStatusFilter('draft'); setPage(1); }}
+          className={`px-5 py-2.5 rounded-xl font-semibold transition-all ${statusFilter === 'draft'
+            ? 'bg-gradient-to-r from-gray-400 to-gray-500 text-white shadow-glow-gray'
+            : 'bg-white dark:bg-navy-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-navy-700 hover:border-gray-400 dark:hover:border-gray-500'
+            }`}
+        >
+          Draft
         </button>
         <button
           onClick={() => { setStatusFilter('pending'); setPage(1); }}

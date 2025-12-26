@@ -288,7 +288,7 @@ export const adminService = {
   async getPolicyDocuments(
     page = 1,
     limit = 25,
-    status: 'pending' | 'verified' | 'rejected' = 'pending',
+    status: 'pending' | 'verified' | 'rejected' | 'draft' = 'draft',
     search?: string
   ): Promise<PaginatedResponse<PolicyUser>> {
     const params = new URLSearchParams({
@@ -345,7 +345,7 @@ export const adminService = {
   async getNomineeDocuments(
     page = 1,
     limit = 25,
-    status: 'pending' | 'verified' | 'rejected' = 'pending',
+    status: 'pending' | 'verified' | 'rejected' | 'draft' = 'draft',
     search?: string
   ): Promise<PaginatedResponse<NomineeUser>> {
     const params = new URLSearchParams({
