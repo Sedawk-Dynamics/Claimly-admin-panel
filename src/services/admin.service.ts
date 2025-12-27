@@ -452,5 +452,18 @@ export const adminService = {
   async deleteSubscriptionPlan(id: string): Promise<void> {
     await api.delete(`/subscription-plan/admin/${id}`);
   },
+
+  // Delete entities by admin
+  async deleteUser(userId: string): Promise<void> {
+    await api.delete(`/admin/documents/user/${userId}`);
+  },
+
+  async deletePolicy(policyId: string): Promise<void> {
+    await api.delete(`/admin/documents/policy/${policyId}`);
+  },
+
+  async deleteNominee(nomineeId: string): Promise<void> {
+    await api.delete(`/admin/documents/nominee/${nomineeId}`);
+  },
 };
 

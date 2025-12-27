@@ -13,6 +13,7 @@ import {
   Search,
   Eye,
   X,
+  Trash2,
 } from 'lucide-react';
 
 type ReviewStatus = 'pending' | 'verified' | 'rejected' | 'draft' | 'all';
@@ -124,6 +125,18 @@ export default function NomineeReview() {
 
   const closeNomineeDetail = () => {
     setSelectedNominee(null);
+  };
+
+  const handleDeleteNominee = async (nomineeId: string) => {
+    if (!confirm('Are you sure you want to delete this nominee? This will permanently delete the nominee and all associated documents. This action cannot be undone.')) return;
+    try {
+      await adminService.deleteNominee(nomineeId);
+      alert('Nominee deleted successfully');
+      setSelectedNominee(null);
+      loadNominees();
+    } catch (err: any) {
+      alert(err.response?.data?.error || 'Failed to delete nominee');
+    }
   };
 
   const handleBulkVerifySelectedNominee = async () => {
@@ -521,6 +534,15 @@ export default function NomineeReview() {
                     </div>
                   </div>
                 )}
+                <div className="mt-6 pt-6 border-t border-gray-200 dark:border-navy-700">
+                  <button
+                    onClick={() => handleDeleteNominee(selectedNominee.id)}
+                    className="w-full px-4 py-2.5 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-xl font-semibold hover:shadow-lg hover:shadow-red-500/50 transition-all flex items-center justify-center gap-2"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                    Delete Nominee
+                  </button>
+                </div>
               </div>
             </div>
           </div>
