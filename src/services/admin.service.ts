@@ -231,7 +231,7 @@ export const adminService = {
   async getKycDocuments(
     page = 1,
     limit = 25,
-    status: 'pending' | 'verified' | 'rejected' | 'draft' = 'pending',
+    status: 'pending' | 'verified' | 'rejected' | 'draft' | 'all' = 'all',
     search?: string
   ): Promise<PaginatedResponse<KycUser>> {
     const params = new URLSearchParams({
@@ -294,7 +294,7 @@ export const adminService = {
   async getPolicyDocuments(
     page = 1,
     limit = 25,
-    status: 'pending' | 'verified' | 'rejected' | 'draft' = 'draft',
+    status: 'pending' | 'verified' | 'rejected' | 'draft' | 'all' = 'all',
     search?: string
   ): Promise<PaginatedResponse<PolicyUser>> {
     const params = new URLSearchParams({
@@ -351,7 +351,7 @@ export const adminService = {
   async getNomineeDocuments(
     page = 1,
     limit = 25,
-    status: 'pending' | 'verified' | 'rejected' | 'draft' = 'draft',
+    status: 'pending' | 'verified' | 'rejected' | 'draft' | 'all' = 'all',
     search?: string
   ): Promise<PaginatedResponse<NomineeUser>> {
     const params = new URLSearchParams({

@@ -17,14 +17,14 @@ import {
   X,
 } from 'lucide-react';
 
-type ReviewStatus = 'pending' | 'verified' | 'rejected' | 'draft';
+type ReviewStatus = 'pending' | 'verified' | 'rejected' | 'draft' | 'all';
 
 export default function PolicyReview() {
   const [records, setRecords] = useState<PaginatedResponse<PolicyUser> | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [page, setPage] = useState(1);
-  const [statusFilter, setStatusFilter] = useState<ReviewStatus | undefined>(undefined);
+  const [statusFilter, setStatusFilter] = useState<ReviewStatus>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const limit = 25;
   const [selectedPolicy, setSelectedPolicy] = useState<PolicyUser | null>(null);
@@ -43,7 +43,7 @@ export default function PolicyReview() {
       setLoading(true);
       setError('');
       const search = searchQuery.trim() || undefined;
-      const data = await adminService.getPolicyDocuments(page, limit, statusFilter || 'draft', search);
+      const data = await adminService.getPolicyDocuments(page, limit, statusFilter, search);
       setRecords(data);
       setSelectedPolicy((prev) => {
         if (!prev) {
@@ -229,13 +229,13 @@ export default function PolicyReview() {
       {/* Status Filters */}
       <div className="flex flex-wrap gap-3">
         <button
-          onClick={() => { setStatusFilter(undefined); setPage(1); }}
-          className={`px-5 py-2.5 rounded-xl font-semibold transition-all ${statusFilter === undefined
+          onClick={() => { setStatusFilter('all'); setPage(1); }}
+          className={`px-5 py-2.5 rounded-xl font-semibold transition-all ${statusFilter === 'all'
             ? 'bg-gradient-brand text-white shadow-glow-brand'
             : 'bg-white dark:bg-navy-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-navy-700 hover:border-brand-400 dark:hover:border-brand-500'
             }`}
         >
-          All
+          ALL
         </button>
         <button
           onClick={() => { setStatusFilter('draft'); setPage(1); }}
@@ -244,7 +244,7 @@ export default function PolicyReview() {
             : 'bg-white dark:bg-navy-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-navy-700 hover:border-gray-400 dark:hover:border-gray-500'
             }`}
         >
-          Draft
+          DRAFT
         </button>
         <button
           onClick={() => { setStatusFilter('pending'); setPage(1); }}
@@ -253,7 +253,7 @@ export default function PolicyReview() {
             : 'bg-white dark:bg-navy-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-navy-700 hover:border-yellow-400 dark:hover:border-yellow-500'
             }`}
         >
-          Pending
+          PENDING
         </button>
         <button
           onClick={() => { setStatusFilter('verified'); setPage(1); }}
@@ -262,7 +262,7 @@ export default function PolicyReview() {
             : 'bg-white dark:bg-navy-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-navy-700 hover:border-cyan-400 dark:hover:border-cyan-500'
             }`}
         >
-          Verified
+          VERIFIED
         </button>
         <button
           onClick={() => { setStatusFilter('rejected'); setPage(1); }}
@@ -271,7 +271,7 @@ export default function PolicyReview() {
             : 'bg-white dark:bg-navy-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-navy-700 hover:border-orange-400 dark:hover:border-orange-500'
             }`}
         >
-          Rejected
+          REJECTED
         </button>
       </div>
 
