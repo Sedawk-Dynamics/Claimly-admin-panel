@@ -13,6 +13,17 @@ export default function Users() {
   const limit = 25;
   const navigate = useNavigate();
 
+  const formatDate = (dateString?: string | Date | null) => {
+    if (!dateString) return '-';
+    // If it's already a formatted date string like '1990-01-01', return it
+    if (typeof dateString === 'string' && dateString.match(/^\d{4}-\d{2}-\d{2}$/)) {
+      return dateString;
+    }
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return '-';
+    return date.toLocaleDateString();
+  };
+
   useEffect(() => {
     loadUsers();
   }, [page, searchQuery]);
@@ -137,6 +148,9 @@ export default function Users() {
                       Phone
                     </th>
                     <th className="px-6 py-4 text-left text-xs font-bold text-cyan-400 uppercase tracking-wider">
+                      DOB
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-bold text-cyan-400 uppercase tracking-wider">
                       Status
                     </th>
                     <th className="px-6 py-4 text-left text-xs font-bold text-cyan-400 uppercase tracking-wider">
@@ -163,6 +177,9 @@ export default function Users() {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="text-sm text-gray-700 dark:text-gray-300">{user.mobileNumber || '—'}</div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm text-gray-700 dark:text-gray-300">{formatDate(user.dob)}</div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <span className={`${getStatusBadge(user.subscriptionStatus)}`}>
