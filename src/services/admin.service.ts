@@ -347,6 +347,12 @@ export const adminService = {
     });
   },
 
+  async verifyPolicyDetails(policyId: string): Promise<void> {
+    await api.post(`/admin/documents/verify-details/${policyId}`, {
+      entityType: 'policy',
+    });
+  },
+
   // Nominee Documents
   async getNomineeDocuments(
     page = 1,
