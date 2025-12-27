@@ -14,6 +14,7 @@ import {
   Search,
   Eye,
   X,
+  Trash2,
 } from 'lucide-react';
 
 type ReviewStatus = 'pending' | 'verified' | 'rejected';
@@ -79,6 +80,16 @@ export default function KycReview() {
       loadDocuments();
     } catch (err: any) {
       alert(err.response?.data?.error || 'Failed to reject document');
+    }
+  };
+
+  const handleDelete = async (documentId: string) => {
+    if (!confirm('Are you sure you want to delete this document? This action cannot be undone.')) return;
+    try {
+      await adminService.deleteKycDocument(documentId);
+      loadDocuments();
+    } catch (err: any) {
+      alert(err.response?.data?.error || 'Failed to delete document');
     }
   };
 
@@ -148,6 +159,22 @@ export default function KycReview() {
   };
 
   const renderStatusBadge = (user: KycUser) => {
+    // Use the status field from API if available, otherwise fall back to calculation
+    if (user.status) {
+      switch (user.status) {
+        case 'REJECTED':
+          return <span className="badge badge-danger"><XCircle className="w-3 h-3 mr-1" /> Rejected</span>;
+        case 'ACCEPTED':
+          return <span className="badge badge-success"><CheckCircle className="w-3 h-3 mr-1" /> Verified</span>;
+        case 'DRAFT':
+          return <span className="badge badge-info"><Clock className="w-3 h-3 mr-1" /> Draft</span>;
+        case 'PENDING':
+        default:
+          return <span className="badge badge-warning"><Clock className="w-3 h-3 mr-1" /> Pending Verification</span>;
+      }
+    }
+
+    // Fallback to manual calculation if status is not available
     const totalDocs = user.documents.length;
     const verifiedDocs = user.documents.filter((doc) => doc.isVerified).length;
     const rejectedDocs = user.documents.filter((doc) => doc.rejectedAt).length;
@@ -161,7 +188,7 @@ export default function KycReview() {
       return <span className="badge badge-success"><CheckCircle className="w-3 h-3 mr-1" /> Verified</span>;
     }
     // Show Pending if ANY document is not verified (includes partially verified cases)
-    return <span className="badge badge-warning"><Clock className="w-3 h-3 mr-1" /> Pending</span>;
+    return <span className="badge badge-warning"><Clock className="w-3 h-3 mr-1" /> Pending Verification</span>;
   };
 
   return (
@@ -488,15 +515,33 @@ export default function KycReview() {
                                     <XCircle className="w-3 h-3 mr-1.5" />
                                     Reject
                                   </button>
+                                  <button
+                                    onClick={() => handleDelete(doc.id)}
+                                    className="flex items-center px-3 py-1.5 text-xs font-semibold text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-gray-500 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-500/10 transition-all"
+                                    title="Delete document"
+                                  >
+                                    <Trash2 className="w-3 h-3 mr-1.5" />
+                                    Delete
+                                  </button>
                                 </>
                               ) : (
-                                <button
-                                  onClick={() => handleRemoveVerification(doc.id)}
-                                  className="flex items-center px-3 py-1.5 text-xs font-semibold text-orange-600 dark:text-orange-400 border border-orange-200 dark:border-orange-500 rounded-lg hover:bg-orange-50 dark:hover:bg-orange-500/10 transition-all"
-                                >
-                                  <RotateCcw className="w-3 h-3 mr-1.5" />
-                                  Revoke
-                                </button>
+                                <>
+                                  <button
+                                    onClick={() => handleRemoveVerification(doc.id)}
+                                    className="flex items-center px-3 py-1.5 text-xs font-semibold text-orange-600 dark:text-orange-400 border border-orange-200 dark:border-orange-500 rounded-lg hover:bg-orange-50 dark:hover:bg-orange-500/10 transition-all"
+                                  >
+                                    <RotateCcw className="w-3 h-3 mr-1.5" />
+                                    Revoke
+                                  </button>
+                                  <button
+                                    onClick={() => handleDelete(doc.id)}
+                                    className="flex items-center px-3 py-1.5 text-xs font-semibold text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-gray-500 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-500/10 transition-all"
+                                    title="Delete document"
+                                  >
+                                    <Trash2 className="w-3 h-3 mr-1.5" />
+                                    Delete
+                                  </button>
+                                </>
                               )}
                             </div>
                           </div>

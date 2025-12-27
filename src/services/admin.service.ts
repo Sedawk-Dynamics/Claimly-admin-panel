@@ -272,6 +272,12 @@ export const adminService = {
     });
   },
 
+  async deleteKycDocument(documentId: string): Promise<void> {
+    await api.delete(`/admin/documents/document/${documentId}`, {
+      data: { documentType: 'user' },
+    });
+  },
+
   async acceptUserWithoutDocuments(userId: string): Promise<void> {
     await api.post(`/admin/documents/accept-entity/${userId}`, {
       entityType: 'user',

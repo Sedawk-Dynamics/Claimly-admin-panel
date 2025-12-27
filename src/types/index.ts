@@ -302,6 +302,7 @@ export interface KycUser {
   name: string;
   email: string | null;
   mobileNumber: string;
+  status?: 'REJECTED' | 'ACCEPTED' | 'PENDING' | 'DRAFT';
   documents: KycUserDocument[];
   pendingDocuments: Array<'AADHAAR' | 'PAN'>;
   verifiedDocuments: Array<'AADHAAR' | 'PAN'>;
