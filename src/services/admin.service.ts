@@ -454,6 +454,10 @@ export const adminService = {
   },
 
   // Delete entities by admin
+  async deleteKycDocuments(userId: string): Promise<void> {
+    await api.delete(`/admin/documents/kyc/${userId}`);
+  },
+
   async deleteUser(userId: string): Promise<void> {
     await api.delete(`/admin/documents/user/${userId}`);
   },

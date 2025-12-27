@@ -131,15 +131,15 @@ export default function KycReview() {
     setSelectedUser(null);
   };
 
-  const handleDeleteUser = async (userId: string) => {
-    if (!confirm('Are you sure you want to delete this user? This will permanently delete the user and all associated data (policies, nominees, documents). This action cannot be undone.')) return;
+  const handleDeleteKycDocuments = async (userId: string) => {
+    if (!confirm('Are you sure you want to delete this KYC request? This will permanently delete all KYC documents (AADHAAR and PAN) for this user. The user account will remain intact. This action cannot be undone.')) return;
     try {
-      await adminService.deleteUser(userId);
-      alert('User deleted successfully');
+      await adminService.deleteKycDocuments(userId);
+      alert('KYC documents deleted successfully');
       setSelectedUser(null);
       loadDocuments();
     } catch (err: any) {
-      alert(err.response?.data?.error || 'Failed to delete user');
+      alert(err.response?.data?.error || 'Failed to delete KYC documents');
     }
   };
 
@@ -588,23 +588,16 @@ export default function KycReview() {
                         <XCircle className="w-4 h-4 mr-1.5" />
                         Reject User
                       </button>
-                      <button
-                        onClick={() => handleDeleteUser(selectedUser.id)}
-                        className="flex items-center px-4 py-2 text-sm font-semibold bg-gradient-to-r from-red-500 to-red-600 text-white rounded-xl hover:shadow-lg hover:shadow-red-500/50 transition-all"
-                      >
-                        <Trash2 className="w-4 h-4 mr-1.5" />
-                        Delete User
-                      </button>
                     </div>
                   </div>
                 )}
                 <div className="mt-6 pt-6 border-t border-gray-200 dark:border-navy-700">
                   <button
-                    onClick={() => handleDeleteUser(selectedUser.id)}
+                    onClick={() => handleDeleteKycDocuments(selectedUser.id)}
                     className="w-full px-4 py-2.5 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-xl font-semibold hover:shadow-lg hover:shadow-red-500/50 transition-all flex items-center justify-center gap-2"
                   >
                     <Trash2 className="w-4 h-4" />
-                    Delete User Account
+                    Delete KYC Request
                   </button>
                 </div>
               </div>
