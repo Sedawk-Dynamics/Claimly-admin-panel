@@ -203,6 +203,38 @@ export default function PolicyReview() {
   };
 
   const renderStatusBadge = (policy: PolicyUser) => {
+    // Use the status field from API if available (this reflects backend status including nominee verification)
+    if (policy.status) {
+      switch (policy.status) {
+        case 'REJECTED':
+          return (
+            <span className="badge badge-danger">
+              <XCircle className="w-3 h-3 mr-1" /> Rejected
+            </span>
+          );
+        case 'ACCEPTED':
+          return (
+            <span className="badge badge-success">
+              <CheckCircle className="w-3 h-3 mr-1" /> Verified
+            </span>
+          );
+        case 'DRAFT':
+          return (
+            <span className="badge badge-info">
+              <Clock className="w-3 h-3 mr-1" /> Draft
+            </span>
+          );
+        case 'PENDING':
+        default:
+          return (
+            <span className="badge badge-warning">
+              <Clock className="w-3 h-3 mr-1" /> Pending
+            </span>
+          );
+      }
+    }
+
+    // Fallback to manual calculation if status is not available
     const totalDocs = policy.documents.length;
     const verifiedDocs = policy.documents.filter(d => d.isVerified && d.verifiedAt);
     const rejectedDocs = policy.documents.filter(d => d.rejectedAt);
