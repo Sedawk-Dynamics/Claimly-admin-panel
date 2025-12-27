@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, CheckCircle, XCircle, RotateCcw, ExternalLink, Clock, FileText, CreditCard, UserPlus, UserCog, Shield, Upload, Edit } from 'lucide-react';
+import { ArrowLeft, CheckCircle, XCircle, RotateCcw, ExternalLink, Clock, FileText, CreditCard, UserPlus, UserCog, Shield, Upload, Edit, Trash2 } from 'lucide-react';
 import { adminService } from '../services/admin.service';
 import { UserDetail as AdminUserDetail, UserActivityLog, PaginatedResponse } from '../types';
 
@@ -190,6 +190,25 @@ export default function UserDetail() {
     }
   };
 
+  const handleDeleteUser = async () => {
+    if (!id) return;
+    if (!confirm('Are you sure you want to delete this user account? This will permanently delete the user and ALL associated data including:\n\n- All policies\n- All nominees\n- All documents\n- All subscriptions\n- All activity logs\n\nThis action CANNOT be undone. Type OK to confirm.')) return;
+    
+    const confirmation = prompt('Type "DELETE" to confirm user account deletion:');
+    if (confirmation !== 'DELETE') {
+      alert('Deletion cancelled. You must type "DELETE" to confirm.');
+      return;
+    }
+
+    try {
+      await adminService.deleteUser(id);
+      alert('User account deleted successfully');
+      navigate('/users');
+    } catch (err: any) {
+      alert(err.response?.data?.error || 'Failed to delete user account');
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-brand dark:bg-gradient-navy p-6">
       <div className="max-w-7xl mx-auto space-y-6">
@@ -218,8 +237,19 @@ export default function UserDetail() {
             {/* User Profile Card */}
             <section className="bg-white dark:bg-navy-800 rounded-2xl shadow-xl border border-gray-100 dark:border-navy-700 p-6 relative overflow-hidden">
               <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-brand opacity-5 rounded-full blur-3xl -mr-32 -mt-32"></div>
-              <h1 className="text-3xl font-bold text-gradient-brand mb-2">{user.name}</h1>
-              <p className="text-sm text-gray-500 dark:text-gray-400 break-all mb-6">User ID: {user.id}</p>
+              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-6">
+                <div>
+                  <h1 className="text-3xl font-bold text-gradient-brand mb-2">{user.name}</h1>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 break-all">User ID: {user.id}</p>
+                </div>
+                <button
+                  onClick={handleDeleteUser}
+                  className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-xl font-semibold hover:shadow-lg hover:shadow-red-500/50 transition-all"
+                >
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  Delete User Account
+                </button>
+              </div>
 
               <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
                 <div className="p-4 bg-gray-50 dark:bg-navy-900/50 rounded-xl border border-gray-100 dark:border-navy-700">
