@@ -102,6 +102,18 @@ export default function NomineeReview() {
     }
   };
 
+  const handleVerifyNomineeDetails = async (nomineeId: string) => {
+    if (!confirm('Are you sure you want to verify nominee details and accept the nominee?')) return;
+    try {
+      await adminService.verifyNomineeDetails(nomineeId);
+      await loadNominees();
+      setSelectedNominee(null);
+      alert('Nominee details verified');
+    } catch (err: any) {
+      alert(err.response?.data?.error || 'Failed to verify nominee details');
+    }
+  };
+
   const handleRejectNomineeWithoutDocuments = async (nomineeId: string) => {
     if (!confirm('Are you sure you want to reject this nominee without documents?')) return;
     try {
@@ -517,20 +529,27 @@ export default function NomineeReview() {
                   <div className="p-6 rounded-2xl border border-dashed border-gray-300 dark:border-navy-700 text-center space-y-3">
                     <p className="text-sm text-gray-500 dark:text-gray-400">No documents uploaded for this nominee.</p>
                     <div className="flex flex-wrap justify-center gap-3">
-                      <button
-                        onClick={() => handleAcceptNomineeWithoutDocuments(selectedNominee.id)}
-                        className="flex items-center px-4 py-2 text-sm font-semibold text-green-600 dark:text-green-400 border border-green-200 dark:border-green-500 rounded-xl hover:bg-green-50 dark:hover:bg-green-500/10 transition-all"
-                      >
-                        <CheckCircle className="w-4 h-4 mr-1.5" />
-                        Accept Nominee
-                      </button>
-                      <button
-                        onClick={() => handleRejectNomineeWithoutDocuments(selectedNominee.id)}
-                        className="flex items-center px-4 py-2 text-sm font-semibold text-red-600 dark:text-red-400 border border-red-200 dark:border-red-500 rounded-xl hover:bg-red-50 dark:hover:bg-red-500/10 transition-all"
-                      >
-                        <XCircle className="w-4 h-4 mr-1.5" />
-                        Reject Nominee
-                      </button>
+                        <button
+                          onClick={() => handleAcceptNomineeWithoutDocuments(selectedNominee.id)}
+                          className="flex items-center px-4 py-2 text-sm font-semibold text-green-600 dark:text-green-400 border border-green-200 dark:border-green-500 rounded-xl hover:bg-green-50 dark:hover:bg-green-500/10 transition-all"
+                        >
+                          <CheckCircle className="w-4 h-4 mr-1.5" />
+                          Accept Nominee
+                        </button>
+                        <button
+                          onClick={() => handleVerifyNomineeDetails(selectedNominee.id)}
+                          className="flex items-center px-4 py-2 text-sm font-semibold text-cyan-700 dark:text-cyan-300 border border-cyan-200 dark:border-cyan-500 rounded-xl hover:bg-cyan-50 dark:hover:bg-cyan-500/10 transition-all"
+                        >
+                          <Users className="w-4 h-4 mr-1.5" />
+                          Verify Details
+                        </button>
+                        <button
+                          onClick={() => handleRejectNomineeWithoutDocuments(selectedNominee.id)}
+                          className="flex items-center px-4 py-2 text-sm font-semibold text-red-600 dark:text-red-400 border border-red-200 dark:border-red-500 rounded-xl hover:bg-red-50 dark:hover:bg-red-500/10 transition-all"
+                        >
+                          <XCircle className="w-4 h-4 mr-1.5" />
+                          Reject Nominee
+                        </button>
                     </div>
                   </div>
                 )}

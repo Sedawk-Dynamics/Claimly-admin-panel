@@ -242,13 +242,32 @@ export default function UserDetail() {
                   <h1 className="text-3xl font-bold text-gradient-brand mb-2">{user.name}</h1>
                   <p className="text-sm text-gray-500 dark:text-gray-400 break-all">User ID: {user.id}</p>
                 </div>
-                <button
-                  onClick={handleDeleteUser}
-                  className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-xl font-semibold hover:shadow-lg hover:shadow-red-500/50 transition-all"
-                >
-                  <Trash2 className="w-4 h-4 mr-2" />
-                  Delete User Account
-                </button>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={async () => {
+                      if (!id) return;
+                      if (!confirm('Verify user details and accept KYC?')) return;
+                      try {
+                        await adminService.verifyUserDetails(id);
+                        await fetchUser();
+                        alert('User details verified');
+                      } catch (err: any) {
+                        alert(err.response?.data?.error || 'Failed to verify user details');
+                      }
+                    }}
+                    className="inline-flex items-center px-3 py-2 bg-gradient-to-r from-cyan-600 to-emerald-500 text-white rounded-xl font-semibold hover:shadow-lg transition-all"
+                  >
+                    <CheckCircle className="w-4 h-4 mr-2" />
+                    Verify Details
+                  </button>
+                  <button
+                    onClick={handleDeleteUser}
+                    className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-xl font-semibold hover:shadow-lg hover:shadow-red-500/50 transition-all"
+                  >
+                    <Trash2 className="w-4 h-4 mr-2" />
+                    Delete User Account
+                  </button>
+                </div>
               </div>
 
               <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">

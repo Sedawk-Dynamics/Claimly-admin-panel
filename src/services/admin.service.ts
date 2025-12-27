@@ -352,6 +352,16 @@ export const adminService = {
       entityType: 'policy',
     });
   },
+  async verifyNomineeDetails(nomineeId: string): Promise<void> {
+    await api.post(`/admin/documents/verify-details/${nomineeId}`, {
+      entityType: 'nominee',
+    });
+  },
+  async verifyUserDetails(userId: string): Promise<void> {
+    await api.post(`/admin/documents/verify-details/${userId}`, {
+      entityType: 'user',
+    });
+  },
 
   // Nominee Documents
   async getNomineeDocuments(
