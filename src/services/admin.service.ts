@@ -231,7 +231,7 @@ export const adminService = {
   async getKycDocuments(
     page = 1,
     limit = 25,
-    status: 'pending' | 'verified' | 'rejected' = 'pending',
+    status: 'pending' | 'verified' | 'rejected' | 'draft' = 'pending',
     search?: string
   ): Promise<PaginatedResponse<KycUser>> {
     const params = new URLSearchParams({

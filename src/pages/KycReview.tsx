@@ -17,7 +17,7 @@ import {
   Trash2,
 } from 'lucide-react';
 
-type ReviewStatus = 'pending' | 'verified' | 'rejected';
+type ReviewStatus = 'pending' | 'verified' | 'rejected' | 'draft';
 
 export default function KycReview() {
   const [records, setRecords] = useState<PaginatedResponse<KycUser> | null>(null);
@@ -277,6 +277,15 @@ export default function KycReview() {
             }`}
         >
           Rejected
+        </button>
+        <button
+          onClick={() => { setStatusFilter('draft'); setPage(1); }}
+          className={`px-5 py-2.5 rounded-xl font-semibold transition-all ${statusFilter === 'draft'
+            ? 'bg-gradient-to-r from-blue-400 to-blue-500 text-white shadow-glow-blue'
+            : 'bg-white dark:bg-navy-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-navy-700 hover:border-blue-400 dark:hover:border-blue-500'
+            }`}
+        >
+          Draft
         </button>
       </div>
 
