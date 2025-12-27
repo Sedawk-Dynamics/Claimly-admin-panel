@@ -348,6 +348,23 @@ export interface PolicyUser {
   };
   documents: PolicyUserDocument[];
   verifiedDocuments: string[];
+  nominees?: Array<{
+    id: string;
+    nominee: {
+      id: string;
+      name: string;
+      relationship: string;
+      mobileNumber: string;
+      email: string | null;
+      dob: string | null;
+      address: string | null;
+      status: string;
+      isVerified: boolean;
+      documentsCount: number;
+      verifiedDocumentsCount: number;
+    };
+    sharePercentage: string;
+  }>;
 }
 
 export interface PolicyUsersResponse {

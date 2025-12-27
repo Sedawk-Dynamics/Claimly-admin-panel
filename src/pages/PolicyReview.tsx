@@ -16,6 +16,8 @@ import {
   Eye,
   X,
   Trash2,
+  UserPlus,
+  ShieldCheck,
 } from 'lucide-react';
 
 type ReviewStatus = 'pending' | 'verified' | 'rejected' | 'draft' | 'all';
@@ -435,7 +437,12 @@ export default function PolicyReview() {
               </button>
             </div>
             <div className="p-6 overflow-y-auto space-y-6">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {/* Policy Details */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className="p-4 rounded-2xl border border-gray-200 dark:border-navy-700 bg-gray-50 dark:bg-navy-800/40">
+                  <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Policy Number</p>
+                  <p className="text-lg font-bold text-gray-900 dark:text-white mt-1">{selectedPolicy.policyNumber}</p>
+                </div>
                 <div className="p-4 rounded-2xl border border-gray-200 dark:border-navy-700 bg-gray-50 dark:bg-navy-800/40">
                   <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Sum Assured</p>
                   <p className="text-lg font-bold text-gray-900 dark:text-white mt-1">
@@ -443,13 +450,140 @@ export default function PolicyReview() {
                   </p>
                 </div>
                 <div className="p-4 rounded-2xl border border-gray-200 dark:border-navy-700 bg-gray-50 dark:bg-navy-800/40">
+                  <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Status</p>
+                  <p className="text-lg font-bold text-gray-900 dark:text-white mt-1">
+                    {selectedPolicy.status === 'ACCEPTED' ? (
+                      <span className="text-green-600 dark:text-green-400">Accepted</span>
+                    ) : selectedPolicy.status === 'REJECTED' ? (
+                      <span className="text-red-600 dark:text-red-400">Rejected</span>
+                    ) : selectedPolicy.status === 'PENDING' ? (
+                      <span className="text-yellow-600 dark:text-yellow-400">Pending</span>
+                    ) : (
+                      <span className="text-gray-600 dark:text-gray-400">Draft</span>
+                    )}
+                  </p>
+                </div>
+                <div className="p-4 rounded-2xl border border-gray-200 dark:border-navy-700 bg-gray-50 dark:bg-navy-800/40">
+                  <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Insurance Company</p>
+                  <p className="text-lg font-bold text-gray-900 dark:text-white mt-1">{selectedPolicy.insuranceCompany.name}</p>
+                </div>
+                <div className="p-4 rounded-2xl border border-gray-200 dark:border-navy-700 bg-gray-50 dark:bg-navy-800/40">
                   <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">User</p>
                   <p className="text-lg font-bold text-gray-900 dark:text-white mt-1">{selectedPolicy.user.name}</p>
                   <p className="text-sm text-gray-500 dark:text-gray-400">{selectedPolicy.user.email || 'No email'}</p>
                   <p className="text-sm text-gray-500 dark:text-gray-400">{selectedPolicy.user.mobileNumber}</p>
                 </div>
+                <div className="p-4 rounded-2xl border border-gray-200 dark:border-navy-700 bg-gray-50 dark:bg-navy-800/40">
+                  <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Uploaded At</p>
+                  <p className="text-sm font-semibold text-gray-900 dark:text-white mt-1">
+                    {new Date(selectedPolicy.uploadedAt).toLocaleDateString()}
+                  </p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                    {new Date(selectedPolicy.uploadedAt).toLocaleTimeString()}
+                  </p>
+                </div>
               </div>
 
+              {/* Linked Nominees */}
+              <div>
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center">
+                      <UserPlus className="w-5 h-5 mr-2 text-brand-500" />
+                      Linked Nominees ({selectedPolicy.nominees?.length || 0})
+                    </h3>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Nominees linked to this policy</p>
+                  </div>
+                </div>
+                {selectedPolicy.nominees && selectedPolicy.nominees.length > 0 ? (
+                  <div className="space-y-3">
+                    {selectedPolicy.nominees.map((nomineeLink) => (
+                      <div
+                        key={nomineeLink.id}
+                        className="p-4 rounded-2xl border border-gray-200 dark:border-navy-700 bg-white dark:bg-navy-800 shadow-sm"
+                      >
+                        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-3 mb-2 flex-wrap">
+                              <h4 className="text-base font-bold text-gray-900 dark:text-white">{nomineeLink.nominee.name}</h4>
+                              {nomineeLink.nominee.isVerified ? (
+                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-green-100 text-green-800 dark:bg-green-500/20 dark:text-green-400">
+                                  <ShieldCheck className="w-3 h-3 mr-1" />
+                                  Verified
+                                </span>
+                              ) : (
+                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-yellow-100 text-yellow-800 dark:bg-yellow-500/20 dark:text-yellow-400">
+                                  <Clock className="w-3 h-3 mr-1" />
+                                  Not Verified
+                                </span>
+                              )}
+                              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-100 text-blue-800 dark:bg-blue-500/20 dark:text-blue-400">
+                                {nomineeLink.sharePercentage}% Share
+                              </span>
+                            </div>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
+                              <div>
+                                <span className="text-gray-500 dark:text-gray-400">Relationship: </span>
+                                <span className="font-semibold text-gray-900 dark:text-white">{nomineeLink.nominee.relationship}</span>
+                              </div>
+                              {nomineeLink.nominee.mobileNumber && (
+                                <div>
+                                  <span className="text-gray-500 dark:text-gray-400">Mobile: </span>
+                                  <span className="font-semibold text-gray-900 dark:text-white">{nomineeLink.nominee.mobileNumber}</span>
+                                </div>
+                              )}
+                              {nomineeLink.nominee.email && (
+                                <div>
+                                  <span className="text-gray-500 dark:text-gray-400">Email: </span>
+                                  <span className="font-semibold text-gray-900 dark:text-white">{nomineeLink.nominee.email}</span>
+                                </div>
+                              )}
+                              {nomineeLink.nominee.dob && (
+                                <div>
+                                  <span className="text-gray-500 dark:text-gray-400">DOB: </span>
+                                  <span className="font-semibold text-gray-900 dark:text-white">
+                                    {new Date(nomineeLink.nominee.dob).toLocaleDateString()}
+                                  </span>
+                                </div>
+                              )}
+                              <div>
+                                <span className="text-gray-500 dark:text-gray-400">Status: </span>
+                                <span className={`font-semibold ${
+                                  nomineeLink.nominee.status === 'ACCEPTED' ? 'text-green-600 dark:text-green-400' :
+                                  nomineeLink.nominee.status === 'REJECTED' ? 'text-red-600 dark:text-red-400' :
+                                  nomineeLink.nominee.status === 'PENDING' ? 'text-yellow-600 dark:text-yellow-400' :
+                                  'text-gray-600 dark:text-gray-400'
+                                }`}>
+                                  {nomineeLink.nominee.status}
+                                </span>
+                              </div>
+                              <div>
+                                <span className="text-gray-500 dark:text-gray-400">Documents: </span>
+                                <span className="font-semibold text-gray-900 dark:text-white">
+                                  {nomineeLink.nominee.verifiedDocumentsCount} / {nomineeLink.nominee.documentsCount} Verified
+                                </span>
+                              </div>
+                            </div>
+                            {nomineeLink.nominee.address && (
+                              <div className="mt-2 text-sm">
+                                <span className="text-gray-500 dark:text-gray-400">Address: </span>
+                                <span className="font-semibold text-gray-900 dark:text-white">{nomineeLink.nominee.address}</span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="p-6 rounded-2xl border border-dashed border-gray-300 dark:border-navy-700 text-center">
+                    <UserPlus className="w-12 h-12 text-gray-300 dark:text-navy-600 mx-auto mb-3" />
+                    <p className="text-sm text-gray-500 dark:text-gray-400">No nominees linked to this policy</p>
+                  </div>
+                )}
+              </div>
+
+              {/* Policy Documents */}
               <div>
                 <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
                   <div>
