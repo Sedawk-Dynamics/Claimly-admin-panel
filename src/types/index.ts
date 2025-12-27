@@ -362,6 +362,16 @@ export interface PolicyUser {
       isVerified: boolean;
       documentsCount: number;
       verifiedDocumentsCount: number;
+      documents?: Array<{
+        id: string;
+        documentType: string;
+        documentName: string;
+        documentUrl: string;
+        isVerified: boolean;
+        uploadedAt: string;
+        verifiedAt: string | null;
+        rejectedAt: string | null;
+      }>;
     };
     sharePercentage: string;
   }>;

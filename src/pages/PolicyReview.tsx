@@ -68,6 +68,17 @@ export default function PolicyReview() {
   };
 
   const handleVerify = async (documentId: string) => {
+    if (!selectedPolicy) return;
+    
+    // Check if all nominees are verified before allowing policy document verification
+    if (selectedPolicy.nominees && selectedPolicy.nominees.length > 0) {
+      const unverifiedNominees = selectedPolicy.nominees.filter((n) => !n.nominee.isVerified);
+      if (unverifiedNominees.length > 0) {
+        alert(`Cannot verify policy document. ${unverifiedNominees.length} nominee(s) are not verified. Please verify all nominee documents first.`);
+        return;
+      }
+    }
+    
     try {
       await adminService.verifyPolicyDocument(documentId);
       loadPolicies();
@@ -136,9 +147,37 @@ export default function PolicyReview() {
     }
   };
 
+  const handleVerifyNomineeDocument = async (documentId: string) => {
+    try {
+      await adminService.verifyNomineeDocument(documentId);
+      loadPolicies();
+    } catch (err: any) {
+      alert(err.response?.data?.error || 'Failed to verify nominee document');
+    }
+  };
+
+  const handleRejectNomineeDocument = async (documentId: string) => {
+    if (!confirm('Are you sure you want to reject this nominee document?')) return;
+    try {
+      await adminService.rejectNomineeDocument(documentId);
+      loadPolicies();
+    } catch (err: any) {
+      alert(err.response?.data?.error || 'Failed to reject nominee document');
+    }
+  };
+
   const handleBulkVerifySelectedPolicy = async () => {
     if (!selectedPolicy) {
       return;
+    }
+
+    // Check if all nominees are verified
+    if (selectedPolicy.nominees && selectedPolicy.nominees.length > 0) {
+      const unverifiedNominees = selectedPolicy.nominees.filter((n) => !n.nominee.isVerified);
+      if (unverifiedNominees.length > 0) {
+        alert(`Cannot verify policy. ${unverifiedNominees.length} nominee(s) are not verified. Please verify all nominee documents first.`);
+        return;
+      }
     }
 
     const documentsToVerify = selectedPolicy.documents.filter(
@@ -568,6 +607,78 @@ export default function PolicyReview() {
                               <div className="mt-2 text-sm">
                                 <span className="text-gray-500 dark:text-gray-400">Address: </span>
                                 <span className="font-semibold text-gray-900 dark:text-white">{nomineeLink.nominee.address}</span>
+                              </div>
+                            )}
+                            
+                            {/* Nominee Documents */}
+                            {nomineeLink.nominee.documents && nomineeLink.nominee.documents.length > 0 && (
+                              <div className="mt-4 pt-4 border-t border-gray-200 dark:border-navy-700">
+                                <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase mb-2">Nominee Documents</p>
+                                <div className="space-y-2">
+                                  {nomineeLink.nominee.documents.map((doc) => (
+                                    <div
+                                      key={doc.id}
+                                      className="p-3 rounded-xl border border-gray-200 dark:border-navy-700 bg-gray-50 dark:bg-navy-900/50"
+                                    >
+                                      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                                        <div className="flex-1">
+                                          <p className="text-sm font-semibold text-gray-900 dark:text-white">{doc.documentName}</p>
+                                          <p className="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">{doc.documentType}</p>
+                                          <p className="text-xs text-gray-400 dark:text-gray-500">
+                                            Uploaded {new Date(doc.uploadedAt).toLocaleDateString()}
+                                          </p>
+                                          {doc.verifiedAt && (
+                                            <p className="text-xs text-green-600 dark:text-green-400">
+                                              Verified {new Date(doc.verifiedAt).toLocaleDateString()}
+                                            </p>
+                                          )}
+                                          {doc.rejectedAt && (
+                                            <p className="text-xs text-red-600 dark:text-red-400">
+                                              Rejected {new Date(doc.rejectedAt).toLocaleDateString()}
+                                            </p>
+                                          )}
+                                        </div>
+                                        <div className="flex flex-wrap gap-2">
+                                          <a
+                                            href={doc.documentUrl}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="flex items-center px-3 py-1.5 text-xs font-semibold text-brand-600 dark:text-brand-300 border border-brand-200 dark:border-brand-500 rounded-lg hover:bg-brand-50 dark:hover:bg-brand-950/30 transition-all"
+                                          >
+                                            <ExternalLink className="w-3 h-3 mr-1.5" />
+                                            View
+                                          </a>
+                                          {!doc.isVerified ? (
+                                            <>
+                                              <button
+                                                onClick={() => handleVerifyNomineeDocument(doc.id)}
+                                                className="flex items-center px-3 py-1.5 text-xs font-semibold text-green-600 dark:text-green-400 border border-green-200 dark:border-green-500 rounded-lg hover:bg-green-50 dark:hover:bg-green-500/10 transition-all"
+                                              >
+                                                <CheckCircle className="w-3 h-3 mr-1.5" />
+                                                Accept
+                                              </button>
+                                              <button
+                                                onClick={() => handleRejectNomineeDocument(doc.id)}
+                                                className="flex items-center px-3 py-1.5 text-xs font-semibold text-red-600 dark:text-red-400 border border-red-200 dark:border-red-500 rounded-lg hover:bg-red-50 dark:hover:bg-red-500/10 transition-all"
+                                              >
+                                                <XCircle className="w-3 h-3 mr-1.5" />
+                                                Reject
+                                              </button>
+                                            </>
+                                          ) : (
+                                            <button
+                                              onClick={() => handleRejectNomineeDocument(doc.id)}
+                                              className="flex items-center px-3 py-1.5 text-xs font-semibold text-orange-600 dark:text-orange-400 border border-orange-200 dark:border-orange-500 rounded-lg hover:bg-orange-50 dark:hover:bg-orange-500/10 transition-all"
+                                            >
+                                              <RotateCcw className="w-3 h-3 mr-1.5" />
+                                              Remove Verification
+                                            </button>
+                                          )}
+                                        </div>
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
                               </div>
                             )}
                           </div>
