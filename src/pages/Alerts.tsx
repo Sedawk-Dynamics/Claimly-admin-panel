@@ -617,7 +617,7 @@ export default function Alerts() {
       {/* Alert Detail Modal */}
       {showDetailModal && selectedAlertForDetail && (
         <div className="fixed inset-0 bg-black/50 dark:bg-black/70 backdrop-blur-sm overflow-y-auto h-full w-full z-50 p-4 flex items-center justify-center">
-          <div className="relative card border-2 border-yellow-400/30 dark:border-yellow-500/30 w-full max-w-2xl shadow-2xl shadow-yellow-500/20 my-8">
+          <div className="relative card border-2 border-yellow-400/30 dark:border-yellow-500/30 w-full max-w-2xl shadow-2xl shadow-yellow-500/20 my-8 p-6">
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center space-x-3">
                 <div className="p-3 bg-gradient-to-br from-yellow-500 to-orange-500 rounded-xl shadow-glow-yellow">
