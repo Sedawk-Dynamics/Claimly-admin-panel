@@ -318,6 +318,16 @@ export const adminService = {
           ...document,
           documentUrl: toAbsoluteUrl(document.documentUrl),
         })),
+        nominees: policy.nominees?.map((nomineeLink) => ({
+          ...nomineeLink,
+          nominee: {
+            ...nomineeLink.nominee,
+            documents: nomineeLink.nominee.documents?.map((document) => ({
+              ...document,
+              documentUrl: toAbsoluteUrl(document.documentUrl),
+            })) || [],
+          },
+        })) || [],
       })),
       pagination: response.data.data.pagination,
     };
