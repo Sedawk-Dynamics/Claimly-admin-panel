@@ -324,15 +324,6 @@ export default function PolicyReview() {
           ALL
         </button>
         <button
-          onClick={() => { setStatusFilter('draft'); setPage(1); }}
-          className={`px-5 py-2.5 rounded-xl font-semibold transition-all ${statusFilter === 'draft'
-            ? 'bg-gradient-to-r from-gray-400 to-gray-500 text-white shadow-glow-gray'
-            : 'bg-white dark:bg-navy-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-navy-700 hover:border-gray-400 dark:hover:border-gray-500'
-            }`}
-        >
-          DRAFT
-        </button>
-        <button
           onClick={() => { setStatusFilter('pending'); setPage(1); }}
           className={`px-5 py-2.5 rounded-xl font-semibold transition-all ${statusFilter === 'pending'
             ? 'bg-gradient-to-r from-yellow-400 to-yellow-500 text-white shadow-glow-yellow'
@@ -358,6 +349,15 @@ export default function PolicyReview() {
             }`}
         >
           REJECTED
+        </button>
+        <button
+          onClick={() => { setStatusFilter('draft'); setPage(1); }}
+          className={`px-5 py-2.5 rounded-xl font-semibold transition-all ${statusFilter === 'draft'
+            ? 'bg-gradient-to-r from-gray-400 to-gray-500 text-white shadow-glow-gray'
+            : 'bg-white dark:bg-navy-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-navy-700 hover:border-blue-400 dark:hover:border-blue-500'
+            }`}
+        >
+          DRAFT
         </button>
       </div>
 

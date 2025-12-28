@@ -171,25 +171,6 @@ export default function Policies() {
                               : 'status-inactive';
                             return <span className={cls}>{policy.status}</span>;
                           })()}
-
-                          {policy.status === 'PENDING' && (
-                            <button
-                              onClick={async () => {
-                                try {
-                                  setLoading(true);
-                                  await adminService.verifyPolicyDetails(policy.id);
-                                  await loadPolicies();
-                                } catch (err: any) {
-                                  setError(err.response?.data?.error || err.message || 'Failed to verify policy details');
-                                } finally {
-                                  setLoading(false);
-                                }
-                              }}
-                              className="ml-2 px-2 py-1 text-xs font-medium rounded-md bg-cyan-600 text-white hover:bg-cyan-700"
-                            >
-                              Verify Details
-                            </button>
-                          )}
                         </div>
                       </td>
                     </tr>

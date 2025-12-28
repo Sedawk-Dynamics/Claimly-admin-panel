@@ -35,6 +35,7 @@ export interface UserDocument {
   isVerified: boolean;
   uploadedAt: string;
   verifiedAt?: string | null;
+  rejectedAt?: string | null;
 }
 
 export interface NomineeDocument extends UserDocument { }
@@ -42,6 +43,9 @@ export interface NomineeDocument extends UserDocument { }
 export interface NomineePolicyLink {
   id: string;
   policyNumber: string;
+  sumAssured?: string;
+  status?: string;
+  sharePercentage?: string;
 }
 
 export interface NomineeDetail {
@@ -67,6 +71,7 @@ export interface PolicyDocument {
   isVerified: boolean;
   uploadedAt: string;
   verifiedAt?: string | null;
+  rejectedAt?: string | null;
 }
 
 export interface UserPolicySummary {
@@ -74,10 +79,21 @@ export interface UserPolicySummary {
   policyNumber: string;
   sumAssured: string;
   status: string;
+  uploadedAt?: string;
   insuranceCompany?: {
     id: string;
     name: string;
+    contactEmail?: string | null;
+    contactNumber?: string | null;
+    websiteUrl?: string | null;
+    address?: string | null;
   };
+  nominees?: Array<{
+    id: string;
+    name: string;
+    relationship: string;
+    sharePercentage: string;
+  }>;
   documents?: PolicyDocument[];
 }
 
@@ -100,6 +116,8 @@ export interface UserAlertSummary {
 export interface UserDetail extends User {
   firebaseUid?: string | null;
   deviceId?: string | null;
+  referralCode?: string | null;
+  walletBalance?: number;
   stats: {
     policiesCount: number;
     nomineesCount: number;

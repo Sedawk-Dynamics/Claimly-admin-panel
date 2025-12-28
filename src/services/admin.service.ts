@@ -227,6 +227,20 @@ export const adminService = {
     });
   },
 
+  async sendBulkNotification(payload: {
+    mode: 'single' | 'all' | 'count' | 'selected';
+    user_ids?: string[];
+    count?: number;
+    title: string;
+    message: string;
+  }): Promise<{ totalUsers: number; success: number; failed: number; errors: Array<{ userId: string; error: string }> }> {
+    const response = await api.post<{
+      success: boolean;
+      data: { totalUsers: number; success: number; failed: number; errors: Array<{ userId: string; error: string }> };
+    }>('/admin/notifications', payload);
+    return response.data.data;
+  },
+
   // KYC Documents
   async getKycDocuments(
     page = 1,
@@ -331,6 +345,18 @@ export const adminService = {
       })),
       pagination: response.data.data.pagination,
     };
+  },
+
+  async verifyUserDocument(documentId: string): Promise<void> {
+    await api.patch(`/admin/documents/verify-document/${documentId}`, {
+      documentType: 'user',
+    });
+  },
+
+  async rejectUserDocument(documentId: string): Promise<void> {
+    await api.patch(`/admin/documents/reject-document/${documentId}`, {
+      documentType: 'user',
+    });
   },
 
   async verifyPolicyDocument(documentId: string): Promise<void> {
@@ -440,6 +466,14 @@ export const adminService = {
       data: response.data.data.logs,
       pagination: response.data.data.pagination,
     };
+  },
+
+  async deleteActivityLog(logId: string): Promise<void> {
+    await api.delete(`/admin/users/activity-logs/${logId}`);
+  },
+
+  async deleteAllActivityLogs(userId: string): Promise<void> {
+    await api.delete(`/admin/users/${userId}/activity-logs`);
   },
 
   // Subscription Plans

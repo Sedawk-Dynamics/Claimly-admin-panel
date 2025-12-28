@@ -23,9 +23,11 @@ const formatCurrency = (value?: string | number | null) => {
   return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 2 }).format(amount);
 };
 
-const getDocumentStatusBadge = (isVerified: boolean) => {
+const getDocumentStatusBadge = (isVerified: boolean, rejectedAt?: string | null) => {
   if (isVerified) {
-    return <span className="badge badge-success"><CheckCircle className="w-3 h-3 mr-1" /> Verified</span>;
+    return <span className="badge badge-success"><CheckCircle className="w-3 h-3 mr-1" /> Accepted</span>;
+  } else if (rejectedAt) {
+    return <span className="badge badge-danger"><XCircle className="w-3 h-3 mr-1" /> Rejected</span>;
   } else {
     return <span className="badge badge-warning"><Clock className="w-3 h-3 mr-1" /> Pending</span>;
   }
@@ -71,6 +73,7 @@ export default function UserDetail() {
   const [activityLogs, setActivityLogs] = useState<PaginatedResponse<UserActivityLog> | null>(null);
   const [activityLogsLoading, setActivityLogsLoading] = useState(false);
   const [activityLogsPage, setActivityLogsPage] = useState(1);
+  const [deletingAllLogs, setDeletingAllLogs] = useState(false);
 
   const fetchUser = async () => {
     if (!id) {
@@ -190,6 +193,44 @@ export default function UserDetail() {
     }
   };
 
+  const handleVerifyUserDocument = async (documentId: string) => {
+    try {
+      setVerifying(documentId);
+      await adminService.verifyUserDocument(documentId);
+      await fetchUser();
+    } catch (err: any) {
+      alert(err.response?.data?.error || 'Failed to verify document');
+    } finally {
+      setVerifying(null);
+    }
+  };
+
+  const handleRejectUserDocument = async (documentId: string) => {
+    if (!confirm('Are you sure you want to reject this user document?')) return;
+    try {
+      setVerifying(documentId);
+      await adminService.rejectUserDocument(documentId);
+      await fetchUser();
+    } catch (err: any) {
+      alert(err.response?.data?.error || 'Failed to reject document');
+    } finally {
+      setVerifying(null);
+    }
+  };
+
+  const handleRemoveUserVerification = async (documentId: string) => {
+    if (!confirm('Are you sure you want to remove verification from this user document?')) return;
+    try {
+      setVerifying(documentId);
+      await adminService.rejectUserDocument(documentId);
+      await fetchUser();
+    } catch (err: any) {
+      alert(err.response?.data?.error || 'Failed to remove verification');
+    } finally {
+      setVerifying(null);
+    }
+  };
+
   const handleDeleteUser = async () => {
     if (!id) return;
     if (!confirm('Are you sure you want to delete this user account? This will permanently delete the user and ALL associated data including:\n\n- All policies\n- All nominees\n- All documents\n- All subscriptions\n- All activity logs\n\nThis action CANNOT be undone. Type OK to confirm.')) return;
@@ -206,6 +247,28 @@ export default function UserDetail() {
       navigate('/users');
     } catch (err: any) {
       alert(err.response?.data?.error || 'Failed to delete user account');
+    }
+  };
+
+  const handleDeleteAllActivityLogs = async () => {
+    if (!id) return;
+    if (!confirm('Are you sure you want to delete ALL activity logs for this user? This action cannot be undone and will permanently remove all activity history.')) return;
+    
+    const confirmation = prompt('Type "DELETE ALL" to confirm deletion of all activity logs:');
+    if (confirmation !== 'DELETE ALL') {
+      alert('Deletion cancelled. You must type "DELETE ALL" to confirm.');
+      return;
+    }
+
+    try {
+      setDeletingAllLogs(true);
+      await adminService.deleteAllActivityLogs(id);
+      await fetchActivityLogs();
+      alert('All activity logs deleted successfully');
+    } catch (err: any) {
+      alert(err.response?.data?.error || 'Failed to delete all activity logs');
+    } finally {
+      setDeletingAllLogs(false);
     }
   };
 
@@ -244,23 +307,6 @@ export default function UserDetail() {
                 </div>
                 <div className="flex items-center gap-2">
                   <button
-                    onClick={async () => {
-                      if (!id) return;
-                      if (!confirm('Verify user details and accept KYC?')) return;
-                      try {
-                        await adminService.verifyUserDetails(id);
-                        await fetchUser();
-                        alert('User details verified');
-                      } catch (err: any) {
-                        alert(err.response?.data?.error || 'Failed to verify user details');
-                      }
-                    }}
-                    className="inline-flex items-center px-3 py-2 bg-gradient-to-r from-cyan-600 to-emerald-500 text-white rounded-xl font-semibold hover:shadow-lg transition-all"
-                  >
-                    <CheckCircle className="w-4 h-4 mr-2" />
-                    Verify Details
-                  </button>
-                  <button
                     onClick={handleDeleteUser}
                     className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-xl font-semibold hover:shadow-lg hover:shadow-red-500/50 transition-all"
                   >
@@ -270,30 +316,57 @@ export default function UserDetail() {
                 </div>
               </div>
 
-              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-                <div className="p-4 bg-gray-50 dark:bg-navy-900/50 rounded-xl border border-gray-100 dark:border-navy-700">
-                  <p className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1">Email</p>
-                  <p className="text-sm font-semibold text-gray-900 dark:text-white break-all">{user.email || '-'}</p>
-                </div>
-                <div className="p-4 bg-gray-50 dark:bg-navy-900/50 rounded-xl border border-gray-100 dark:border-navy-700">
-                  <p className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1">Mobile</p>
-                  <p className="text-sm font-semibold text-gray-900 dark:text-white">{user.mobileNumber || '-'}</p>
-                </div>
-                <div className="p-4 bg-gray-50 dark:bg-navy-900/50 rounded-xl border border-gray-100 dark:border-navy-700">
-                  <p className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1">Subscription</p>
-                  <p className="text-sm font-semibold text-gray-900 dark:text-white">{formatEnumLabel(user.subscriptionStatus)}</p>
-                </div>
-                <div className="p-4 bg-gray-50 dark:bg-navy-900/50 rounded-xl border border-gray-100 dark:border-navy-700">
-                  <p className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1">DOB</p>
-                  <p className="text-sm font-semibold text-gray-900 dark:text-white">{user.dob ? formatDate(user.dob) : '-'}</p>
-                </div>
-                <div className="p-4 bg-gray-50 dark:bg-navy-900/50 rounded-xl border border-gray-100 dark:border-navy-700">
-                  <p className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1">Created</p>
-                  <p className="text-sm font-semibold text-gray-900 dark:text-white">{formatDate(user.createdAt)}</p>
-                </div>
-                <div className="p-4 bg-gray-50 dark:bg-navy-900/50 rounded-xl border border-gray-100 dark:border-navy-700">
-                  <p className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1">Last Updated</p>
-                  <p className="text-sm font-semibold text-gray-900 dark:text-white">{formatDate(user.updatedAt)}</p>
+              <div className="space-y-4">
+                <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">User Information</h3>
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                  <div className="p-4 bg-gray-50 dark:bg-navy-900/50 rounded-xl border border-gray-100 dark:border-navy-700">
+                    <p className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1">Name</p>
+                    <p className="text-sm font-semibold text-gray-900 dark:text-white">{user.name || '-'}</p>
+                  </div>
+                  <div className="p-4 bg-gray-50 dark:bg-navy-900/50 rounded-xl border border-gray-100 dark:border-navy-700">
+                    <p className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1">User ID</p>
+                    <p className="text-sm font-semibold text-gray-900 dark:text-white break-all">{user.id || '-'}</p>
+                  </div>
+                  <div className="p-4 bg-gray-50 dark:bg-navy-900/50 rounded-xl border border-gray-100 dark:border-navy-700">
+                    <p className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1">Email</p>
+                    <p className="text-sm font-semibold text-gray-900 dark:text-white break-all">{user.email || '-'}</p>
+                  </div>
+                  <div className="p-4 bg-gray-50 dark:bg-navy-900/50 rounded-xl border border-gray-100 dark:border-navy-700">
+                    <p className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1">Mobile Number</p>
+                    <p className="text-sm font-semibold text-gray-900 dark:text-white">{user.mobileNumber || '-'}</p>
+                  </div>
+                  <div className="p-4 bg-gray-50 dark:bg-navy-900/50 rounded-xl border border-gray-100 dark:border-navy-700">
+                    <p className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1">Date of Birth</p>
+                    <p className="text-sm font-semibold text-gray-900 dark:text-white">{user.dob ? formatDate(user.dob) : '-'}</p>
+                  </div>
+                  <div className="p-4 bg-gray-50 dark:bg-navy-900/50 rounded-xl border border-gray-100 dark:border-navy-700">
+                    <p className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1">Subscription Status</p>
+                    <p className="text-sm font-semibold text-gray-900 dark:text-white">{formatEnumLabel(user.subscriptionStatus)}</p>
+                  </div>
+                  <div className="p-4 bg-gray-50 dark:bg-navy-900/50 rounded-xl border border-gray-100 dark:border-navy-700">
+                    <p className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1">Firebase UID</p>
+                    <p className="text-sm font-semibold text-gray-900 dark:text-white break-all">{user.firebaseUid || '-'}</p>
+                  </div>
+                  <div className="p-4 bg-gray-50 dark:bg-navy-900/50 rounded-xl border border-gray-100 dark:border-navy-700">
+                    <p className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1">Device ID</p>
+                    <p className="text-sm font-semibold text-gray-900 dark:text-white break-all">{user.deviceId || '-'}</p>
+                  </div>
+                  <div className="p-4 bg-gray-50 dark:bg-navy-900/50 rounded-xl border border-gray-100 dark:border-navy-700">
+                    <p className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1">Referral Code</p>
+                    <p className="text-sm font-semibold text-gray-900 dark:text-white">{user.referralCode || '-'}</p>
+                  </div>
+                  <div className="p-4 bg-gray-50 dark:bg-navy-900/50 rounded-xl border border-gray-100 dark:border-navy-700">
+                    <p className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1">Wallet Balance</p>
+                    <p className="text-sm font-semibold text-gray-900 dark:text-white">{user.walletBalance !== undefined ? formatCurrency(user.walletBalance) : '-'}</p>
+                  </div>
+                  <div className="p-4 bg-gray-50 dark:bg-navy-900/50 rounded-xl border border-gray-100 dark:border-navy-700">
+                    <p className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1">Created At</p>
+                    <p className="text-sm font-semibold text-gray-900 dark:text-white">{formatDate(user.createdAt)}</p>
+                  </div>
+                  <div className="p-4 bg-gray-50 dark:bg-navy-900/50 rounded-xl border border-gray-100 dark:border-navy-700">
+                    <p className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1">Last Updated</p>
+                    <p className="text-sm font-semibold text-gray-900 dark:text-white">{formatDate(user.updatedAt)}</p>
+                  </div>
                 </div>
               </div>
             </section>
@@ -330,50 +403,99 @@ export default function UserDetail() {
                 <div className="space-y-6">
                   {user.nominees.map((nominee) => (
                     <div key={nominee.id} className="rounded-xl border border-gray-200 dark:border-navy-700 p-5 bg-gray-50/50 dark:bg-navy-900/30">
-                      <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between mb-4">
-                        <div className="space-y-2">
-                          <div className="flex items-center gap-3">
-                            <h3 className="text-lg font-bold text-gray-900 dark:text-white">{nominee.name}</h3>
-                            {(() => {
-                              const statusClass = nominee.status === 'ACCEPTED'
-                                ? 'status-active'
-                                : nominee.status === 'PENDING'
-                                ? 'status-pending'
-                                : nominee.status === 'REJECTED'
-                                ? 'status-rejected'
-                                : nominee.status === 'DRAFT'
-                                ? 'status-inactive'
-                                : 'status-inactive';
-                              return (
-                                <span className={statusClass}>
-                                  {nominee.status}
-                                </span>
-                              );
-                            })()}
+                      <div className="mb-4">
+                        <div className="flex items-center gap-3 mb-4">
+                          <h3 className="text-lg font-bold text-gray-900 dark:text-white">{nominee.name}</h3>
+                          {(() => {
+                            const statusClass = nominee.status === 'ACCEPTED'
+                              ? 'status-active'
+                              : nominee.status === 'PENDING'
+                              ? 'status-pending'
+                              : nominee.status === 'REJECTED'
+                              ? 'status-rejected'
+                              : nominee.status === 'DRAFT'
+                              ? 'status-inactive'
+                              : 'status-inactive';
+                            return (
+                              <span className={statusClass}>
+                                {nominee.status}
+                              </span>
+                            );
+                          })()}
+                        </div>
+                        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 mb-4">
+                          <div className="p-3 bg-white dark:bg-navy-800 rounded-lg border border-gray-200 dark:border-navy-600">
+                            <p className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1">Nominee ID</p>
+                            <p className="text-sm font-semibold text-gray-900 dark:text-white break-all">{nominee.id}</p>
                           </div>
-                          <div className="flex flex-wrap gap-3 text-sm">
-                            <span className="px-2 py-1 rounded-md bg-white dark:bg-navy-800 border border-gray-200 dark:border-navy-600 text-gray-600 dark:text-gray-300">
-                              {formatEnumLabel(nominee.relationship)}
-                            </span>
-                            <span className="px-2 py-1 rounded-md bg-white dark:bg-navy-800 border border-gray-200 dark:border-navy-600 text-gray-600 dark:text-gray-300">
-                              {nominee.mobileNumber || '-'}
-                            </span>
-                            <span className="px-2 py-1 rounded-md bg-white dark:bg-navy-800 border border-gray-200 dark:border-navy-600 text-gray-600 dark:text-gray-300">
-                              {nominee.dob ? formatDate(nominee.dob) : 'DOB not provided'}
-                            </span>
-                            <span className="px-2 py-1 rounded-md bg-white dark:bg-navy-800 border border-gray-200 dark:border-navy-600 text-gray-600 dark:text-gray-300">
-                              {nominee.email || '-'}
-                            </span>
+                          <div className="p-3 bg-white dark:bg-navy-800 rounded-lg border border-gray-200 dark:border-navy-600">
+                            <p className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1">Name</p>
+                            <p className="text-sm font-semibold text-gray-900 dark:text-white">{nominee.name}</p>
+                          </div>
+                          <div className="p-3 bg-white dark:bg-navy-800 rounded-lg border border-gray-200 dark:border-navy-600">
+                            <p className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1">Relationship</p>
+                            <p className="text-sm font-semibold text-gray-900 dark:text-white">{formatEnumLabel(nominee.relationship)}</p>
+                          </div>
+                          <div className="p-3 bg-white dark:bg-navy-800 rounded-lg border border-gray-200 dark:border-navy-600">
+                            <p className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1">Mobile Number</p>
+                            <p className="text-sm font-semibold text-gray-900 dark:text-white">{nominee.mobileNumber || '-'}</p>
+                          </div>
+                          <div className="p-3 bg-white dark:bg-navy-800 rounded-lg border border-gray-200 dark:border-navy-600">
+                            <p className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1">Email</p>
+                            <p className="text-sm font-semibold text-gray-900 dark:text-white break-all">{nominee.email || '-'}</p>
+                          </div>
+                          <div className="p-3 bg-white dark:bg-navy-800 rounded-lg border border-gray-200 dark:border-navy-600">
+                            <p className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1">Date of Birth</p>
+                            <p className="text-sm font-semibold text-gray-900 dark:text-white">{nominee.dob ? formatDate(nominee.dob) : '-'}</p>
+                          </div>
+                          <div className="p-3 bg-white dark:bg-navy-800 rounded-lg border border-gray-200 dark:border-navy-600 sm:col-span-2 lg:col-span-3">
+                            <p className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1">Address</p>
+                            <p className="text-sm font-semibold text-gray-900 dark:text-white">{nominee.address || '-'}</p>
+                          </div>
+                          <div className="p-3 bg-white dark:bg-navy-800 rounded-lg border border-gray-200 dark:border-navy-600">
+                            <p className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1">Status</p>
+                            <p className="text-sm font-semibold text-gray-900 dark:text-white">{formatEnumLabel(nominee.status)}</p>
+                          </div>
+                          <div className="p-3 bg-white dark:bg-navy-800 rounded-lg border border-gray-200 dark:border-navy-600">
+                            <p className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1">Created At</p>
+                            <p className="text-sm font-semibold text-gray-900 dark:text-white">{formatDate(nominee.createdAt)}</p>
+                          </div>
+                          <div className="p-3 bg-white dark:bg-navy-800 rounded-lg border border-gray-200 dark:border-navy-600">
+                            <p className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1">Last Updated</p>
+                            <p className="text-sm font-semibold text-gray-900 dark:text-white">{formatDate(nominee.updatedAt)}</p>
                           </div>
                         </div>
                         {nominee.policies.length > 0 && (
-                          <div className="md:text-right">
-                            <p className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-2">Linked Policies</p>
-                            <div className="flex flex-wrap gap-2 justify-end">
+                          <div className="mt-4 rounded-xl border border-gray-200 dark:border-navy-600 bg-white dark:bg-navy-800 p-4">
+                            <p className="text-xs font-bold uppercase text-gray-500 dark:text-gray-400 mb-3">Linked Policies</p>
+                            <div className="space-y-3">
                               {nominee.policies.map((policy) => (
-                                <span key={policy.id} className="px-2 py-1 rounded bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 text-xs font-medium">
-                                  {policy.policyNumber}
-                                </span>
+                                <div key={policy.id} className="p-3 rounded-lg bg-gray-50 dark:bg-navy-900/50 border border-gray-100 dark:border-navy-700">
+                                  <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
+                                    <div>
+                                      <p className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1">Policy Number</p>
+                                      <p className="text-sm font-semibold text-gray-900 dark:text-white">{policy.policyNumber}</p>
+                                    </div>
+                                    {policy.sumAssured && (
+                                      <div>
+                                        <p className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1">Sum Assured</p>
+                                        <p className="text-sm font-semibold text-gray-900 dark:text-white">{formatCurrency(policy.sumAssured)}</p>
+                                      </div>
+                                    )}
+                                    {policy.status && (
+                                      <div>
+                                        <p className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1">Policy Status</p>
+                                        <p className="text-sm font-semibold text-gray-900 dark:text-white">{formatEnumLabel(policy.status)}</p>
+                                      </div>
+                                    )}
+                                    {policy.sharePercentage && (
+                                      <div>
+                                        <p className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1">Share Percentage</p>
+                                        <p className="text-sm font-semibold text-gray-900 dark:text-white">{policy.sharePercentage}%</p>
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
                               ))}
                             </div>
                           </div>
@@ -393,14 +515,14 @@ export default function UserDetail() {
                                   </p>
                                 </div>
                                 <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
-                                  {getDocumentStatusBadge(document.isVerified)}
+                                  {getDocumentStatusBadge(document.isVerified, document.rejectedAt)}
                                   <a href={document.documentUrl} target="_blank" rel="noopener noreferrer" className="btn-xs btn-outline-primary">
                                     <ExternalLink className="w-3 h-3 mr-1" /> View
                                   </a>
                                   {!document.isVerified ? (
                                     <>
                                       <button onClick={() => handleVerifyNomineeDocument(document.id)} disabled={verifying === document.id} className="btn-xs btn-success">
-                                        <CheckCircle className="w-3 h-3 mr-1" /> Verify
+                                        <CheckCircle className="w-3 h-3 mr-1" /> Accept
                                       </button>
                                       <button onClick={() => handleRejectNomineeDocument(document.id)} disabled={verifying === document.id} className="btn-xs btn-danger">
                                         <XCircle className="w-3 h-3 mr-1" /> Reject
@@ -462,43 +584,111 @@ export default function UserDetail() {
             <section className="bg-white dark:bg-navy-800 rounded-2xl shadow-xl border border-gray-100 dark:border-navy-700 p-6">
               <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6 flex items-center">
                 <div className="w-1 h-6 bg-gradient-brand rounded-full mr-3"></div>
-                Policies
+                Policies ({user.recentPolicies.length})
               </h2>
               {user.recentPolicies.length > 0 ? (
                 <div className="space-y-6">
                   {user.recentPolicies.map((policy) => (
                     <div key={policy.id} className="rounded-xl border border-gray-200 dark:border-navy-700 p-5 bg-gray-50/50 dark:bg-navy-900/30">
-                      <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
-                        <div>
-                          <p className="text-xs font-bold uppercase text-gray-500 dark:text-gray-400">Policy Number</p>
-                          <p className="text-sm font-bold text-gray-900 dark:text-white mt-1">{policy.policyNumber}</p>
+                      <div className="mb-4">
+                        <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">{policy.policyNumber}</h3>
+                        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 mb-4">
+                          <div className="p-3 bg-white dark:bg-navy-800 rounded-lg border border-gray-200 dark:border-navy-600">
+                            <p className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1">Policy ID</p>
+                            <p className="text-sm font-semibold text-gray-900 dark:text-white break-all">{policy.id}</p>
+                          </div>
+                          <div className="p-3 bg-white dark:bg-navy-800 rounded-lg border border-gray-200 dark:border-navy-600">
+                            <p className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1">Policy Number</p>
+                            <p className="text-sm font-semibold text-gray-900 dark:text-white">{policy.policyNumber}</p>
+                          </div>
+                          <div className="p-3 bg-white dark:bg-navy-800 rounded-lg border border-gray-200 dark:border-navy-600">
+                            <p className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1">Sum Assured</p>
+                            <p className="text-sm font-semibold text-gray-900 dark:text-white">{formatCurrency(policy.sumAssured)}</p>
+                          </div>
+                          <div className="p-3 bg-white dark:bg-navy-800 rounded-lg border border-gray-200 dark:border-navy-600">
+                            <p className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1">Status</p>
+                            <span
+                              className={`${
+                                policy.status === 'ACCEPTED'
+                                  ? 'status-active'
+                                  : policy.status === 'PENDING'
+                                  ? 'status-pending'
+                                  : policy.status === 'REJECTED'
+                                  ? 'status-rejected'
+                                  : policy.status === 'DRAFT'
+                                  ? 'status-inactive'
+                                  : 'status-inactive'
+                              } text-sm font-bold inline-block`}
+                            >
+                              {formatEnumLabel(policy.status)}
+                            </span>
+                          </div>
+                          {policy.uploadedAt && (
+                            <div className="p-3 bg-white dark:bg-navy-800 rounded-lg border border-gray-200 dark:border-navy-600">
+                              <p className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1">Uploaded At</p>
+                              <p className="text-sm font-semibold text-gray-900 dark:text-white">{formatDate(policy.uploadedAt)}</p>
+                            </div>
+                          )}
+                          {policy.insuranceCompany && (
+                            <>
+                              <div className="p-3 bg-white dark:bg-navy-800 rounded-lg border border-gray-200 dark:border-navy-600">
+                                <p className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1">Insurance Company</p>
+                                <p className="text-sm font-semibold text-gray-900 dark:text-white">{policy.insuranceCompany.name}</p>
+                              </div>
+                              {policy.insuranceCompany.contactEmail && (
+                                <div className="p-3 bg-white dark:bg-navy-800 rounded-lg border border-gray-200 dark:border-navy-600">
+                                  <p className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1">Company Email</p>
+                                  <p className="text-sm font-semibold text-gray-900 dark:text-white break-all">{policy.insuranceCompany.contactEmail}</p>
+                                </div>
+                              )}
+                              {policy.insuranceCompany.contactNumber && (
+                                <div className="p-3 bg-white dark:bg-navy-800 rounded-lg border border-gray-200 dark:border-navy-600">
+                                  <p className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1">Company Contact</p>
+                                  <p className="text-sm font-semibold text-gray-900 dark:text-white">{policy.insuranceCompany.contactNumber}</p>
+                                </div>
+                              )}
+                              {policy.insuranceCompany.websiteUrl && (
+                                <div className="p-3 bg-white dark:bg-navy-800 rounded-lg border border-gray-200 dark:border-navy-600">
+                                  <p className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1">Website</p>
+                                  <a href={policy.insuranceCompany.websiteUrl} target="_blank" rel="noopener noreferrer" className="text-sm font-semibold text-blue-600 dark:text-blue-400 hover:underline break-all">
+                                    {policy.insuranceCompany.websiteUrl}
+                                  </a>
+                                </div>
+                              )}
+                              {policy.insuranceCompany.address && (
+                                <div className="p-3 bg-white dark:bg-navy-800 rounded-lg border border-gray-200 dark:border-navy-600 sm:col-span-2 lg:col-span-3">
+                                  <p className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1">Company Address</p>
+                                  <p className="text-sm font-semibold text-gray-900 dark:text-white">{policy.insuranceCompany.address}</p>
+                                </div>
+                              )}
+                            </>
+                          )}
                         </div>
-                        <div>
-                          <p className="text-xs font-bold uppercase text-gray-500 dark:text-gray-400">Sum Assured</p>
-                          <p className="text-sm font-bold text-gray-900 dark:text-white mt-1">{formatCurrency(policy.sumAssured)}</p>
-                        </div>
-                        <div>
-                          <p className="text-xs font-bold uppercase text-gray-500 dark:text-gray-400">Status</p>
-                          <span
-                            className={`${
-                              policy.status === 'ACCEPTED'
-                                ? 'status-active'
-                                : policy.status === 'PENDING'
-                                ? 'status-pending'
-                                : policy.status === 'REJECTED'
-                                ? 'status-rejected'
-                                : policy.status === 'DRAFT'
-                                ? 'status-inactive'
-                                : 'status-inactive'
-                            } text-sm font-bold mt-1 inline-block`}
-                          >
-                            {formatEnumLabel(policy.status)}
-                          </span>
-                        </div>
-                        <div>
-                          <p className="text-xs font-bold uppercase text-gray-500 dark:text-gray-400">Insurer</p>
-                          <p className="text-sm font-bold text-gray-900 dark:text-white mt-1">{policy.insuranceCompany?.name || '-'}</p>
-                        </div>
+                        {policy.nominees && policy.nominees.length > 0 && (
+                          <div className="mt-4 rounded-xl border border-gray-200 dark:border-navy-600 bg-white dark:bg-navy-800 p-4">
+                            <p className="text-xs font-bold uppercase text-gray-500 dark:text-gray-400 mb-3">Linked Nominees</p>
+                            <div className="space-y-3">
+                              {policy.nominees.map((nominee) => (
+                                <div key={nominee.id} className="p-3 rounded-lg bg-gray-50 dark:bg-navy-900/50 border border-gray-100 dark:border-navy-700">
+                                  <div className="grid gap-2 sm:grid-cols-3">
+                                    <div>
+                                      <p className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1">Nominee Name</p>
+                                      <p className="text-sm font-semibold text-gray-900 dark:text-white">{nominee.name}</p>
+                                    </div>
+                                    <div>
+                                      <p className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1">Relationship</p>
+                                      <p className="text-sm font-semibold text-gray-900 dark:text-white">{formatEnumLabel(nominee.relationship)}</p>
+                                    </div>
+                                    <div>
+                                      <p className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1">Share Percentage</p>
+                                      <p className="text-sm font-semibold text-gray-900 dark:text-white">{nominee.sharePercentage}%</p>
+                                    </div>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
                       </div>
 
                       {policy.documents && policy.documents.length > 0 && (
@@ -514,14 +704,14 @@ export default function UserDetail() {
                                   </p>
                                 </div>
                                 <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
-                                  {getDocumentStatusBadge(document.isVerified)}
+                                  {getDocumentStatusBadge(document.isVerified, document.rejectedAt)}
                                   <a href={document.documentUrl} target="_blank" rel="noopener noreferrer" className="btn-xs btn-outline-primary">
                                     <ExternalLink className="w-3 h-3 mr-1" /> View
                                   </a>
                                   {!document.isVerified ? (
                                     <>
                                       <button onClick={() => handleVerifyPolicyDocument(document.id)} disabled={verifying === document.id} className="btn-xs btn-success">
-                                        <CheckCircle className="w-3 h-3 mr-1" /> Verify
+                                        <CheckCircle className="w-3 h-3 mr-1" /> Accept
                                       </button>
                                       <button onClick={() => handleRejectPolicyDocument(document.id)} disabled={verifying === document.id} className="btn-xs btn-danger">
                                         <XCircle className="w-3 h-3 mr-1" /> Reject
@@ -580,25 +770,37 @@ export default function UserDetail() {
             <section className="bg-white dark:bg-navy-800 rounded-2xl shadow-xl border border-gray-100 dark:border-navy-700 p-6">
               <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6 flex items-center">
                 <div className="w-1 h-6 bg-gradient-brand rounded-full mr-3"></div>
-                User Documents
+                User Documents ({user.documents.length})
               </h2>
               {user.documents.length > 0 ? (
                 <div className="space-y-4">
                   {user.documents.map((document) => (
                     <div key={document.id} className="flex flex-col gap-3 rounded-xl border border-gray-200 dark:border-navy-700 bg-gray-50/50 dark:bg-navy-900/30 p-4 sm:flex-row sm:items-center sm:justify-between">
-                      <div>
-                        <p className="text-sm font-bold text-gray-900 dark:text-white">{document.documentName}</p>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm font-bold text-gray-900 dark:text-white break-words">{document.documentName}</p>
                         <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                           {formatEnumLabel(document.documentType)} • Uploaded {formatDate(document.uploadedAt)}
                         </p>
                       </div>
-                      <div className="flex items-center gap-3">
-                        <span className={`badge ${document.isVerified ? 'badge-success' : 'badge-warning'}`}>
-                          {document.isVerified ? 'Verified' : 'Pending'}
-                        </span>
+                      <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
+                        {getDocumentStatusBadge(document.isVerified)}
                         <a href={document.documentUrl} target="_blank" rel="noopener noreferrer" className="btn-xs btn-outline-primary">
-                          View
+                          <ExternalLink className="w-3 h-3 mr-1" /> View
                         </a>
+                        {!document.isVerified ? (
+                          <>
+                            <button onClick={() => handleVerifyUserDocument(document.id)} disabled={verifying === document.id} className="btn-xs btn-success">
+                              <CheckCircle className="w-3 h-3 mr-1" /> Accept
+                            </button>
+                            <button onClick={() => handleRejectUserDocument(document.id)} disabled={verifying === document.id} className="btn-xs btn-danger">
+                              <XCircle className="w-3 h-3 mr-1" /> Reject
+                            </button>
+                          </>
+                        ) : (
+                          <button onClick={() => handleRemoveUserVerification(document.id)} disabled={verifying === document.id} className="btn-xs btn-warning">
+                            <RotateCcw className="w-3 h-3 mr-1" /> Remove
+                          </button>
+                        )}
                       </div>
                     </div>
                   ))}
@@ -618,11 +820,33 @@ export default function UserDetail() {
                   </h2>
                   <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 ml-4">Track all user activities and changes</p>
                 </div>
-                {activityLogs && activityLogs.pagination.total > 0 && (
-                  <div className="px-3 py-1 bg-brand-50 dark:bg-brand-900/30 text-brand-700 dark:text-brand-300 rounded-full text-xs font-bold border border-brand-100 dark:border-brand-800">
-                    {activityLogs.pagination.total} Activities
-                  </div>
-                )}
+                <div className="flex items-center gap-3">
+                  {activityLogs && activityLogs.pagination.total > 0 && (
+                    <div className="px-3 py-1 bg-brand-50 dark:bg-brand-900/30 text-brand-700 dark:text-brand-300 rounded-full text-xs font-bold border border-brand-100 dark:border-brand-800">
+                      {activityLogs.pagination.total} Activities
+                    </div>
+                  )}
+                  {activityLogs && activityLogs.pagination.total > 0 && (
+                    <button
+                      onClick={handleDeleteAllActivityLogs}
+                      disabled={deletingAllLogs}
+                      className="inline-flex items-center px-3 py-1.5 text-xs font-semibold bg-gradient-to-r from-red-500 to-red-600 text-white rounded-lg hover:shadow-lg hover:shadow-red-500/50 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                      title="Delete all activity logs"
+                    >
+                      {deletingAllLogs ? (
+                        <>
+                          <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                          Deleting...
+                        </>
+                      ) : (
+                        <>
+                          <Trash2 className="w-3 h-3 mr-1.5" />
+                          Delete All
+                        </>
+                      )}
+                    </button>
+                  )}
+                </div>
               </div>
 
               {activityLogsLoading ? (
