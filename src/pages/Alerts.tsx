@@ -794,7 +794,7 @@ export default function Alerts() {
       {/* Verify Modal */}
       {showVerifyModal && selectedAlert && (
         <div className="fixed inset-0 bg-black/50 dark:bg-black/70 backdrop-blur-sm overflow-y-auto h-full w-full z-50 p-4 flex items-center justify-center">
-          <div className="relative card border-2 border-yellow-400/30 dark:border-yellow-500/30 w-full max-w-md shadow-2xl shadow-yellow-500/20">
+          <div className="relative card border-2 border-yellow-400/30 dark:border-yellow-500/30 w-full max-w-md shadow-2xl shadow-yellow-500/20 p-6">
             <h3 className="text-xl font-bold text-gradient-fire mb-4">
               {selectedAlert.verificationStatus === 'PENDING' ? 'Verify Alert' : 'Edit Alert Verification'}
             </h3>
