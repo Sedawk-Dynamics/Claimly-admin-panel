@@ -38,6 +38,8 @@ export default function Alerts() {
   const [selectedAlerts, setSelectedAlerts] = useState<Set<string>>(new Set());
   const [selectedAlert, setSelectedAlert] = useState<Alert | null>(null);
   const [showVerifyModal, setShowVerifyModal] = useState(false);
+  const [showDetailModal, setShowDetailModal] = useState(false);
+  const [selectedAlertForDetail, setSelectedAlertForDetail] = useState<Alert | null>(null);
   const [verificationStatus, setVerificationStatus] = useState<'VERIFIED' | 'FALSE_ALERT'>('VERIFIED');
   const [remarks, setRemarks] = useState('');
   const limit = 20;
@@ -91,6 +93,11 @@ export default function Alerts() {
   const handleSearch = () => {
     setPage(1);
     loadAlerts();
+  };
+
+  const handleViewAlert = (alert: Alert) => {
+    setSelectedAlertForDetail(alert);
+    setShowDetailModal(true);
   };
 
   const handleVerify = (alert: Alert) => {
@@ -500,7 +507,7 @@ export default function Alerts() {
                 {alerts?.data && alerts.data.length > 0 ? (
                   alerts.data.map((alert) => (
                     <tr key={alert.id} className="hover:bg-yellow-50 dark:hover:bg-yellow-950/10 transition-all duration-200 group">
-                      <td className="px-6 py-4">
+                      <td className="px-6 py-4" onClick={(e) => e.stopPropagation()}>
                         <button onClick={() => toggleSelectAlert(alert.id)}>
                           {selectedAlerts.has(alert.id) ? (
                             <CheckSquare className="w-5 h-5 text-yellow-500 dark:text-yellow-400" />
@@ -509,7 +516,7 @@ export default function Alerts() {
                           )}
                         </button>
                       </td>
-                      <td className="px-6 py-4">
+                      <td className="px-6 py-4 cursor-pointer" onClick={() => handleViewAlert(alert)}>
                         <div className="flex items-start space-x-3">
                           <div className="p-2 bg-gradient-to-br from-yellow-100 to-orange-100 dark:from-yellow-900/30 dark:to-orange-900/30 rounded-lg group-hover:scale-110 transition-transform">
                             {getAlertTypeIcon(alert.alertType)}
@@ -531,12 +538,12 @@ export default function Alerts() {
                           </div>
                         </div>
                       </td>
-                      <td className="px-6 py-4">
+                      <td className="px-6 py-4 cursor-pointer" onClick={() => handleViewAlert(alert)}>
                         <div className="text-sm font-medium text-gray-900 dark:text-white">{alert.user?.name || 'N/A'}</div>
                         <div className="text-sm text-gray-600 dark:text-gray-400">{alert.user?.email || 'N/A'}</div>
                         <div className="text-xs text-gray-500 dark:text-gray-500">{alert.user?.mobileNumber || 'N/A'}</div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td className="px-6 py-4 whitespace-nowrap cursor-pointer" onClick={() => handleViewAlert(alert)}>
                         <div className="flex items-center space-x-2">
                           {getStatusIcon(alert.verificationStatus)}
                           <span className={getStatusColor(alert.verificationStatus)}>
@@ -544,7 +551,7 @@ export default function Alerts() {
                           </span>
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td className="px-6 py-4 whitespace-nowrap cursor-pointer" onClick={() => handleViewAlert(alert)}>
                         <div className="text-sm font-semibold text-gray-900 dark:text-white">
                           {format(new Date(alert.createdAt), 'MMM dd, yyyy')}
                         </div>
@@ -552,7 +559,7 @@ export default function Alerts() {
                           {format(new Date(alert.createdAt), 'hh:mm a')}
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium" onClick={(e) => e.stopPropagation()}>
                         <button
                           onClick={() => handleVerify(alert)}
                           className="text-brand-600 dark:text-cyan-400 hover:text-white dark:hover:text-white hover:bg-gradient-brand dark:hover:bg-gradient-cyan px-3 py-1.5 rounded-lg transition-all font-semibold"
@@ -605,6 +612,183 @@ export default function Alerts() {
             </div>
           )}
         </>
+      )}
+
+      {/* Alert Detail Modal */}
+      {showDetailModal && selectedAlertForDetail && (
+        <div className="fixed inset-0 bg-black/50 dark:bg-black/70 backdrop-blur-sm overflow-y-auto h-full w-full z-50 p-4 flex items-center justify-center">
+          <div className="relative card border-2 border-yellow-400/30 dark:border-yellow-500/30 w-full max-w-2xl shadow-2xl shadow-yellow-500/20 my-8">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center space-x-3">
+                <div className="p-3 bg-gradient-to-br from-yellow-500 to-orange-500 rounded-xl shadow-glow-yellow">
+                  {getAlertTypeIcon(selectedAlertForDetail.alertType)}
+                </div>
+                <div>
+                  <h3 className="text-2xl font-bold text-gradient-fire">
+                    Alert Details
+                  </h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    {getAlertTypeLabel(selectedAlertForDetail.alertType)}
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => {
+                  setShowDetailModal(false);
+                  setSelectedAlertForDetail(null);
+                }}
+                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors"
+              >
+                <XCircle className="w-6 h-6" />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              {/* Alert Information */}
+              <div className="p-5 bg-gradient-to-br from-yellow-50 to-orange-50 dark:from-yellow-950/20 dark:to-orange-950/20 rounded-xl border border-yellow-200 dark:border-yellow-800">
+                <h4 className="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center space-x-2">
+                  <Bell className="w-5 h-5 text-yellow-500" />
+                  <span>Alert Information</span>
+                </h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <span className="text-sm font-semibold text-gray-600 dark:text-gray-400">Alert ID</span>
+                    <p className="text-sm text-gray-900 dark:text-white font-mono mt-1">{selectedAlertForDetail.id}</p>
+                  </div>
+                  <div>
+                    <span className="text-sm font-semibold text-gray-600 dark:text-gray-400">Alert Type</span>
+                    <p className="text-sm text-gray-900 dark:text-white mt-1">{getAlertTypeLabel(selectedAlertForDetail.alertType)}</p>
+                  </div>
+                  <div>
+                    <span className="text-sm font-semibold text-gray-600 dark:text-gray-400">Detection Method</span>
+                    <p className="text-sm text-gray-900 dark:text-white mt-1">{selectedAlertForDetail.detectedVia}</p>
+                  </div>
+                  <div>
+                    <span className="text-sm font-semibold text-gray-600 dark:text-gray-400">Verification Status</span>
+                    <div className="flex items-center space-x-2 mt-1">
+                      {getStatusIcon(selectedAlertForDetail.verificationStatus)}
+                      <span className={getStatusColor(selectedAlertForDetail.verificationStatus)}>
+                        {selectedAlertForDetail.verificationStatus}
+                      </span>
+                    </div>
+                  </div>
+                  <div>
+                    <span className="text-sm font-semibold text-gray-600 dark:text-gray-400">Detection Date</span>
+                    <p className="text-sm text-gray-900 dark:text-white mt-1">
+                      {format(new Date(selectedAlertForDetail.detectionDate), 'MMM dd, yyyy hh:mm a')}
+                    </p>
+                  </div>
+                  <div>
+                    <span className="text-sm font-semibold text-gray-600 dark:text-gray-400">Created At</span>
+                    <p className="text-sm text-gray-900 dark:text-white mt-1">
+                      {format(new Date(selectedAlertForDetail.createdAt), 'MMM dd, yyyy hh:mm a')}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* SMS Text */}
+              {selectedAlertForDetail.smsText && (
+                <div className="p-5 bg-gray-50 dark:bg-navy-800 rounded-xl border border-gray-200 dark:border-navy-700">
+                  <h4 className="text-lg font-bold text-gray-900 dark:text-white mb-3 flex items-center space-x-2">
+                    <MessageSquare className="w-5 h-5 text-cyan-500" />
+                    <span>SMS Text</span>
+                  </h4>
+                  <div className="bg-white dark:bg-navy-900 p-4 rounded-lg border border-gray-200 dark:border-navy-700">
+                    <p className="text-sm text-gray-800 dark:text-gray-200 italic leading-relaxed">
+                      "{selectedAlertForDetail.smsText}"
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {/* User Information */}
+              {selectedAlertForDetail.user && (
+                <div className="p-5 bg-cyan-50 dark:bg-cyan-950/20 rounded-xl border border-cyan-200 dark:border-cyan-800">
+                  <h4 className="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center space-x-2">
+                    <Users className="w-5 h-5 text-cyan-500" />
+                    <span>User Information</span>
+                  </h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <span className="text-sm font-semibold text-gray-600 dark:text-gray-400">Name</span>
+                      <p className="text-sm text-gray-900 dark:text-white mt-1">{selectedAlertForDetail.user.name}</p>
+                    </div>
+                    <div>
+                      <span className="text-sm font-semibold text-gray-600 dark:text-gray-400">Email</span>
+                      <p className="text-sm text-gray-900 dark:text-white mt-1">{selectedAlertForDetail.user.email}</p>
+                    </div>
+                    <div>
+                      <span className="text-sm font-semibold text-gray-600 dark:text-gray-400">Mobile Number</span>
+                      <p className="text-sm text-gray-900 dark:text-white mt-1">{selectedAlertForDetail.user.mobileNumber}</p>
+                    </div>
+                    <div>
+                      <span className="text-sm font-semibold text-gray-600 dark:text-gray-400">User ID</span>
+                      <p className="text-sm text-gray-900 dark:text-white font-mono mt-1">{selectedAlertForDetail.user.id}</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Remarks */}
+              {selectedAlertForDetail.remarks && (
+                <div className="p-5 bg-gray-50 dark:bg-navy-800 rounded-xl border border-gray-200 dark:border-navy-700">
+                  <h4 className="text-lg font-bold text-gray-900 dark:text-white mb-3 flex items-center space-x-2">
+                    <FileText className="w-5 h-5 text-orange-500" />
+                    <span>Remarks</span>
+                  </h4>
+                  <div className="bg-white dark:bg-navy-900 p-4 rounded-lg border border-gray-200 dark:border-navy-700">
+                    <p className="text-sm text-gray-800 dark:text-gray-200 leading-relaxed whitespace-pre-wrap">
+                      {selectedAlertForDetail.remarks}
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {/* Verification Information */}
+              {selectedAlertForDetail.verifiedBy && (
+                <div className="p-5 bg-green-50 dark:bg-green-950/20 rounded-xl border border-green-200 dark:border-green-800">
+                  <h4 className="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center space-x-2">
+                    <CheckCircle className="w-5 h-5 text-green-500" />
+                    <span>Verification Information</span>
+                  </h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <span className="text-sm font-semibold text-gray-600 dark:text-gray-400">Verified By</span>
+                      <p className="text-sm text-gray-900 dark:text-white mt-1">{selectedAlertForDetail.verifiedBy.name}</p>
+                    </div>
+                    <div>
+                      <span className="text-sm font-semibold text-gray-600 dark:text-gray-400">Verifier Email</span>
+                      <p className="text-sm text-gray-900 dark:text-white mt-1">{selectedAlertForDetail.verifiedBy.email}</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Action Buttons */}
+              <div className="flex space-x-3 pt-4 border-t border-gray-200 dark:border-navy-700">
+                <button
+                  onClick={() => {
+                    handleVerify(selectedAlertForDetail);
+                    setShowDetailModal(false);
+                  }}
+                  className="flex-1 btn-brand"
+                >
+                  {selectedAlertForDetail.verificationStatus === 'PENDING' ? 'Verify Alert' : 'Edit Verification'}
+                </button>
+                <button
+                  onClick={() => {
+                    setShowDetailModal(false);
+                    setSelectedAlertForDetail(null);
+                  }}
+                  className="flex-1 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 py-2.5 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-all font-semibold"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
 
       {/* Verify Modal */}
