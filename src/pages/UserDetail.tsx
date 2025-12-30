@@ -433,6 +433,10 @@ export default function UserDetail() {
                             <p className="text-sm font-semibold text-gray-900 dark:text-white">{nominee.name}</p>
                           </div>
                           <div className="p-3 bg-white dark:bg-navy-800 rounded-lg border border-gray-200 dark:border-navy-600">
+                            <p className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1">Gender</p>
+                            <p className="text-sm font-semibold text-gray-900 dark:text-white">{nominee.gender ? formatEnumLabel(nominee.gender) : '-'}</p>
+                          </div>
+                          <div className="p-3 bg-white dark:bg-navy-800 rounded-lg border border-gray-200 dark:border-navy-600">
                             <p className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1">Relationship</p>
                             <p className="text-sm font-semibold text-gray-900 dark:text-white">{formatEnumLabel(nominee.relationship)}</p>
                           </div>

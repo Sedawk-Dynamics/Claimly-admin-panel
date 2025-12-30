@@ -56,6 +56,7 @@ export interface NomineeDetail {
   dob?: string | null;
   email?: string | null;
   address?: string | null;
+  gender?: 'MALE' | 'FEMALE' | 'OTHER' | null;
   status: 'DRAFT' | 'PENDING' | 'ACCEPTED' | 'REJECTED';
   createdAt: string;
   updatedAt: string;

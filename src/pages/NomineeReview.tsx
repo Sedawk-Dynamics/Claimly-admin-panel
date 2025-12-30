@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { adminService } from '../services/admin.service';
 import { NomineeUser, PaginatedResponse } from '../types';
 import {
@@ -14,11 +15,13 @@ import {
   Eye,
   X,
   Trash2,
+  User,
 } from 'lucide-react';
 
 type ReviewStatus = 'pending' | 'verified' | 'rejected' | 'draft' | 'all';
 
 export default function NomineeReview() {
+  const navigate = useNavigate();
   const [records, setRecords] = useState<PaginatedResponse<NomineeUser> | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -416,12 +419,22 @@ export default function NomineeReview() {
                   Relationship: {formatRelationship(selectedNominee.relationship)} • Created {new Date(selectedNominee.createdAt).toLocaleDateString()}
                 </p>
               </div>
-              <button
-                onClick={closeNomineeDetail}
-                className="p-2 rounded-full bg-gray-100 dark:bg-navy-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-navy-700 transition-colors"
-              >
-                <X className="w-5 h-5" />
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => navigate(`/users/${selectedNominee.user.id}`)}
+                  className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-brand-600 dark:text-brand-300 bg-brand-50 dark:bg-brand-900/30 border border-brand-200 dark:border-brand-500 rounded-xl hover:bg-brand-100 dark:hover:bg-brand-900/50 transition-all"
+                  title="View all user details"
+                >
+                  <User className="w-4 h-4" />
+                  View User Details
+                </button>
+                <button
+                  onClick={closeNomineeDetail}
+                  className="p-2 rounded-full bg-gray-100 dark:bg-navy-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-navy-700 transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
             </div>
             <div className="p-6 overflow-y-auto space-y-6">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
