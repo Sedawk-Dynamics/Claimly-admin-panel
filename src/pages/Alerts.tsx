@@ -582,15 +582,15 @@ export default function Alerts() {
 
       {/* Alert Detail Modal */}
       {showDetailModal && selectedAlertForDetail && (
-        <div className="fixed inset-0 bg-black/50 dark:bg-black/70 backdrop-blur-sm overflow-y-auto h-full w-full z-50 p-3 sm:p-4 md:p-6 flex items-center justify-center">
-          <div className="relative card border-2 border-yellow-400/30 dark:border-yellow-500/30 w-full max-w-md sm:max-w-lg md:max-w-2xl shadow-2xl shadow-yellow-500/20 my-4 sm:my-8 p-4 sm:p-5 md:p-6 lg:p-8">
-            <div className="flex items-start sm:items-center justify-between mb-4 sm:mb-5 md:mb-6 gap-3">
+        <div className="fixed inset-0 bg-black/50 dark:bg-black/70 backdrop-blur-sm overflow-y-auto h-full w-full z-50 p-3 sm:p-4 flex items-center justify-center">
+          <div className="relative card border-2 border-yellow-400/30 dark:border-yellow-500/30 w-full max-w-md sm:max-w-lg shadow-2xl shadow-yellow-500/20 my-4 sm:my-8 p-4 sm:p-5 md:p-6">
+            <div className="flex items-start sm:items-center justify-between mb-4 sm:mb-5 gap-3">
               <div className="flex items-center space-x-2 sm:space-x-3 flex-1 min-w-0">
                 <div className="p-2 sm:p-3 bg-gradient-to-br from-yellow-500 to-orange-500 rounded-lg sm:rounded-xl shadow-glow-yellow flex-shrink-0">
                   {getAlertTypeIcon(selectedAlertForDetail.alertType)}
                 </div>
                 <div className="min-w-0 flex-1">
-                  <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-gradient-fire truncate">
+                  <h3 className="text-lg sm:text-xl font-bold text-gradient-fire truncate">
                     Alert Details
                   </h3>
                   <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 truncate">
@@ -609,7 +609,7 @@ export default function Alerts() {
               </button>
             </div>
 
-            <div className="space-y-3 sm:space-y-4 md:space-y-5">
+            <div className="space-y-3 sm:space-y-4">
               {/* Alert Information */}
               <div className="p-3 sm:p-4 md:p-5 bg-gradient-to-br from-yellow-50 to-orange-50 dark:from-yellow-950/20 dark:to-orange-950/20 rounded-lg sm:rounded-xl border border-yellow-200 dark:border-yellow-800">
                 <h4 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white mb-3 sm:mb-4 flex items-center space-x-2">
@@ -759,12 +759,12 @@ export default function Alerts() {
 
       {/* Verify Modal */}
       {showVerifyModal && selectedAlert && (
-        <div className="fixed inset-0 bg-black/50 dark:bg-black/70 backdrop-blur-sm overflow-y-auto h-full w-full z-50 p-3 sm:p-4 md:p-6 flex items-center justify-center">
-          <div className="relative card border-2 border-yellow-400/30 dark:border-yellow-500/30 w-full max-w-md sm:max-w-lg md:max-w-xl shadow-2xl shadow-yellow-500/20 p-4 sm:p-5 md:p-6 lg:p-8 my-4 sm:my-8">
-            <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-gradient-fire mb-4 sm:mb-5 md:mb-6">
+        <div className="fixed inset-0 bg-black/50 dark:bg-black/70 backdrop-blur-sm overflow-y-auto h-full w-full z-50 p-3 sm:p-4 flex items-center justify-center">
+          <div className="relative card border-2 border-yellow-400/30 dark:border-yellow-500/30 w-full max-w-md sm:max-w-lg shadow-2xl shadow-yellow-500/20 p-4 sm:p-5 md:p-6 mb-4 sm:mb-8 mt-0">
+            <h3 className="text-lg sm:text-xl font-bold text-gradient-fire mb-4 sm:mb-5">
               {selectedAlert.verificationStatus === 'PENDING' ? 'Verify Alert' : 'Edit Alert Verification'}
             </h3>
-            <div className="mb-4 sm:mb-5 md:mb-6 space-y-2 sm:space-y-3 p-3 sm:p-4 md:p-5 bg-gray-50 dark:bg-navy-800 rounded-lg sm:rounded-xl border border-gray-200 dark:border-navy-700">
+            <div className="mb-4 sm:mb-5 space-y-2 sm:space-y-3 p-3 sm:p-4 md:p-5 bg-gray-50 dark:bg-navy-800 rounded-lg sm:rounded-xl border border-gray-200 dark:border-navy-700">
               <div className="flex flex-col sm:flex-row sm:items-start gap-1 sm:gap-2">
                 <span className="text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-300 sm:min-w-[100px]">Type:</span>
                 <span className="text-xs sm:text-sm text-gray-900 dark:text-white break-words">{getAlertTypeLabel(selectedAlert.alertType)}</span>
@@ -814,7 +814,7 @@ export default function Alerts() {
                 </div>
               )}
             </div>
-            <div className="space-y-3 sm:space-y-4 md:space-y-5">
+            <div className="space-y-3 sm:space-y-4">
               <div>
                 <label className="block text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5 sm:mb-2">Verification Status</label>
                 <select
