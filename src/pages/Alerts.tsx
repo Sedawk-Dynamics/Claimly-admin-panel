@@ -582,8 +582,9 @@ export default function Alerts() {
 
       {/* Alert Detail Modal */}
       {showDetailModal && selectedAlertForDetail && (
-        <div className="fixed inset-0 bg-black/50 dark:bg-black/70 backdrop-blur-sm overflow-y-auto h-full w-full z-50 p-3 sm:p-4 flex items-center justify-center">
-          <div className="relative card border-2 border-yellow-400/30 dark:border-yellow-500/30 w-full max-w-md sm:max-w-lg shadow-2xl shadow-yellow-500/20 my-4 sm:my-8 p-4 sm:p-5 md:p-6">
+        <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto">
+          <div className="fixed inset-0 bg-black/50 dark:bg-black/70 backdrop-blur-sm"></div>
+          <div className="relative z-50 card border-2 border-yellow-400/30 dark:border-yellow-500/30 w-full max-w-md sm:max-w-lg shadow-2xl shadow-yellow-500/20 m-3 sm:m-4 md:m-6 mt-4 sm:mt-6 md:mt-8 mb-4 sm:mb-8 p-4 sm:p-5 md:p-6">
             <div className="flex items-start sm:items-center justify-between mb-4 sm:mb-5 gap-3">
               <div className="flex items-center space-x-2 sm:space-x-3 flex-1 min-w-0">
                 <div className="p-2 sm:p-3 bg-gradient-to-br from-yellow-500 to-orange-500 rounded-lg sm:rounded-xl shadow-glow-yellow flex-shrink-0">
@@ -759,8 +760,9 @@ export default function Alerts() {
 
       {/* Verify Modal */}
       {showVerifyModal && selectedAlert && (
-        <div className="fixed inset-0 bg-black/50 dark:bg-black/70 backdrop-blur-sm overflow-y-auto h-full w-full z-50 p-3 sm:p-4 flex items-center justify-center">
-          <div className="relative card border-2 border-yellow-400/30 dark:border-yellow-500/30 w-full max-w-md sm:max-w-lg shadow-2xl shadow-yellow-500/20 p-4 sm:p-5 md:p-6 mb-4 sm:mb-8 mt-0">
+        <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto">
+          <div className="fixed inset-0 bg-black/50 dark:bg-black/70 backdrop-blur-sm"></div>
+          <div className="relative z-50 card border-2 border-yellow-400/30 dark:border-yellow-500/30 w-full max-w-md sm:max-w-lg shadow-2xl shadow-yellow-500/20 m-3 sm:m-4 md:m-6 mt-4 sm:mt-6 md:mt-8 mb-4 sm:mb-8 p-4 sm:p-5 md:p-6">
             <h3 className="text-lg sm:text-xl font-bold text-gradient-fire mb-4 sm:mb-5">
               {selectedAlert.verificationStatus === 'PENDING' ? 'Verify Alert' : 'Edit Alert Verification'}
             </h3>

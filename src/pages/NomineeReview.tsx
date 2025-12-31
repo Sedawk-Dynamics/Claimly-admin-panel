@@ -405,12 +405,12 @@ export default function NomineeReview() {
         </div>
       )}
       {selectedNominee && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 md:p-6">
+        <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto">
           <div
-            className="absolute inset-0 bg-black/60 dark:bg-black/70 backdrop-blur-sm"
+            className="fixed inset-0 bg-black/60 dark:bg-black/70 backdrop-blur-sm"
             onClick={closeNomineeDetail}
           ></div>
-          <div className="relative z-50 w-full max-w-md sm:max-w-lg md:max-w-2xl lg:max-w-4xl bg-white dark:bg-navy-900 rounded-2xl sm:rounded-3xl shadow-2xl flex flex-col max-h-[95vh] sm:max-h-[90vh]">
+          <div className="relative z-50 w-full max-w-md sm:max-w-lg md:max-w-2xl lg:max-w-4xl bg-white dark:bg-navy-900 rounded-2xl sm:rounded-3xl shadow-2xl flex flex-col max-h-[95vh] sm:max-h-[90vh] m-3 sm:m-4 md:m-6 mt-4 sm:mt-6 md:mt-8 mb-4 sm:mb-8">
             <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 sm:gap-4 p-4 sm:p-6 border-b border-gray-100 dark:border-navy-700">
               <div className="min-w-0 flex-1">
                 <p className="text-xs font-semibold uppercase text-gray-500 dark:text-gray-400">Nominee Review</p>

@@ -354,8 +354,9 @@ export default function Companies() {
 
       {/* Modal */}
       {showModal && (
-        <div className="fixed inset-0 bg-black/50 dark:bg-black/70 backdrop-blur-sm overflow-y-auto h-full w-full z-50 p-3 sm:p-4 md:p-6 flex items-center justify-center">
-          <div className="relative card border-2 border-orange-400/30 dark:border-orange-500/30 w-full max-w-md sm:max-w-lg md:max-w-xl shadow-2xl shadow-orange-500/20 my-4 sm:my-8 p-4 sm:p-5 md:p-6 lg:p-8">
+        <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto">
+          <div className="fixed inset-0 bg-black/50 dark:bg-black/70 backdrop-blur-sm"></div>
+          <div className="relative z-50 card border-2 border-orange-400/30 dark:border-orange-500/30 w-full max-w-md sm:max-w-lg md:max-w-xl shadow-2xl shadow-orange-500/20 m-3 sm:m-4 md:m-6 mt-4 sm:mt-6 md:mt-8 mb-4 sm:mb-8 p-4 sm:p-5 md:p-6 lg:p-8">
             <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-gradient-sunset mb-4 sm:mb-5 md:mb-6">
               {editingCompany ? 'Edit Company' : 'Create Company'}
             </h3>
