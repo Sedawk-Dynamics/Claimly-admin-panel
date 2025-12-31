@@ -354,81 +354,86 @@ export default function Companies() {
 
       {/* Modal */}
       {showModal && (
-        <div className="fixed inset-0 bg-black/50 dark:bg-black/70 backdrop-blur-sm overflow-y-auto h-full w-full z-50 p-4 flex items-center justify-center">
-          <div className="relative card border-2 border-orange-400/30 dark:border-orange-500/30 w-full max-w-md shadow-2xl shadow-orange-500/20">
-            <h3 className="text-xl font-bold text-gradient-sunset mb-4">
+        <div className="fixed inset-0 bg-black/50 dark:bg-black/70 backdrop-blur-sm overflow-y-auto h-full w-full z-50 p-3 sm:p-4 md:p-6 flex items-center justify-center">
+          <div className="relative card border-2 border-orange-400/30 dark:border-orange-500/30 w-full max-w-md sm:max-w-lg md:max-w-xl shadow-2xl shadow-orange-500/20 my-4 sm:my-8 p-4 sm:p-5 md:p-6 lg:p-8">
+            <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-gradient-sunset mb-4 sm:mb-5 md:mb-6">
               {editingCompany ? 'Edit Company' : 'Create Company'}
             </h3>
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4 md:space-y-5">
               <div>
-                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Name</label>
+                <label className="block text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5 sm:mb-2">Name</label>
                 <input
                   type="text"
                   required
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="input-elegant w-full"
+                  placeholder="Enter company name"
+                  className="input-elegant w-full text-sm sm:text-base"
                 />
               </div>
               <div>
-                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Contact Email</label>
+                <label className="block text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5 sm:mb-2">Contact Email</label>
                 <input
                   type="email"
                   required
                   value={formData.contactEmail}
                   onChange={(e) => setFormData({ ...formData, contactEmail: e.target.value })}
-                  className="input-elegant w-full"
+                  placeholder="company@example.com"
+                  className="input-elegant w-full text-sm sm:text-base"
                 />
               </div>
               <div>
-                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Contact Number</label>
+                <label className="block text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5 sm:mb-2">Contact Number</label>
                 <input
                   type="text"
                   required
                   value={formData.contactNumber}
                   onChange={(e) => setFormData({ ...formData, contactNumber: e.target.value })}
-                  className="input-elegant w-full"
+                  placeholder="+91 XXXXXXXXXX"
+                  className="input-elegant w-full text-sm sm:text-base"
                 />
               </div>
               <div>
-                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Website URL</label>
+                <label className="block text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5 sm:mb-2">Website URL</label>
                 <input
                   type="url"
                   value={formData.websiteUrl}
                   onChange={(e) => setFormData({ ...formData, websiteUrl: e.target.value })}
-                  className="input-elegant w-full"
+                  placeholder="https://www.example.com"
+                  className="input-elegant w-full text-sm sm:text-base"
                 />
               </div>
               <div>
-                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Address</label>
+                <label className="block text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5 sm:mb-2">Address</label>
                 <textarea
                   value={formData.address}
                   onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                  className="input-elegant w-full"
+                  placeholder="Enter company address"
+                  className="input-elegant w-full text-sm sm:text-base"
                   rows={3}
                 />
               </div>
               {editingCompany && (
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Status</label>
+                  <label className="block text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5 sm:mb-2">Status</label>
                   <select
                     value={formData.status}
                     onChange={(e) => setFormData({ ...formData, status: e.target.value as 'ACTIVE' | 'INACTIVE' })}
-                    className="input-elegant w-full"
+                    className="input-elegant w-full text-sm sm:text-base"
                   >
                     <option value="ACTIVE">Active</option>
                     <option value="INACTIVE">Inactive</option>
                   </select>
                 </div>
               )}
-              <div className="flex space-x-3">
-                <button type="submit" className="flex-1 btn-orange">
+              <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 pt-2 sm:pt-3">
+                <button type="submit" className="flex-1 btn-orange text-sm sm:text-base py-2.5 sm:py-3">
                   {editingCompany ? 'Update' : 'Create'}
                 </button>
                 <button
                   type="button"
                   onClick={() => setShowModal(false)}
-                  className="flex-1 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 py-2.5 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-all font-semibold"
+                  className="flex-1 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 py-2.5 sm:py-3 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-all font-semibold text-sm sm:text-base"
                 >
                   Cancel
                 </button>

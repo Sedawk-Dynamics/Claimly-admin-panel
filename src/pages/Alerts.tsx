@@ -14,7 +14,6 @@ import {
   FileText,
   Users,
   CreditCard,
-  Download,
   CheckSquare,
   Square,
   Zap,
@@ -218,32 +217,6 @@ export default function Alerts() {
     }
   };
 
-  const exportToCSV = () => {
-    if (!alerts?.data.length) return;
-
-    const headers = ['ID', 'Type', 'User', 'Email', 'Mobile', 'Status', 'Detected Via', 'Remarks', 'Created At'];
-    const rows = alerts.data.map((alert) => [
-      alert.id,
-      getAlertTypeLabel(alert.alertType),
-      alert.user?.name || 'N/A',
-      alert.user?.email || 'N/A',
-      alert.user?.mobileNumber || 'N/A',
-      alert.verificationStatus,
-      alert.detectedVia,
-      alert.remarks || '',
-      format(new Date(alert.createdAt), 'yyyy-MM-dd HH:mm:ss'),
-    ]);
-
-    const csv = [headers, ...rows].map((row) => row.map((cell) => `"${cell}"`).join(',')).join('\n');
-    const blob = new Blob([csv], { type: 'text/csv' });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `alerts-${format(new Date(), 'yyyy-MM-dd')}.csv`;
-    a.click();
-    window.URL.revokeObjectURL(url);
-  };
-
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -270,13 +243,6 @@ export default function Alerts() {
               <span>Bulk Verify ({selectedAlerts.size})</span>
             </button>
           )}
-          <button
-            onClick={exportToCSV}
-            className="btn-outline-orange flex items-center space-x-2"
-          >
-            <Download className="w-4 h-4" />
-            <span>Export CSV</span>
-          </button>
         </div>
       </div>
 
@@ -616,18 +582,18 @@ export default function Alerts() {
 
       {/* Alert Detail Modal */}
       {showDetailModal && selectedAlertForDetail && (
-        <div className="fixed inset-0 bg-black/50 dark:bg-black/70 backdrop-blur-sm overflow-y-auto h-full w-full z-50 p-4 flex items-center justify-center">
-          <div className="relative card border-2 border-yellow-400/30 dark:border-yellow-500/30 w-full max-w-2xl shadow-2xl shadow-yellow-500/20 my-8 p-6">
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center space-x-3">
-                <div className="p-3 bg-gradient-to-br from-yellow-500 to-orange-500 rounded-xl shadow-glow-yellow">
+        <div className="fixed inset-0 bg-black/50 dark:bg-black/70 backdrop-blur-sm overflow-y-auto h-full w-full z-50 p-3 sm:p-4 md:p-6 flex items-center justify-center">
+          <div className="relative card border-2 border-yellow-400/30 dark:border-yellow-500/30 w-full max-w-md sm:max-w-lg md:max-w-2xl shadow-2xl shadow-yellow-500/20 my-4 sm:my-8 p-4 sm:p-5 md:p-6 lg:p-8">
+            <div className="flex items-start sm:items-center justify-between mb-4 sm:mb-5 md:mb-6 gap-3">
+              <div className="flex items-center space-x-2 sm:space-x-3 flex-1 min-w-0">
+                <div className="p-2 sm:p-3 bg-gradient-to-br from-yellow-500 to-orange-500 rounded-lg sm:rounded-xl shadow-glow-yellow flex-shrink-0">
                   {getAlertTypeIcon(selectedAlertForDetail.alertType)}
                 </div>
-                <div>
-                  <h3 className="text-2xl font-bold text-gradient-fire">
+                <div className="min-w-0 flex-1">
+                  <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-gradient-fire truncate">
                     Alert Details
                   </h3>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                  <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 truncate">
                     {getAlertTypeLabel(selectedAlertForDetail.alertType)}
                   </p>
                 </div>
@@ -637,50 +603,50 @@ export default function Alerts() {
                   setShowDetailModal(false);
                   setSelectedAlertForDetail(null);
                 }}
-                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors"
+                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors flex-shrink-0 p-1"
               >
-                <XCircle className="w-6 h-6" />
+                <XCircle className="w-5 h-5 sm:w-6 sm:h-6" />
               </button>
             </div>
 
-            <div className="space-y-4">
+            <div className="space-y-3 sm:space-y-4 md:space-y-5">
               {/* Alert Information */}
-              <div className="p-5 bg-gradient-to-br from-yellow-50 to-orange-50 dark:from-yellow-950/20 dark:to-orange-950/20 rounded-xl border border-yellow-200 dark:border-yellow-800">
-                <h4 className="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center space-x-2">
-                  <Bell className="w-5 h-5 text-yellow-500" />
+              <div className="p-3 sm:p-4 md:p-5 bg-gradient-to-br from-yellow-50 to-orange-50 dark:from-yellow-950/20 dark:to-orange-950/20 rounded-lg sm:rounded-xl border border-yellow-200 dark:border-yellow-800">
+                <h4 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white mb-3 sm:mb-4 flex items-center space-x-2">
+                  <Bell className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-500" />
                   <span>Alert Information</span>
                 </h4>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                   <div>
-                    <span className="text-sm font-semibold text-gray-600 dark:text-gray-400">Alert ID</span>
-                    <p className="text-sm text-gray-900 dark:text-white font-mono mt-1">{selectedAlertForDetail.id}</p>
+                    <span className="text-xs sm:text-sm font-semibold text-gray-600 dark:text-gray-400">Alert ID</span>
+                    <p className="text-xs sm:text-sm text-gray-900 dark:text-white font-mono mt-1 break-words">{selectedAlertForDetail.id}</p>
                   </div>
                   <div>
-                    <span className="text-sm font-semibold text-gray-600 dark:text-gray-400">Alert Type</span>
-                    <p className="text-sm text-gray-900 dark:text-white mt-1">{getAlertTypeLabel(selectedAlertForDetail.alertType)}</p>
+                    <span className="text-xs sm:text-sm font-semibold text-gray-600 dark:text-gray-400">Alert Type</span>
+                    <p className="text-xs sm:text-sm text-gray-900 dark:text-white mt-1 break-words">{getAlertTypeLabel(selectedAlertForDetail.alertType)}</p>
                   </div>
                   <div>
-                    <span className="text-sm font-semibold text-gray-600 dark:text-gray-400">Detection Method</span>
-                    <p className="text-sm text-gray-900 dark:text-white mt-1">{selectedAlertForDetail.detectedVia}</p>
+                    <span className="text-xs sm:text-sm font-semibold text-gray-600 dark:text-gray-400">Detection Method</span>
+                    <p className="text-xs sm:text-sm text-gray-900 dark:text-white mt-1 break-words">{selectedAlertForDetail.detectedVia}</p>
                   </div>
                   <div>
-                    <span className="text-sm font-semibold text-gray-600 dark:text-gray-400">Verification Status</span>
+                    <span className="text-xs sm:text-sm font-semibold text-gray-600 dark:text-gray-400">Verification Status</span>
                     <div className="flex items-center space-x-2 mt-1">
                       {getStatusIcon(selectedAlertForDetail.verificationStatus)}
-                      <span className={getStatusColor(selectedAlertForDetail.verificationStatus)}>
+                      <span className={`${getStatusColor(selectedAlertForDetail.verificationStatus)} text-xs sm:text-sm`}>
                         {selectedAlertForDetail.verificationStatus}
                       </span>
                     </div>
                   </div>
                   <div>
-                    <span className="text-sm font-semibold text-gray-600 dark:text-gray-400">Detection Date</span>
-                    <p className="text-sm text-gray-900 dark:text-white mt-1">
+                    <span className="text-xs sm:text-sm font-semibold text-gray-600 dark:text-gray-400">Detection Date</span>
+                    <p className="text-xs sm:text-sm text-gray-900 dark:text-white mt-1 break-words">
                       {format(new Date(selectedAlertForDetail.detectionDate), 'MMM dd, yyyy hh:mm a')}
                     </p>
                   </div>
                   <div>
-                    <span className="text-sm font-semibold text-gray-600 dark:text-gray-400">Created At</span>
-                    <p className="text-sm text-gray-900 dark:text-white mt-1">
+                    <span className="text-xs sm:text-sm font-semibold text-gray-600 dark:text-gray-400">Created At</span>
+                    <p className="text-xs sm:text-sm text-gray-900 dark:text-white mt-1 break-words">
                       {format(new Date(selectedAlertForDetail.createdAt), 'MMM dd, yyyy hh:mm a')}
                     </p>
                   </div>
@@ -689,13 +655,13 @@ export default function Alerts() {
 
               {/* SMS Text */}
               {selectedAlertForDetail.smsText && (
-                <div className="p-5 bg-gray-50 dark:bg-navy-800 rounded-xl border border-gray-200 dark:border-navy-700">
-                  <h4 className="text-lg font-bold text-gray-900 dark:text-white mb-3 flex items-center space-x-2">
-                    <MessageSquare className="w-5 h-5 text-cyan-500" />
+                <div className="p-3 sm:p-4 md:p-5 bg-gray-50 dark:bg-navy-800 rounded-lg sm:rounded-xl border border-gray-200 dark:border-navy-700">
+                  <h4 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white mb-2 sm:mb-3 flex items-center space-x-2">
+                    <MessageSquare className="w-4 h-4 sm:w-5 sm:h-5 text-cyan-500" />
                     <span>SMS Text</span>
                   </h4>
-                  <div className="bg-white dark:bg-navy-900 p-4 rounded-lg border border-gray-200 dark:border-navy-700">
-                    <p className="text-sm text-gray-800 dark:text-gray-200 italic leading-relaxed">
+                  <div className="bg-white dark:bg-navy-900 p-3 sm:p-4 rounded-lg border border-gray-200 dark:border-navy-700">
+                    <p className="text-xs sm:text-sm text-gray-800 dark:text-gray-200 italic leading-relaxed break-words">
                       "{selectedAlertForDetail.smsText}"
                     </p>
                   </div>
@@ -704,27 +670,27 @@ export default function Alerts() {
 
               {/* User Information */}
               {selectedAlertForDetail.user && (
-                <div className="p-5 bg-cyan-50 dark:bg-cyan-950/20 rounded-xl border border-cyan-200 dark:border-cyan-800">
-                  <h4 className="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center space-x-2">
-                    <Users className="w-5 h-5 text-cyan-500" />
+                <div className="p-3 sm:p-4 md:p-5 bg-cyan-50 dark:bg-cyan-950/20 rounded-lg sm:rounded-xl border border-cyan-200 dark:border-cyan-800">
+                  <h4 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white mb-3 sm:mb-4 flex items-center space-x-2">
+                    <Users className="w-4 h-4 sm:w-5 sm:h-5 text-cyan-500" />
                     <span>User Information</span>
                   </h4>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                     <div>
-                      <span className="text-sm font-semibold text-gray-600 dark:text-gray-400">Name</span>
-                      <p className="text-sm text-gray-900 dark:text-white mt-1">{selectedAlertForDetail.user.name}</p>
+                      <span className="text-xs sm:text-sm font-semibold text-gray-600 dark:text-gray-400">Name</span>
+                      <p className="text-xs sm:text-sm text-gray-900 dark:text-white mt-1 break-words">{selectedAlertForDetail.user.name}</p>
                     </div>
                     <div>
-                      <span className="text-sm font-semibold text-gray-600 dark:text-gray-400">Email</span>
-                      <p className="text-sm text-gray-900 dark:text-white mt-1">{selectedAlertForDetail.user.email}</p>
+                      <span className="text-xs sm:text-sm font-semibold text-gray-600 dark:text-gray-400">Email</span>
+                      <p className="text-xs sm:text-sm text-gray-900 dark:text-white mt-1 break-words">{selectedAlertForDetail.user.email}</p>
                     </div>
                     <div>
-                      <span className="text-sm font-semibold text-gray-600 dark:text-gray-400">Mobile Number</span>
-                      <p className="text-sm text-gray-900 dark:text-white mt-1">{selectedAlertForDetail.user.mobileNumber}</p>
+                      <span className="text-xs sm:text-sm font-semibold text-gray-600 dark:text-gray-400">Mobile Number</span>
+                      <p className="text-xs sm:text-sm text-gray-900 dark:text-white mt-1 break-words">{selectedAlertForDetail.user.mobileNumber}</p>
                     </div>
                     <div>
-                      <span className="text-sm font-semibold text-gray-600 dark:text-gray-400">User ID</span>
-                      <p className="text-sm text-gray-900 dark:text-white font-mono mt-1">{selectedAlertForDetail.user.id}</p>
+                      <span className="text-xs sm:text-sm font-semibold text-gray-600 dark:text-gray-400">User ID</span>
+                      <p className="text-xs sm:text-sm text-gray-900 dark:text-white font-mono mt-1 break-words">{selectedAlertForDetail.user.id}</p>
                     </div>
                   </div>
                 </div>
@@ -732,13 +698,13 @@ export default function Alerts() {
 
               {/* Remarks */}
               {selectedAlertForDetail.remarks && (
-                <div className="p-5 bg-gray-50 dark:bg-navy-800 rounded-xl border border-gray-200 dark:border-navy-700">
-                  <h4 className="text-lg font-bold text-gray-900 dark:text-white mb-3 flex items-center space-x-2">
-                    <FileText className="w-5 h-5 text-orange-500" />
+                <div className="p-3 sm:p-4 md:p-5 bg-gray-50 dark:bg-navy-800 rounded-lg sm:rounded-xl border border-gray-200 dark:border-navy-700">
+                  <h4 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white mb-2 sm:mb-3 flex items-center space-x-2">
+                    <FileText className="w-4 h-4 sm:w-5 sm:h-5 text-orange-500" />
                     <span>Remarks</span>
                   </h4>
-                  <div className="bg-white dark:bg-navy-900 p-4 rounded-lg border border-gray-200 dark:border-navy-700">
-                    <p className="text-sm text-gray-800 dark:text-gray-200 leading-relaxed whitespace-pre-wrap">
+                  <div className="bg-white dark:bg-navy-900 p-3 sm:p-4 rounded-lg border border-gray-200 dark:border-navy-700">
+                    <p className="text-xs sm:text-sm text-gray-800 dark:text-gray-200 leading-relaxed whitespace-pre-wrap break-words">
                       {selectedAlertForDetail.remarks}
                     </p>
                   </div>
@@ -747,32 +713,32 @@ export default function Alerts() {
 
               {/* Verification Information */}
               {selectedAlertForDetail.verifiedBy && (
-                <div className="p-5 bg-green-50 dark:bg-green-950/20 rounded-xl border border-green-200 dark:border-green-800">
-                  <h4 className="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center space-x-2">
-                    <CheckCircle className="w-5 h-5 text-green-500" />
+                <div className="p-3 sm:p-4 md:p-5 bg-green-50 dark:bg-green-950/20 rounded-lg sm:rounded-xl border border-green-200 dark:border-green-800">
+                  <h4 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white mb-3 sm:mb-4 flex items-center space-x-2">
+                    <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 text-green-500" />
                     <span>Verification Information</span>
                   </h4>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                     <div>
-                      <span className="text-sm font-semibold text-gray-600 dark:text-gray-400">Verified By</span>
-                      <p className="text-sm text-gray-900 dark:text-white mt-1">{selectedAlertForDetail.verifiedBy.name}</p>
+                      <span className="text-xs sm:text-sm font-semibold text-gray-600 dark:text-gray-400">Verified By</span>
+                      <p className="text-xs sm:text-sm text-gray-900 dark:text-white mt-1 break-words">{selectedAlertForDetail.verifiedBy.name}</p>
                     </div>
                     <div>
-                      <span className="text-sm font-semibold text-gray-600 dark:text-gray-400">Verifier Email</span>
-                      <p className="text-sm text-gray-900 dark:text-white mt-1">{selectedAlertForDetail.verifiedBy.email}</p>
+                      <span className="text-xs sm:text-sm font-semibold text-gray-600 dark:text-gray-400">Verifier Email</span>
+                      <p className="text-xs sm:text-sm text-gray-900 dark:text-white mt-1 break-words">{selectedAlertForDetail.verifiedBy.email}</p>
                     </div>
                   </div>
                 </div>
               )}
 
               {/* Action Buttons */}
-              <div className="flex space-x-3 pt-4 border-t border-gray-200 dark:border-navy-700">
+              <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 pt-3 sm:pt-4 border-t border-gray-200 dark:border-navy-700">
                 <button
                   onClick={() => {
                     handleVerify(selectedAlertForDetail);
                     setShowDetailModal(false);
                   }}
-                  className="flex-1 btn-brand"
+                  className="flex-1 btn-brand text-sm sm:text-base py-2.5 sm:py-3"
                 >
                   {selectedAlertForDetail.verificationStatus === 'PENDING' ? 'Verify Alert' : 'Edit Verification'}
                 </button>
@@ -781,7 +747,7 @@ export default function Alerts() {
                     setShowDetailModal(false);
                     setSelectedAlertForDetail(null);
                   }}
-                  className="flex-1 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 py-2.5 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-all font-semibold"
+                  className="flex-1 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 py-2.5 sm:py-3 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-all font-semibold text-sm sm:text-base"
                 >
                   Close
                 </button>
@@ -793,87 +759,87 @@ export default function Alerts() {
 
       {/* Verify Modal */}
       {showVerifyModal && selectedAlert && (
-        <div className="fixed inset-0 bg-black/50 dark:bg-black/70 backdrop-blur-sm overflow-y-auto h-full w-full z-50 p-4 flex items-center justify-center">
-          <div className="relative card border-2 border-yellow-400/30 dark:border-yellow-500/30 w-full max-w-md shadow-2xl shadow-yellow-500/20 p-6">
-            <h3 className="text-xl font-bold text-gradient-fire mb-4">
+        <div className="fixed inset-0 bg-black/50 dark:bg-black/70 backdrop-blur-sm overflow-y-auto h-full w-full z-50 p-3 sm:p-4 md:p-6 flex items-center justify-center">
+          <div className="relative card border-2 border-yellow-400/30 dark:border-yellow-500/30 w-full max-w-md sm:max-w-lg md:max-w-xl shadow-2xl shadow-yellow-500/20 p-4 sm:p-5 md:p-6 lg:p-8 my-4 sm:my-8">
+            <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-gradient-fire mb-4 sm:mb-5 md:mb-6">
               {selectedAlert.verificationStatus === 'PENDING' ? 'Verify Alert' : 'Edit Alert Verification'}
             </h3>
-            <div className="mb-4 space-y-3 p-4 bg-gray-50 dark:bg-navy-800 rounded-xl border border-gray-200 dark:border-navy-700">
-              <div className="flex items-start space-x-2">
-                <span className="text-sm font-semibold text-gray-700 dark:text-gray-300 min-w-[100px]">Type:</span>
-                <span className="text-sm text-gray-900 dark:text-white">{getAlertTypeLabel(selectedAlert.alertType)}</span>
+            <div className="mb-4 sm:mb-5 md:mb-6 space-y-2 sm:space-y-3 p-3 sm:p-4 md:p-5 bg-gray-50 dark:bg-navy-800 rounded-lg sm:rounded-xl border border-gray-200 dark:border-navy-700">
+              <div className="flex flex-col sm:flex-row sm:items-start gap-1 sm:gap-2">
+                <span className="text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-300 sm:min-w-[100px]">Type:</span>
+                <span className="text-xs sm:text-sm text-gray-900 dark:text-white break-words">{getAlertTypeLabel(selectedAlert.alertType)}</span>
               </div>
-              <div className="flex items-start space-x-2">
-                <span className="text-sm font-semibold text-gray-700 dark:text-gray-300 min-w-[100px]">Detected Via:</span>
-                <span className="text-sm text-gray-900 dark:text-white">{selectedAlert.detectedVia}</span>
+              <div className="flex flex-col sm:flex-row sm:items-start gap-1 sm:gap-2">
+                <span className="text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-300 sm:min-w-[100px]">Detected Via:</span>
+                <span className="text-xs sm:text-sm text-gray-900 dark:text-white break-words">{selectedAlert.detectedVia}</span>
               </div>
               {selectedAlert.smsText && (
-                <div className="flex items-start space-x-2">
-                  <span className="text-sm font-semibold text-gray-700 dark:text-gray-300 min-w-[100px]">SMS Text:</span>
-                  <div className="flex-1 bg-gray-100 dark:bg-navy-900 p-2 rounded-lg">
-                    <span className="text-sm text-gray-800 dark:text-gray-200 italic">"{selectedAlert.smsText}"</span>
+                <div className="flex flex-col sm:flex-row sm:items-start gap-1 sm:gap-2">
+                  <span className="text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-300 sm:min-w-[100px]">SMS Text:</span>
+                  <div className="flex-1 bg-gray-100 dark:bg-navy-900 p-2 sm:p-3 rounded-lg">
+                    <span className="text-xs sm:text-sm text-gray-800 dark:text-gray-200 italic break-words">"{selectedAlert.smsText}"</span>
                   </div>
                 </div>
               )}
-              <div className="flex items-start space-x-2">
-                <span className="text-sm font-semibold text-gray-700 dark:text-gray-300 min-w-[100px]">Date:</span>
-                <span className="text-sm text-gray-900 dark:text-white">{format(new Date(selectedAlert.detectionDate), 'MMM dd, yyyy')}</span>
+              <div className="flex flex-col sm:flex-row sm:items-start gap-1 sm:gap-2">
+                <span className="text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-300 sm:min-w-[100px]">Date:</span>
+                <span className="text-xs sm:text-sm text-gray-900 dark:text-white break-words">{format(new Date(selectedAlert.detectionDate), 'MMM dd, yyyy')}</span>
               </div>
               {selectedAlert.user && (
                 <>
-                  <div className="flex items-start space-x-2">
-                    <span className="text-sm font-semibold text-gray-700 dark:text-gray-300 min-w-[100px]">User:</span>
-                    <span className="text-sm text-gray-900 dark:text-white">{selectedAlert.user.name}</span>
+                  <div className="flex flex-col sm:flex-row sm:items-start gap-1 sm:gap-2">
+                    <span className="text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-300 sm:min-w-[100px]">User:</span>
+                    <span className="text-xs sm:text-sm text-gray-900 dark:text-white break-words">{selectedAlert.user.name}</span>
                   </div>
-                  <div className="flex items-start space-x-2">
-                    <span className="text-sm font-semibold text-gray-700 dark:text-gray-300 min-w-[100px]">Email:</span>
-                    <span className="text-sm text-gray-900 dark:text-white">{selectedAlert.user.email}</span>
+                  <div className="flex flex-col sm:flex-row sm:items-start gap-1 sm:gap-2">
+                    <span className="text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-300 sm:min-w-[100px]">Email:</span>
+                    <span className="text-xs sm:text-sm text-gray-900 dark:text-white break-words">{selectedAlert.user.email}</span>
                   </div>
-                  <div className="flex items-start space-x-2">
-                    <span className="text-sm font-semibold text-gray-700 dark:text-gray-300 min-w-[100px]">Mobile:</span>
-                    <span className="text-sm text-gray-900 dark:text-white">{selectedAlert.user.mobileNumber}</span>
+                  <div className="flex flex-col sm:flex-row sm:items-start gap-1 sm:gap-2">
+                    <span className="text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-300 sm:min-w-[100px]">Mobile:</span>
+                    <span className="text-xs sm:text-sm text-gray-900 dark:text-white break-words">{selectedAlert.user.mobileNumber}</span>
                   </div>
                 </>
               )}
               {selectedAlert.remarks && (
-                <div className="flex items-start space-x-2">
-                  <span className="text-sm font-semibold text-gray-700 dark:text-gray-300 min-w-[100px]">Remarks:</span>
-                  <span className="text-sm text-gray-900 dark:text-white">{selectedAlert.remarks}</span>
+                <div className="flex flex-col sm:flex-row sm:items-start gap-1 sm:gap-2">
+                  <span className="text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-300 sm:min-w-[100px]">Remarks:</span>
+                  <span className="text-xs sm:text-sm text-gray-900 dark:text-white break-words">{selectedAlert.remarks}</span>
                 </div>
               )}
               {selectedAlert.verificationStatus !== 'PENDING' && (
-                <div className="flex items-start space-x-2">
-                  <span className="text-sm font-semibold text-gray-700 dark:text-gray-300 min-w-[100px]">Status:</span>
-                  <span className={getStatusColor(selectedAlert.verificationStatus)}>{selectedAlert.verificationStatus}</span>
+                <div className="flex flex-col sm:flex-row sm:items-start gap-1 sm:gap-2">
+                  <span className="text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-300 sm:min-w-[100px]">Status:</span>
+                  <span className={`${getStatusColor(selectedAlert.verificationStatus)} text-xs sm:text-sm`}>{selectedAlert.verificationStatus}</span>
                 </div>
               )}
             </div>
-            <div className="space-y-4">
+            <div className="space-y-3 sm:space-y-4 md:space-y-5">
               <div>
-                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Verification Status</label>
+                <label className="block text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5 sm:mb-2">Verification Status</label>
                 <select
                   value={verificationStatus}
                   onChange={(e) => setVerificationStatus(e.target.value as 'VERIFIED' | 'FALSE_ALERT')}
-                  className="input-elegant w-full"
+                  className="input-elegant w-full text-sm sm:text-base"
                 >
                   <option value="VERIFIED">Verified</option>
                   <option value="FALSE_ALERT">False Alert</option>
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Remarks</label>
+                <label className="block text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5 sm:mb-2">Remarks</label>
                 <textarea
                   value={remarks}
                   onChange={(e) => setRemarks(e.target.value)}
-                  className="input-elegant w-full"
+                  className="input-elegant w-full text-sm sm:text-base"
                   rows={3}
                   placeholder="Add remarks (optional)"
                 />
               </div>
-              <div className="flex space-x-3">
+              <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 pt-2 sm:pt-3">
                 <button
                   onClick={handleSubmitVerification}
-                  className="flex-1 btn-brand"
+                  className="flex-1 btn-brand text-sm sm:text-base py-2.5 sm:py-3"
                 >
                   Submit
                 </button>
@@ -882,7 +848,7 @@ export default function Alerts() {
                     setShowVerifyModal(false);
                     setSelectedAlert(null);
                   }}
-                  className="flex-1 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 py-2.5 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-all font-semibold"
+                  className="flex-1 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 py-2.5 sm:py-3 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-all font-semibold text-sm sm:text-base"
                 >
                   Cancel
                 </button>

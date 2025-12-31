@@ -49,7 +49,7 @@ export default function Login() {
 
       <div className="max-w-md w-full relative z-10 animate-scale-in">
         {/* Glassmorphic Login Card */}
-        <div className="glass backdrop-blur-xl rounded-2xl p-8 sm:p-10 border-2 border-orange-400/30 shadow-card-3d-hover">
+        <div className="glass backdrop-blur-xl rounded-xl sm:rounded-2xl p-6 sm:p-8 lg:p-10 border-2 border-orange-400/30 shadow-card-3d-hover">
 
           {/* Logo and Title */}
           <div className="text-center mb-8">

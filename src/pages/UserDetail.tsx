@@ -273,13 +273,13 @@ export default function UserDetail() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-brand dark:bg-gradient-navy p-6">
-      <div className="max-w-7xl mx-auto space-y-6">
+    <div className="min-h-screen p-3 sm:p-4 md:p-6">
+      <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6">
         <button
           onClick={() => navigate('/users')}
-          className="inline-flex items-center text-sm font-medium text-white/80 hover:text-white transition-colors"
+          className="inline-flex items-center px-4 py-2.5 text-sm font-semibold text-gray-700 dark:text-white/90 hover:text-gray-900 dark:hover:text-white bg-gray-100 dark:bg-white/10 hover:bg-gray-200 dark:hover:bg-white/20 backdrop-blur-sm border border-gray-300 dark:border-white/20 hover:border-gray-400 dark:hover:border-white/30 rounded-lg transition-all duration-200 hover:shadow-lg hover:shadow-gray-200/50 dark:hover:shadow-white/10 hover:-translate-y-0.5 group mt-4 sm:mt-6"
         >
-          <ArrowLeft className="mr-2 h-4 w-4" />
+          <ArrowLeft className="mr-2 h-4 w-4 group-hover:-translate-x-1 transition-transform duration-200" />
           Back to Users
         </button>
 
@@ -298,30 +298,31 @@ export default function UserDetail() {
         ) : user ? (
           <div className="space-y-6 sm:space-y-8">
             {/* User Profile Card */}
-            <section className="bg-white dark:bg-navy-800 rounded-2xl shadow-xl border border-gray-100 dark:border-navy-700 p-6 relative overflow-hidden">
+            <section className="bg-white dark:bg-navy-800 rounded-xl sm:rounded-2xl shadow-xl border border-gray-100 dark:border-navy-700 p-4 sm:p-6 relative overflow-hidden">
               <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-brand opacity-5 rounded-full blur-3xl -mr-32 -mt-32"></div>
-              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-6">
-                <div>
-                  <h1 className="text-3xl font-bold text-gradient-brand mb-2">{user.name}</h1>
-                  <p className="text-sm text-gray-500 dark:text-gray-400 break-all">User ID: {user.id}</p>
+              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 sm:gap-4 mb-4 sm:mb-6">
+                <div className="min-w-0 flex-1">
+                  <h1 className="text-2xl sm:text-3xl font-bold text-gradient-brand mb-1 sm:mb-2 truncate">{user.name}</h1>
+                  <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 break-all">User ID: {user.id}</p>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-shrink-0">
                   <button
                     onClick={handleDeleteUser}
-                    className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-xl font-semibold hover:shadow-lg hover:shadow-red-500/50 transition-all"
+                    className="inline-flex items-center px-3 sm:px-4 py-1.5 sm:py-2 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-lg sm:rounded-xl font-semibold hover:shadow-lg hover:shadow-red-500/50 transition-all text-xs sm:text-sm"
                   >
-                    <Trash2 className="w-4 h-4 mr-2" />
-                    Delete User Account
+                    <Trash2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1.5 sm:mr-2" />
+                    <span className="hidden sm:inline">Delete User Account</span>
+                    <span className="sm:hidden">Delete</span>
                   </button>
                 </div>
               </div>
 
-              <div className="space-y-4">
-                <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">User Information</h3>
-                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                  <div className="p-4 bg-gray-50 dark:bg-navy-900/50 rounded-xl border border-gray-100 dark:border-navy-700">
+              <div className="space-y-3 sm:space-y-4">
+                <h3 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white mb-3 sm:mb-4">User Information</h3>
+                <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+                  <div className="p-3 sm:p-4 bg-gray-50 dark:bg-navy-900/50 rounded-lg sm:rounded-xl border border-gray-100 dark:border-navy-700">
                     <p className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1">Name</p>
-                    <p className="text-sm font-semibold text-gray-900 dark:text-white">{user.name || '-'}</p>
+                    <p className="text-xs sm:text-sm font-semibold text-gray-900 dark:text-white break-words">{user.name || '-'}</p>
                   </div>
                   <div className="p-4 bg-gray-50 dark:bg-navy-900/50 rounded-xl border border-gray-100 dark:border-navy-700">
                     <p className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1">User ID</p>
@@ -372,12 +373,12 @@ export default function UserDetail() {
             </section>
 
             {/* Usage Summary */}
-            <section className="bg-white dark:bg-navy-800 rounded-2xl shadow-xl border border-gray-100 dark:border-navy-700 p-6">
-              <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6 flex items-center">
-                <div className="w-1 h-6 bg-gradient-brand rounded-full mr-3"></div>
+            <section className="bg-white dark:bg-navy-800 rounded-xl sm:rounded-2xl shadow-xl border border-gray-100 dark:border-navy-700 p-4 sm:p-6">
+              <h2 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white mb-4 sm:mb-6 flex items-center">
+                <div className="w-1 h-5 sm:h-6 bg-gradient-brand rounded-full mr-2 sm:mr-3"></div>
                 Usage Summary
               </h2>
-              <div className="grid gap-4 grid-cols-2 sm:grid-cols-3 lg:grid-cols-5">
+              <div className="grid gap-3 sm:gap-4 grid-cols-2 sm:grid-cols-3 lg:grid-cols-5">
                 {[
                   { label: 'Policies', value: user.stats.policiesCount, color: 'text-blue-600 dark:text-blue-400', bg: 'bg-blue-50 dark:bg-blue-900/20' },
                   { label: 'Nominees', value: user.stats.nomineesCount, color: 'text-purple-600 dark:text-purple-400', bg: 'bg-purple-50 dark:bg-purple-900/20' },
@@ -385,18 +386,18 @@ export default function UserDetail() {
                   { label: 'Subscriptions', value: user.stats.subscriptionsCount, color: 'text-orange-600 dark:text-orange-400', bg: 'bg-orange-50 dark:bg-orange-900/20' },
                   { label: 'Alerts', value: user.stats.alertsCount, color: 'text-red-600 dark:text-red-400', bg: 'bg-red-50 dark:bg-red-900/20' },
                 ].map((stat, idx) => (
-                  <div key={idx} className={`rounded-xl border border-transparent hover:border-gray-200 dark:hover:border-navy-600 p-4 transition-all ${stat.bg}`}>
+                  <div key={idx} className={`rounded-lg sm:rounded-xl border border-transparent hover:border-gray-200 dark:hover:border-navy-600 p-3 sm:p-4 transition-all ${stat.bg}`}>
                     <p className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">{stat.label}</p>
-                    <p className={`mt-2 text-3xl font-bold ${stat.color}`}>{stat.value}</p>
+                    <p className={`mt-1 sm:mt-2 text-2xl sm:text-3xl font-bold ${stat.color}`}>{stat.value}</p>
                   </div>
                 ))}
               </div>
             </section>
 
             {/* Nominees */}
-            <section className="bg-white dark:bg-navy-800 rounded-2xl shadow-xl border border-gray-100 dark:border-navy-700 p-6">
-              <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6 flex items-center">
-                <div className="w-1 h-6 bg-gradient-brand rounded-full mr-3"></div>
+            <section className="bg-white dark:bg-navy-800 rounded-xl sm:rounded-2xl shadow-xl border border-gray-100 dark:border-navy-700 p-4 sm:p-6">
+              <h2 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white mb-4 sm:mb-6 flex items-center">
+                <div className="w-1 h-5 sm:h-6 bg-gradient-brand rounded-full mr-2 sm:mr-3"></div>
                 Nominees ({user.nominees.length})
               </h2>
               {user.nominees.length > 0 ? (
@@ -423,10 +424,10 @@ export default function UserDetail() {
                             );
                           })()}
                         </div>
-                        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 mb-4">
-                          <div className="p-3 bg-white dark:bg-navy-800 rounded-lg border border-gray-200 dark:border-navy-600">
+                        <div className="grid gap-3 sm:gap-4 sm:grid-cols-2 lg:grid-cols-3 mb-3 sm:mb-4">
+                          <div className="p-2.5 sm:p-3 bg-white dark:bg-navy-800 rounded-lg border border-gray-200 dark:border-navy-600">
                             <p className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1">Nominee ID</p>
-                            <p className="text-sm font-semibold text-gray-900 dark:text-white break-all">{nominee.id}</p>
+                            <p className="text-xs sm:text-sm font-semibold text-gray-900 dark:text-white break-all">{nominee.id}</p>
                           </div>
                           <div className="p-3 bg-white dark:bg-navy-800 rounded-lg border border-gray-200 dark:border-navy-600">
                             <p className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1">Name</p>
@@ -585,9 +586,9 @@ export default function UserDetail() {
             </section>
 
             {/* Policies */}
-            <section className="bg-white dark:bg-navy-800 rounded-2xl shadow-xl border border-gray-100 dark:border-navy-700 p-6">
-              <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6 flex items-center">
-                <div className="w-1 h-6 bg-gradient-brand rounded-full mr-3"></div>
+            <section className="bg-white dark:bg-navy-800 rounded-xl sm:rounded-2xl shadow-xl border border-gray-100 dark:border-navy-700 p-4 sm:p-6">
+              <h2 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white mb-4 sm:mb-6 flex items-center">
+                <div className="w-1 h-5 sm:h-6 bg-gradient-brand rounded-full mr-2 sm:mr-3"></div>
                 Policies ({user.recentPolicies.length})
               </h2>
               {user.recentPolicies.length > 0 ? (
@@ -596,7 +597,7 @@ export default function UserDetail() {
                     <div key={policy.id} className="rounded-xl border border-gray-200 dark:border-navy-700 p-5 bg-gray-50/50 dark:bg-navy-900/30">
                       <div className="mb-4">
                         <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">{policy.policyNumber}</h3>
-                        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 mb-4">
+                        <div className="grid gap-3 sm:gap-4 sm:grid-cols-2 lg:grid-cols-3 mb-3 sm:mb-4">
                           <div className="p-3 bg-white dark:bg-navy-800 rounded-lg border border-gray-200 dark:border-navy-600">
                             <p className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1">Policy ID</p>
                             <p className="text-sm font-semibold text-gray-900 dark:text-white break-all">{policy.id}</p>
@@ -741,9 +742,9 @@ export default function UserDetail() {
             </section>
 
             {/* Recent Subscriptions */}
-            <section className="bg-white dark:bg-navy-800 rounded-2xl shadow-xl border border-gray-100 dark:border-navy-700 p-6">
-              <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6 flex items-center">
-                <div className="w-1 h-6 bg-gradient-brand rounded-full mr-3"></div>
+            <section className="bg-white dark:bg-navy-800 rounded-xl sm:rounded-2xl shadow-xl border border-gray-100 dark:border-navy-700 p-4 sm:p-6">
+              <h2 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white mb-4 sm:mb-6 flex items-center">
+                <div className="w-1 h-5 sm:h-6 bg-gradient-brand rounded-full mr-2 sm:mr-3"></div>
                 Recent Subscriptions
               </h2>
               {user.recentSubscriptions.length > 0 ? (
@@ -771,9 +772,9 @@ export default function UserDetail() {
             </section>
 
             {/* User Documents */}
-            <section className="bg-white dark:bg-navy-800 rounded-2xl shadow-xl border border-gray-100 dark:border-navy-700 p-6">
-              <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6 flex items-center">
-                <div className="w-1 h-6 bg-gradient-brand rounded-full mr-3"></div>
+            <section className="bg-white dark:bg-navy-800 rounded-xl sm:rounded-2xl shadow-xl border border-gray-100 dark:border-navy-700 p-4 sm:p-6">
+              <h2 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white mb-4 sm:mb-6 flex items-center">
+                <div className="w-1 h-5 sm:h-6 bg-gradient-brand rounded-full mr-2 sm:mr-3"></div>
                 User Documents ({user.documents.length})
               </h2>
               {user.documents.length > 0 ? (
@@ -815,7 +816,7 @@ export default function UserDetail() {
             </section>
 
             {/* Activity Log */}
-            <section className="bg-white dark:bg-navy-800 rounded-2xl shadow-xl border border-gray-100 dark:border-navy-700 p-6">
+            <section className="bg-white dark:bg-navy-800 rounded-xl sm:rounded-2xl shadow-xl border border-gray-100 dark:border-navy-700 p-4 sm:p-6">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
                 <div>
                   <h2 className="text-xl font-bold text-gray-900 dark:text-white flex items-center">

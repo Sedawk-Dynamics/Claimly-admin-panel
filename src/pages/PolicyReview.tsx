@@ -489,53 +489,55 @@ export default function PolicyReview() {
         </div>
       )}
       {selectedPolicy && (
-        <div className="fixed inset-0 z-40 flex items-center justify-center px-4 py-6">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 md:p-6">
           <div
-            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            className="absolute inset-0 bg-black/60 dark:bg-black/70 backdrop-blur-sm"
             onClick={closePolicyDetail}
           ></div>
-          <div className="relative z-50 w-full max-w-5xl bg-white dark:bg-navy-900 rounded-3xl shadow-2xl flex flex-col max-h-[90vh]">
-            <div className="flex items-start justify-between gap-4 p-6 border-b border-gray-100 dark:border-navy-700">
-              <div>
+          <div className="relative z-50 w-full max-w-md sm:max-w-lg md:max-w-2xl lg:max-w-4xl xl:max-w-5xl bg-white dark:bg-navy-900 rounded-2xl sm:rounded-3xl shadow-2xl flex flex-col max-h-[95vh] sm:max-h-[90vh]">
+            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 sm:gap-4 p-4 sm:p-6 border-b border-gray-100 dark:border-navy-700">
+              <div className="min-w-0 flex-1">
                 <p className="text-xs font-semibold uppercase text-gray-500 dark:text-gray-400">Policy Review</p>
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-white">{selectedPolicy.policyNumber}</h2>
-                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white truncate">{selectedPolicy.policyNumber}</h2>
+                <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-1 break-words">
                   {selectedPolicy.insuranceCompany.name} • Added {new Date(selectedPolicy.uploadedAt).toLocaleDateString()}
                 </p>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-shrink-0">
                 <button
                   onClick={() => navigate(`/users/${selectedPolicy.user.id}`)}
-                  className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-brand-600 dark:text-brand-300 bg-brand-50 dark:bg-brand-900/30 border border-brand-200 dark:border-brand-500 rounded-xl hover:bg-brand-100 dark:hover:bg-brand-900/50 transition-all"
+                  className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold text-brand-600 dark:text-brand-300 bg-brand-50 dark:bg-brand-900/30 border border-brand-200 dark:border-brand-500 rounded-lg sm:rounded-xl hover:bg-brand-100 dark:hover:bg-brand-900/50 transition-all"
                   title="View all user details"
                 >
-                  <User className="w-4 h-4" />
-                  View User Details
+                  <User className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                  <span className="hidden sm:inline">View User Details</span>
+                  <span className="sm:hidden">View User</span>
                 </button>
                 <button
                   onClick={closePolicyDetail}
                   className="p-2 rounded-full bg-gray-100 dark:bg-navy-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-navy-700 transition-colors"
+                  aria-label="Close"
                 >
-                  <X className="w-5 h-5" />
+                  <X className="w-4 h-4 sm:w-5 sm:h-5" />
                 </button>
               </div>
             </div>
-            <div className="p-6 overflow-y-auto space-y-6">
+            <div className="p-4 sm:p-6 overflow-y-auto space-y-4 sm:space-y-6">
               {/* Policy Details */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                <div className="p-4 rounded-2xl border border-gray-200 dark:border-navy-700 bg-gray-50 dark:bg-navy-800/40">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+                <div className="p-3 sm:p-4 rounded-xl sm:rounded-2xl border border-gray-200 dark:border-navy-700 bg-gray-50 dark:bg-navy-800/40">
                   <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Policy Number</p>
-                  <p className="text-lg font-bold text-gray-900 dark:text-white mt-1">{selectedPolicy.policyNumber}</p>
+                  <p className="text-base sm:text-lg font-bold text-gray-900 dark:text-white mt-1 break-words">{selectedPolicy.policyNumber}</p>
                 </div>
-                <div className="p-4 rounded-2xl border border-gray-200 dark:border-navy-700 bg-gray-50 dark:bg-navy-800/40">
+                <div className="p-3 sm:p-4 rounded-xl sm:rounded-2xl border border-gray-200 dark:border-navy-700 bg-gray-50 dark:bg-navy-800/40">
                   <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Sum Assured</p>
-                  <p className="text-lg font-bold text-gray-900 dark:text-white mt-1">
+                  <p className="text-base sm:text-lg font-bold text-gray-900 dark:text-white mt-1">
                     ₹{parseFloat(selectedPolicy.sumAssured).toLocaleString('en-IN')}
                   </p>
                 </div>
-                <div className="p-4 rounded-2xl border border-gray-200 dark:border-navy-700 bg-gray-50 dark:bg-navy-800/40">
+                <div className="p-3 sm:p-4 rounded-xl sm:rounded-2xl border border-gray-200 dark:border-navy-700 bg-gray-50 dark:bg-navy-800/40">
                   <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Status</p>
-                  <p className="text-lg font-bold text-gray-900 dark:text-white mt-1">
+                  <p className="text-base sm:text-lg font-bold text-gray-900 dark:text-white mt-1">
                     {selectedPolicy.status === 'ACCEPTED' ? (
                       <span className="text-green-600 dark:text-green-400">Accepted</span>
                     ) : selectedPolicy.status === 'REJECTED' ? (
@@ -547,19 +549,19 @@ export default function PolicyReview() {
                     )}
                   </p>
                 </div>
-                <div className="p-4 rounded-2xl border border-gray-200 dark:border-navy-700 bg-gray-50 dark:bg-navy-800/40">
+                <div className="p-3 sm:p-4 rounded-xl sm:rounded-2xl border border-gray-200 dark:border-navy-700 bg-gray-50 dark:bg-navy-800/40">
                   <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Insurance Company</p>
-                  <p className="text-lg font-bold text-gray-900 dark:text-white mt-1">{selectedPolicy.insuranceCompany.name}</p>
+                  <p className="text-base sm:text-lg font-bold text-gray-900 dark:text-white mt-1 break-words">{selectedPolicy.insuranceCompany.name}</p>
                 </div>
-                <div className="p-4 rounded-2xl border border-gray-200 dark:border-navy-700 bg-gray-50 dark:bg-navy-800/40">
+                <div className="p-3 sm:p-4 rounded-xl sm:rounded-2xl border border-gray-200 dark:border-navy-700 bg-gray-50 dark:bg-navy-800/40">
                   <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">User</p>
-                  <p className="text-lg font-bold text-gray-900 dark:text-white mt-1">{selectedPolicy.user.name}</p>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">{selectedPolicy.user.email || 'No email'}</p>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">{selectedPolicy.user.mobileNumber}</p>
+                  <p className="text-base sm:text-lg font-bold text-gray-900 dark:text-white mt-1 break-words">{selectedPolicy.user.name}</p>
+                  <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 break-words">{selectedPolicy.user.email || 'No email'}</p>
+                  <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 break-words">{selectedPolicy.user.mobileNumber}</p>
                 </div>
-                <div className="p-4 rounded-2xl border border-gray-200 dark:border-navy-700 bg-gray-50 dark:bg-navy-800/40">
+                <div className="p-3 sm:p-4 rounded-xl sm:rounded-2xl border border-gray-200 dark:border-navy-700 bg-gray-50 dark:bg-navy-800/40">
                   <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Uploaded At</p>
-                  <p className="text-sm font-semibold text-gray-900 dark:text-white mt-1">
+                  <p className="text-xs sm:text-sm font-semibold text-gray-900 dark:text-white mt-1">
                     {new Date(selectedPolicy.uploadedAt).toLocaleDateString()}
                   </p>
                   <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
@@ -570,13 +572,13 @@ export default function PolicyReview() {
 
               {/* Linked Nominees */}
               <div>
-                <div className="flex items-center justify-between mb-4">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-4 mb-3 sm:mb-4">
                   <div>
-                    <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center">
-                      <UserPlus className="w-5 h-5 mr-2 text-brand-500" />
-                      Linked Nominees ({selectedPolicy.nominees?.length || 0})
+                    <h3 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white flex items-center flex-wrap">
+                      <UserPlus className="w-4 h-4 sm:w-5 sm:h-5 mr-2 text-brand-500 flex-shrink-0" />
+                      <span>Linked Nominees ({selectedPolicy.nominees?.length || 0})</span>
                     </h3>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">Nominees linked to this policy</p>
+                    <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-1">Nominees linked to this policy</p>
                   </div>
                 </div>
                 {selectedPolicy.nominees && selectedPolicy.nominees.length > 0 ? (
@@ -584,7 +586,7 @@ export default function PolicyReview() {
                     {selectedPolicy.nominees.map((nomineeLink) => (
                       <div
                         key={nomineeLink.id}
-                        className="p-4 rounded-2xl border border-gray-200 dark:border-navy-700 bg-white dark:bg-navy-800 shadow-sm"
+                        className="p-3 sm:p-4 rounded-xl sm:rounded-2xl border border-gray-200 dark:border-navy-700 bg-white dark:bg-navy-800 shadow-sm"
                       >
                         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                           <div className="flex-1">
