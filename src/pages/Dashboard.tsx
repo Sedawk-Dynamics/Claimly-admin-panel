@@ -781,7 +781,7 @@ export default function Dashboard() {
                   </Pie>
                   <Tooltip 
                     wrapperStyle={{ fontSize: '0.75rem' }}
-                    formatter={(value: number, name: string, props: any) => {
+                    formatter={(value: number, name: string) => {
                       const total = stats.policyStatusStats.reduce((sum, item) => sum + item.value, 0);
                       const percent = total > 0 ? ((value / total) * 100).toFixed(1) : '0';
                       return [`${value} (${percent}%)`, name];
