@@ -233,24 +233,24 @@ export default function Alerts() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div className="flex items-center space-x-4">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
+        <div className="flex items-center space-x-3 sm:space-x-4">
           <div className="relative">
             <div className="absolute inset-0 bg-gradient-fire rounded-xl blur-lg opacity-60 animate-pulse-glow-orange"></div>
-            <div className="relative p-3 bg-gradient-to-br from-yellow-500 to-orange-500 rounded-xl shadow-glow-yellow">
-              <Zap className="w-7 h-7 text-white" />
+            <div className="relative p-2 sm:p-3 bg-gradient-to-br from-yellow-500 to-orange-500 rounded-xl shadow-glow-yellow">
+              <Zap className="w-5 h-5 sm:w-7 sm:h-7 text-white" />
             </div>
           </div>
           <div>
-            <h1 className="text-3xl sm:text-4xl font-bold text-gradient-fire">Alerts</h1>
-            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Monitor and verify system alerts</p>
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gradient-fire">Alerts</h1>
+            <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mt-1">Monitor and verify system alerts</p>
           </div>
         </div>
         <div className="flex flex-wrap gap-2">
           {selectedAlerts.size > 0 && (
             <button
               onClick={handleBulkVerify}
-              className="btn-brand flex items-center space-x-2"
+              className="btn-brand flex items-center justify-center space-x-2 text-sm sm:text-base px-4 sm:px-6 py-2 sm:py-3 w-full sm:w-auto"
             >
               <CheckSquare className="w-4 h-4" />
               <span>Bulk Verify ({selectedAlerts.size})</span>
@@ -294,45 +294,48 @@ export default function Alerts() {
       )}
 
       {/* Search and Filters */}
-      <div className="card p-5 border border-cyan-400/20">
-        <div className="flex flex-col md:flex-row gap-4">
+      <div className="card p-4 sm:p-5 border border-cyan-400/20">
+        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
           <div className="flex-1 relative">
-            <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-cyan-500 dark:text-cyan-400 w-5 h-5" />
+            <Search className="absolute left-3 sm:left-4 top-1/2 transform -translate-y-1/2 text-cyan-500 dark:text-cyan-400 w-4 h-4 sm:w-5 sm:h-5" />
             <input
               type="text"
-              placeholder="Search by user name, email, mobile, or remarks..."
+              placeholder="Search alerts..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-              className="w-full pl-12 pr-4 py-3 border-2 border-cyan-400/30 dark:border-cyan-500/30 rounded-xl bg-white dark:bg-navy-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-cyan-400 dark:focus:ring-cyan-500 focus:border-cyan-400 dark:focus:border-cyan-500 transition-all duration-300 placeholder:text-gray-400"
+              className="w-full pl-10 sm:pl-12 pr-3 sm:pr-4 py-2.5 sm:py-3 text-sm sm:text-base border-2 border-cyan-400/30 dark:border-cyan-500/30 rounded-xl bg-white dark:bg-navy-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-cyan-400 dark:focus:ring-cyan-500 focus:border-cyan-400 dark:focus:border-cyan-500 transition-all duration-300 placeholder:text-gray-400"
             />
           </div>
-          <button
-            onClick={handleSearch}
-            className="btn-cyan"
-          >
-            Search
-          </button>
-          <button
-            onClick={() => setShowFilters(!showFilters)}
-            className="btn-outline-brand flex items-center space-x-2"
-          >
-            <Filter className="w-4 h-4" />
-            <span>Filters</span>
-          </button>
+          <div className="flex gap-2 sm:gap-3">
+            <button
+              onClick={handleSearch}
+              className="btn-cyan flex-1 sm:flex-none text-sm sm:text-base px-4 sm:px-6"
+            >
+              Search
+            </button>
+            <button
+              onClick={() => setShowFilters(!showFilters)}
+              className="btn-outline-brand flex items-center justify-center space-x-2 flex-1 sm:flex-none text-sm sm:text-base px-4 sm:px-6"
+            >
+              <Filter className="w-4 h-4" />
+              <span className="hidden xs:inline">Filters</span>
+              <span className="xs:hidden">Filter</span>
+            </button>
+          </div>
         </div>
 
         {showFilters && (
-          <div className="mt-4 pt-4 border-t border-gray-200 dark:border-navy-700 grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="mt-4 pt-4 border-t border-gray-200 dark:border-navy-700 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             <div>
-              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Detection Method</label>
+              <label className="block text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Detection Method</label>
               <select
                 value={detectedViaFilter || ''}
                 onChange={(e) => {
                   setDetectedViaFilter((e.target.value as 'SMS' | 'MANUAL' | '') || undefined);
                   setPage(1);
                 }}
-                className="input-elegant w-full"
+                className="input-elegant w-full text-sm sm:text-base"
               >
                 <option value="">All</option>
                 <option value="SMS">SMS</option>
@@ -340,14 +343,14 @@ export default function Alerts() {
               </select>
             </div>
             <div>
-              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Alert Type</label>
+              <label className="block text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Alert Type</label>
               <select
                 value={alertTypeFilter || ''}
                 onChange={(e) => {
                   setAlertTypeFilter(e.target.value || undefined);
                   setPage(1);
                 }}
-                className="input-elegant w-full"
+                className="input-elegant w-full text-sm sm:text-base"
               >
                 <option value="">All Types</option>
                 <option value="NEW_USER">New User</option>
@@ -357,9 +360,9 @@ export default function Alerts() {
                 <option value="OTHER">Other</option>
               </select>
             </div>
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Date Range</label>
-              <div className="flex space-x-2">
+            <div className="sm:col-span-2 lg:col-span-1">
+              <label className="block text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Date Range</label>
+              <div className="flex flex-col sm:flex-row gap-2">
                 <input
                   type="date"
                   value={startDate}
@@ -367,7 +370,7 @@ export default function Alerts() {
                     setStartDate(e.target.value);
                     setPage(1);
                   }}
-                  className="input-elegant flex-1"
+                  className="input-elegant flex-1 text-sm sm:text-base"
                 />
                 <input
                   type="date"
@@ -376,7 +379,7 @@ export default function Alerts() {
                     setEndDate(e.target.value);
                     setPage(1);
                   }}
-                  className="input-elegant flex-1"
+                  className="input-elegant flex-1 text-sm sm:text-base"
                 />
               </div>
             </div>
@@ -385,13 +388,13 @@ export default function Alerts() {
       </div>
 
       {/* Status Filters */}
-      <div className="flex flex-wrap gap-3">
+      <div className="flex flex-wrap gap-2 sm:gap-3">
         <button
           onClick={() => {
             setStatusFilter(undefined);
             setPage(1);
           }}
-          className={`px-5 py-2.5 rounded-xl font-semibold transition-all ${statusFilter === undefined
+          className={`px-3 sm:px-5 py-2 sm:py-2.5 rounded-xl font-semibold text-sm sm:text-base transition-all ${statusFilter === undefined
             ? 'bg-gradient-brand text-white shadow-glow-brand'
             : 'bg-white dark:bg-navy-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-navy-700 hover:border-brand-400 dark:hover:border-brand-500'
             }`}
@@ -403,7 +406,7 @@ export default function Alerts() {
             setStatusFilter('PENDING');
             setPage(1);
           }}
-          className={`px-5 py-2.5 rounded-xl font-semibold transition-all ${statusFilter === 'PENDING'
+          className={`px-3 sm:px-5 py-2 sm:py-2.5 rounded-xl font-semibold text-sm sm:text-base transition-all ${statusFilter === 'PENDING'
             ? 'bg-gradient-to-r from-yellow-400 to-yellow-500 text-white shadow-glow-yellow'
             : 'bg-white dark:bg-navy-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-navy-700 hover:border-yellow-400 dark:hover:border-yellow-500'
             }`}
@@ -415,7 +418,7 @@ export default function Alerts() {
             setStatusFilter('VERIFIED');
             setPage(1);
           }}
-          className={`px-5 py-2.5 rounded-xl font-semibold transition-all ${statusFilter === 'VERIFIED'
+          className={`px-3 sm:px-5 py-2 sm:py-2.5 rounded-xl font-semibold text-sm sm:text-base transition-all ${statusFilter === 'VERIFIED'
             ? 'bg-gradient-to-r from-cyan-400 to-cyan-500 text-white shadow-glow-cyan'
             : 'bg-white dark:bg-navy-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-navy-700 hover:border-cyan-400 dark:hover:border-cyan-500'
             }`}
@@ -427,7 +430,7 @@ export default function Alerts() {
             setStatusFilter('FALSE_ALERT');
             setPage(1);
           }}
-          className={`px-5 py-2.5 rounded-xl font-semibold transition-all ${statusFilter === 'FALSE_ALERT'
+          className={`px-3 sm:px-5 py-2 sm:py-2.5 rounded-xl font-semibold text-sm sm:text-base transition-all ${statusFilter === 'FALSE_ALERT'
             ? 'bg-gradient-sunset text-white shadow-glow-orange'
             : 'bg-white dark:bg-navy-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-navy-700 hover:border-orange-400 dark:hover:border-orange-500'
             }`}
@@ -437,7 +440,7 @@ export default function Alerts() {
       </div>
 
       {error && (
-        <div className="bg-gradient-to-r from-orange-50 to-yellow-50 dark:from-orange-950/30 dark:to-yellow-950/30 border-2 border-orange-400 dark:border-orange-500 text-orange-700 dark:text-orange-400 px-5 py-4 rounded-xl shadow-glow-orange">
+        <div className="bg-gradient-to-r from-orange-50 to-yellow-50 dark:from-orange-950/30 dark:to-yellow-950/30 border-2 border-orange-400 dark:border-orange-500 text-orange-700 dark:text-orange-400 px-4 sm:px-5 py-3 sm:py-4 rounded-xl shadow-glow-orange text-sm sm:text-base">
           {error}
         </div>
       )}
@@ -452,131 +455,256 @@ export default function Alerts() {
         </div>
       ) : (
         <>
-          <div className="card elevated overflow-hidden border border-yellow-400/20">
-            <table className="min-w-full divide-y divide-gray-200 dark:divide-navy-700">
-              <thead className="bg-gradient-to-r from-navy-900 via-yellow-900/50 to-navy-900 dark:from-navy-950 dark:via-yellow-950/50 dark:to-navy-950">
-                <tr>
-                  <th className="px-6 py-4 text-left">
-                    <button onClick={toggleSelectAll} className="flex items-center">
-                      {selectedAlerts.size === alerts?.data.length && alerts.data.length > 0 ? (
-                        <CheckSquare className="w-5 h-5 text-yellow-400" />
-                      ) : (
-                        <Square className="w-5 h-5 text-gray-400" />
-                      )}
-                    </button>
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-bold text-yellow-400 uppercase tracking-wider">
-                    Alert
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-bold text-yellow-400 uppercase tracking-wider">
-                    User
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-bold text-yellow-400 uppercase tracking-wider">
-                    Status
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-bold text-yellow-400 uppercase tracking-wider">
-                    Date
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-bold text-yellow-400 uppercase tracking-wider">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white dark:bg-navy-900 divide-y divide-gray-200 dark:divide-navy-700">
-                {alerts?.data && alerts.data.length > 0 ? (
-                  alerts.data.map((alert) => (
-                    <tr key={alert.id} className="hover:bg-yellow-50 dark:hover:bg-yellow-950/10 transition-all duration-200 group">
-                      <td className="px-6 py-4" onClick={(e) => e.stopPropagation()}>
-                        <button onClick={() => toggleSelectAlert(alert.id)}>
-                          {selectedAlerts.has(alert.id) ? (
-                            <CheckSquare className="w-5 h-5 text-yellow-500 dark:text-yellow-400" />
-                          ) : (
-                            <Square className="w-5 h-5 text-gray-400" />
-                          )}
-                        </button>
-                      </td>
-                      <td className="px-6 py-4 cursor-pointer" onClick={() => handleViewAlert(alert)}>
-                        <div className="flex items-start space-x-3">
-                          <div className="p-2 bg-gradient-to-br from-yellow-100 to-orange-100 dark:from-yellow-900/30 dark:to-orange-900/30 rounded-lg group-hover:scale-110 transition-transform">
-                            {getAlertTypeIcon(alert.alertType)}
-                          </div>
-                          <div>
-                            <div className="text-sm font-bold text-gray-900 dark:text-white">
-                              {getAlertTypeLabel(alert.alertType)}
+          {/* Desktop Table View */}
+          <div className="hidden lg:block card elevated overflow-hidden border border-yellow-400/20">
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200 dark:divide-navy-700">
+                <thead className="bg-gradient-to-r from-navy-900 via-yellow-900/50 to-navy-900 dark:from-navy-950 dark:via-yellow-950/50 dark:to-navy-950">
+                  <tr>
+                    <th className="px-6 py-4 text-left">
+                      <button onClick={toggleSelectAll} className="flex items-center">
+                        {selectedAlerts.size === alerts?.data.length && alerts.data.length > 0 ? (
+                          <CheckSquare className="w-5 h-5 text-yellow-400" />
+                        ) : (
+                          <Square className="w-5 h-5 text-gray-400" />
+                        )}
+                      </button>
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-bold text-yellow-400 uppercase tracking-wider">
+                      Alert
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-bold text-yellow-400 uppercase tracking-wider">
+                      User
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-bold text-yellow-400 uppercase tracking-wider">
+                      Status
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-bold text-yellow-400 uppercase tracking-wider">
+                      Date
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-bold text-yellow-400 uppercase tracking-wider">
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white dark:bg-navy-900 divide-y divide-gray-200 dark:divide-navy-700">
+                  {alerts?.data && alerts.data.length > 0 ? (
+                    alerts.data.map((alert) => (
+                      <tr key={alert.id} className="hover:bg-yellow-50 dark:hover:bg-yellow-950/10 transition-all duration-200 group">
+                        <td className="px-6 py-4" onClick={(e) => e.stopPropagation()}>
+                          <button onClick={() => toggleSelectAlert(alert.id)}>
+                            {selectedAlerts.has(alert.id) ? (
+                              <CheckSquare className="w-5 h-5 text-yellow-500 dark:text-yellow-400" />
+                            ) : (
+                              <Square className="w-5 h-5 text-gray-400" />
+                            )}
+                          </button>
+                        </td>
+                        <td className="px-6 py-4 cursor-pointer" onClick={() => handleViewAlert(alert)}>
+                          <div className="flex items-start space-x-3">
+                            <div className="p-2 bg-gradient-to-br from-yellow-100 to-orange-100 dark:from-yellow-900/30 dark:to-orange-900/30 rounded-lg group-hover:scale-110 transition-transform">
+                              {getAlertTypeIcon(alert.alertType)}
                             </div>
-                            <div className="text-xs text-gray-600 dark:text-gray-400 mt-1">{alert.detectedVia}</div>
-                            {alert.smsText && (
-                              <div className="flex items-start mt-1 space-x-1">
-                                <MessageSquare className="w-3 h-3 text-gray-400 mt-0.5 flex-shrink-0" />
-                                <span className="text-xs text-gray-500 dark:text-gray-500 line-clamp-1 italic">"{alert.smsText}"</span>
+                            <div>
+                              <div className="text-sm font-bold text-gray-900 dark:text-white">
+                                {getAlertTypeLabel(alert.alertType)}
                               </div>
-                            )}
-                            {alert.remarks && (
-                              <div className="text-xs text-gray-500 dark:text-gray-500 mt-1 line-clamp-1">{alert.remarks}</div>
-                            )}
+                              <div className="text-xs text-gray-600 dark:text-gray-400 mt-1">{alert.detectedVia}</div>
+                              {alert.smsText && (
+                                <div className="flex items-start mt-1 space-x-1">
+                                  <MessageSquare className="w-3 h-3 text-gray-400 mt-0.5 flex-shrink-0" />
+                                  <span className="text-xs text-gray-500 dark:text-gray-500 line-clamp-1 italic">"{alert.smsText}"</span>
+                                </div>
+                              )}
+                              {alert.remarks && (
+                                <div className="text-xs text-gray-500 dark:text-gray-500 mt-1 line-clamp-1">{alert.remarks}</div>
+                              )}
+                            </div>
                           </div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 cursor-pointer" onClick={() => handleViewAlert(alert)}>
-                        <div className="text-sm font-medium text-gray-900 dark:text-white">{alert.user?.name || 'N/A'}</div>
-                        <div className="text-sm text-gray-600 dark:text-gray-400">{alert.user?.email || 'N/A'}</div>
-                        <div className="text-xs text-gray-500 dark:text-gray-500">{alert.user?.mobileNumber || 'N/A'}</div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap cursor-pointer" onClick={() => handleViewAlert(alert)}>
-                        <div className="flex items-center space-x-2">
-                          {getStatusIcon(alert.verificationStatus)}
-                          <span className={getStatusColor(alert.verificationStatus)}>
-                            {alert.verificationStatus}
-                          </span>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap cursor-pointer" onClick={() => handleViewAlert(alert)}>
-                        <div className="text-sm font-semibold text-gray-900 dark:text-white">
-                          {format(new Date(alert.createdAt), 'MMM dd, yyyy')}
-                        </div>
-                        <div className="text-sm text-gray-600 dark:text-gray-400">
-                          {format(new Date(alert.createdAt), 'hh:mm a')}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium" onClick={(e) => e.stopPropagation()}>
-                        <div className="flex items-center space-x-2">
-                          <button
-                            onClick={() => handleVerify(alert)}
-                            className="text-brand-600 dark:text-cyan-400 hover:text-white dark:hover:text-white hover:bg-gradient-brand dark:hover:bg-gradient-cyan px-3 py-1.5 rounded-lg transition-all font-semibold"
-                          >
-                            {alert.verificationStatus === 'PENDING' ? 'Verify' : 'Edit'}
-                          </button>
-                          <button
-                            onClick={() => handleDeleteAlert(alert)}
-                            className="text-red-600 dark:text-red-400 hover:text-white dark:hover:text-white hover:bg-gradient-to-r hover:from-red-500 hover:to-orange-500 dark:hover:from-red-600 dark:hover:to-orange-600 px-3 py-1.5 rounded-lg transition-all font-semibold flex items-center space-x-1"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                            <span>Delete</span>
-                          </button>
+                        </td>
+                        <td className="px-6 py-4 cursor-pointer" onClick={() => handleViewAlert(alert)}>
+                          <div className="text-sm font-medium text-gray-900 dark:text-white">{alert.user?.name || 'N/A'}</div>
+                          <div className="text-sm text-gray-600 dark:text-gray-400">{alert.user?.email || 'N/A'}</div>
+                          <div className="text-xs text-gray-500 dark:text-gray-500">{alert.user?.mobileNumber || 'N/A'}</div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap cursor-pointer" onClick={() => handleViewAlert(alert)}>
+                          <div className="flex items-center space-x-2">
+                            {getStatusIcon(alert.verificationStatus)}
+                            <span className={getStatusColor(alert.verificationStatus)}>
+                              {alert.verificationStatus}
+                            </span>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap cursor-pointer" onClick={() => handleViewAlert(alert)}>
+                          <div className="text-sm font-semibold text-gray-900 dark:text-white">
+                            {format(new Date(alert.createdAt), 'MMM dd, yyyy')}
+                          </div>
+                          <div className="text-sm text-gray-600 dark:text-gray-400">
+                            {format(new Date(alert.createdAt), 'hh:mm a')}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium" onClick={(e) => e.stopPropagation()}>
+                          <div className="flex items-center space-x-2">
+                            <button
+                              onClick={() => handleVerify(alert)}
+                              className="text-brand-600 dark:text-cyan-400 hover:text-white dark:hover:text-white hover:bg-gradient-brand dark:hover:bg-gradient-cyan px-3 py-1.5 rounded-lg transition-all font-semibold"
+                            >
+                              {alert.verificationStatus === 'PENDING' ? 'Verify' : 'Edit'}
+                            </button>
+                            <button
+                              onClick={() => handleDeleteAlert(alert)}
+                              className="text-red-600 dark:text-red-400 hover:text-white dark:hover:text-white hover:bg-gradient-to-r hover:from-red-500 hover:to-orange-500 dark:hover:from-red-600 dark:hover:to-orange-600 px-3 py-1.5 rounded-lg transition-all font-semibold flex items-center space-x-1"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                              <span>Delete</span>
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan={6} className="px-6 py-16 text-center">
+                        <div className="flex flex-col items-center space-y-4">
+                          <div className="p-4 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-navy-800 dark:to-navy-900 rounded-2xl">
+                            <Bell className="w-16 h-16 text-gray-400 dark:text-gray-600" />
+                          </div>
+                          <p className="text-sm font-semibold text-gray-900 dark:text-white">No alerts found</p>
                         </div>
                       </td>
                     </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan={6} className="px-6 py-16 text-center">
-                      <div className="flex flex-col items-center space-y-4">
-                        <div className="p-4 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-navy-800 dark:to-navy-900 rounded-2xl">
-                          <Bell className="w-16 h-16 text-gray-400 dark:text-gray-600" />
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* Mobile/Tablet Card View */}
+          <div className="lg:hidden space-y-4">
+            {alerts?.data && alerts.data.length > 0 ? (
+              alerts.data.map((alert) => (
+                <div
+                  key={alert.id}
+                  className="card p-4 sm:p-5 border border-yellow-400/20 hover:border-yellow-400/40 transition-all"
+                >
+                  <div className="flex items-start justify-between gap-3 mb-3">
+                    <div className="flex items-start space-x-3 flex-1 min-w-0">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleSelectAlert(alert.id);
+                        }}
+                        className="flex-shrink-0 mt-1"
+                      >
+                        {selectedAlerts.has(alert.id) ? (
+                          <CheckSquare className="w-5 h-5 text-yellow-500 dark:text-yellow-400" />
+                        ) : (
+                          <Square className="w-5 h-5 text-gray-400" />
+                        )}
+                      </button>
+                      <div
+                        className="flex items-start space-x-3 flex-1 min-w-0 cursor-pointer"
+                        onClick={() => handleViewAlert(alert)}
+                      >
+                        <div className="p-2 bg-gradient-to-br from-yellow-100 to-orange-100 dark:from-yellow-900/30 dark:to-orange-900/30 rounded-lg flex-shrink-0">
+                          {getAlertTypeIcon(alert.alertType)}
                         </div>
-                        <p className="text-sm font-semibold text-gray-900 dark:text-white">No alerts found</p>
+                        <div className="min-w-0 flex-1">
+                          <div className="text-base font-bold text-gray-900 dark:text-white">
+                            {getAlertTypeLabel(alert.alertType)}
+                          </div>
+                          <div className="text-xs text-gray-600 dark:text-gray-400 mt-1">{alert.detectedVia}</div>
+                        </div>
                       </div>
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
+                    </div>
+                    <div className="flex items-center space-x-2 flex-shrink-0">
+                      {getStatusIcon(alert.verificationStatus)}
+                      <span className={`${getStatusColor(alert.verificationStatus)} text-xs`}>
+                        {alert.verificationStatus}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div
+                    className="space-y-2 mb-4 cursor-pointer"
+                    onClick={() => handleViewAlert(alert)}
+                  >
+                    {alert.user && (
+                      <div className="flex items-start space-x-2">
+                        <Users className="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" />
+                        <div className="min-w-0 flex-1">
+                          <div className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                            {alert.user.name || 'N/A'}
+                          </div>
+                          <div className="text-xs text-gray-600 dark:text-gray-400 truncate">
+                            {alert.user.email || 'N/A'}
+                          </div>
+                          <div className="text-xs text-gray-500 dark:text-gray-500 truncate">
+                            {alert.user.mobileNumber || 'N/A'}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                    <div className="flex items-center space-x-2">
+                      <Bell className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                      <div className="text-xs text-gray-600 dark:text-gray-400">
+                        {format(new Date(alert.createdAt), 'MMM dd, yyyy')} at {format(new Date(alert.createdAt), 'hh:mm a')}
+                      </div>
+                    </div>
+                    {alert.smsText && (
+                      <div className="flex items-start space-x-2 pt-2 border-t border-gray-200 dark:border-navy-700">
+                        <MessageSquare className="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" />
+                        <span className="text-xs text-gray-500 dark:text-gray-500 line-clamp-2 italic flex-1">
+                          "{alert.smsText}"
+                        </span>
+                      </div>
+                    )}
+                    {alert.remarks && (
+                      <div className="text-xs text-gray-500 dark:text-gray-500 line-clamp-2 pt-2 border-t border-gray-200 dark:border-navy-700">
+                        {alert.remarks}
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="flex flex-col sm:flex-row gap-2 pt-3 border-t border-gray-200 dark:border-navy-700" onClick={(e) => e.stopPropagation()}>
+                    <button
+                      onClick={() => handleViewAlert(alert)}
+                      className="flex-1 btn-brand text-sm py-2 flex items-center justify-center space-x-2"
+                    >
+                      <span>View Details</span>
+                    </button>
+                    <button
+                      onClick={() => handleVerify(alert)}
+                      className="flex-1 text-brand-600 dark:text-cyan-400 hover:text-white dark:hover:text-white hover:bg-gradient-brand dark:hover:bg-gradient-cyan px-3 py-2 rounded-lg transition-all font-semibold text-sm border border-brand-500 dark:border-cyan-500"
+                    >
+                      {alert.verificationStatus === 'PENDING' ? 'Verify' : 'Edit'}
+                    </button>
+                    <button
+                      onClick={() => handleDeleteAlert(alert)}
+                      className="flex-1 text-red-600 dark:text-red-400 hover:text-white dark:hover:text-white hover:bg-gradient-to-r hover:from-red-500 hover:to-orange-500 dark:hover:from-red-600 dark:hover:to-orange-600 px-3 py-2 rounded-lg transition-all font-semibold text-sm flex items-center justify-center space-x-1 border border-red-500 dark:border-red-500"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                      <span>Delete</span>
+                    </button>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="card p-8 text-center border border-yellow-400/20">
+                <div className="flex flex-col items-center space-y-4">
+                  <div className="p-4 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-navy-800 dark:to-navy-900 rounded-2xl">
+                    <Bell className="w-16 h-16 text-gray-400 dark:text-gray-600" />
+                  </div>
+                  <p className="text-sm font-semibold text-gray-900 dark:text-white">No alerts found</p>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Pagination */}
           {alerts && alerts.pagination.totalPages > 1 && (
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-3 card p-4 sm:p-5 border border-yellow-400/20">
-              <div className="text-sm text-gray-700 dark:text-gray-300 text-center sm:text-left">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-3 card p-3 sm:p-4 lg:p-5 border border-yellow-400/20">
+              <div className="text-xs sm:text-sm text-gray-700 dark:text-gray-300 text-center sm:text-left">
                 Showing <span className="font-bold text-yellow-500 dark:text-yellow-400">{((page - 1) * limit) + 1}</span> to{' '}
                 <span className="font-bold text-yellow-500 dark:text-yellow-400">{Math.min(page * limit, alerts.pagination.total)}</span> of{' '}
                 <span className="font-bold text-yellow-500 dark:text-yellow-400">{alerts.pagination.total}</span> results
@@ -585,16 +713,18 @@ export default function Alerts() {
                 <button
                   onClick={() => setPage(page - 1)}
                   disabled={page === 1}
-                  className="px-4 py-2.5 border-2 border-yellow-400 dark:border-yellow-500 text-yellow-500 dark:text-yellow-400 rounded-lg disabled:opacity-30 disabled:cursor-not-allowed hover:bg-gradient-to-r hover:from-yellow-400 hover:to-orange-500 hover:text-white hover:border-transparent transition-all font-semibold disabled:hover:bg-transparent disabled:hover:text-yellow-500 dark:disabled:hover:text-yellow-400 hover:scale-105"
+                  className="px-3 sm:px-4 py-2 sm:py-2.5 border-2 border-yellow-400 dark:border-yellow-500 text-yellow-500 dark:text-yellow-400 rounded-lg disabled:opacity-30 disabled:cursor-not-allowed hover:bg-gradient-to-r hover:from-yellow-400 hover:to-orange-500 hover:text-white hover:border-transparent transition-all font-semibold disabled:hover:bg-transparent disabled:hover:text-yellow-500 dark:disabled:hover:text-yellow-400 hover:scale-105"
+                  aria-label="Previous page"
                 >
-                  <ChevronLeft className="w-5 h-5" />
+                  <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" />
                 </button>
                 <button
                   onClick={() => setPage(page + 1)}
                   disabled={page >= alerts.pagination.totalPages}
-                  className="px-4 py-2.5 border-2 border-yellow-400 dark:border-yellow-500 text-yellow-500 dark:text-yellow-400 rounded-lg disabled:opacity-30 disabled:cursor-not-allowed hover:bg-gradient-to-r hover:from-yellow-400 hover:to-orange-500 hover:text-white hover:border-transparent transition-all font-semibold disabled:hover:bg-transparent disabled:hover:text-yellow-500 dark:disabled:hover:text-yellow-400 hover:scale-105"
+                  className="px-3 sm:px-4 py-2 sm:py-2.5 border-2 border-yellow-400 dark:border-yellow-500 text-yellow-500 dark:text-yellow-400 rounded-lg disabled:opacity-30 disabled:cursor-not-allowed hover:bg-gradient-to-r hover:from-yellow-400 hover:to-orange-500 hover:text-white hover:border-transparent transition-all font-semibold disabled:hover:bg-transparent disabled:hover:text-yellow-500 dark:disabled:hover:text-yellow-400 hover:scale-105"
+                  aria-label="Next page"
                 >
-                  <ChevronRight className="w-5 h-5" />
+                  <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
                 </button>
               </div>
             </div>

@@ -375,6 +375,12 @@ export const adminService = {
     });
   },
 
+  async deletePolicyDocument(documentId: string): Promise<void> {
+    await api.delete(`/admin/documents/document/${documentId}`, {
+      data: { documentType: 'policy' },
+    });
+  },
+
   async acceptPolicyWithoutDocuments(policyId: string): Promise<void> {
     await api.post(`/admin/documents/accept-entity/${policyId}`, {
       entityType: 'policy',
@@ -444,6 +450,12 @@ export const adminService = {
   async rejectNomineeDocument(documentId: string): Promise<void> {
     await api.patch(`/admin/documents/reject-document/${documentId}`, {
       documentType: 'nominee',
+    });
+  },
+
+  async deleteNomineeDocument(documentId: string): Promise<void> {
+    await api.delete(`/admin/documents/document/${documentId}`, {
+      data: { documentType: 'nominee' },
     });
   },
 
