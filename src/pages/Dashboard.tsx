@@ -8,13 +8,11 @@ import {
   PieChart, LineChart, Zap, History, UserPlus,
   PlusCircle, Edit, Trash2
 } from 'lucide-react';
-import { format, subDays } from 'date-fns';
+import { format, subDays, subMonths, startOfDay, endOfDay } from 'date-fns';
 import {
-  LineChart as RechartsLineChart,
   AreaChart,
   BarChart,
   PieChart as RechartsPieChart,
-  Line,
   Area,
   Bar,
   Pie,
@@ -43,32 +41,93 @@ interface DashboardStats {
   documentStats: any[];
   alertDetectionStats: any[];
   policyStatusStats: any[];
-  companyStatusStats: any[];
 }
 
 // Helper to aggregate data by date
-const aggregateByDate = (items: any[], dateField: string, days: number = 7) => {
+const aggregateByDate = (
+  items: any[], 
+  dateField: string, 
+  startDate: Date, 
+  endDate: Date,
+  groupBy: 'day' | 'week' | 'month' = 'day'
+) => {
   const data: Record<string, number> = {};
-  const today = new Date();
-
-  // Initialize all days with 0
-  for (let i = 0; i < days; i++) {
-    const date = subDays(today, i);
-    const dateStr = format(date, 'yyyy-MM-dd');
-    data[dateStr] = 0;
+  const current = new Date(startDate);
+  
+  // Initialize all periods with 0
+  while (current <= endDate) {
+    let key: string;
+    if (groupBy === 'day') {
+      key = format(current, 'yyyy-MM-dd');
+      current.setDate(current.getDate() + 1);
+    } else if (groupBy === 'week') {
+      const weekStart = startOfDay(current);
+      key = format(weekStart, 'yyyy-MM-dd');
+      current.setDate(current.getDate() + 7);
+    } else {
+      key = format(current, 'yyyy-MM');
+      current.setMonth(current.getMonth() + 1);
+    }
+    data[key] = 0;
   }
 
-  // Count items per day
+  // Count items per period
   items.forEach(item => {
     if (item[dateField]) {
-      const dateStr = format(new Date(item[dateField]), 'yyyy-MM-dd');
-      if (data[dateStr] !== undefined) {
-        data[dateStr]++;
+      const itemDate = new Date(item[dateField]);
+      if (itemDate >= startDate && itemDate <= endDate) {
+        let key: string;
+        if (groupBy === 'day') {
+          key = format(itemDate, 'yyyy-MM-dd');
+        } else if (groupBy === 'week') {
+          const weekStart = startOfDay(itemDate);
+          key = format(weekStart, 'yyyy-MM-dd');
+        } else {
+          key = format(itemDate, 'yyyy-MM');
+        }
+        if (data[key] !== undefined) {
+          data[key]++;
+        }
       }
     }
   });
 
   return data;
+};
+
+// Helper to get date range and group by based on period
+const getTrendConfig = (period: string) => {
+  const today = endOfDay(new Date());
+  let startDate: Date;
+  let endDate: Date = today;
+  let groupBy: 'day' | 'week' | 'month' = 'day';
+  let dateFormat: string = 'MMM dd';
+
+  if (period === '7days') {
+    startDate = startOfDay(subDays(today, 6));
+    groupBy = 'day';
+    dateFormat = 'MMM dd';
+  } else if (period === '30days') {
+    startDate = startOfDay(subDays(today, 29));
+    groupBy = 'day';
+    dateFormat = 'MMM dd';
+  } else if (period === '3months') {
+    startDate = startOfDay(subMonths(today, 3));
+    groupBy = 'week';
+    dateFormat = 'MMM dd';
+  } else if (period === '6months') {
+    startDate = startOfDay(subMonths(today, 6));
+    groupBy = 'month';
+    dateFormat = 'MMM yyyy';
+  } else if (period === '1year') {
+    startDate = startOfDay(subMonths(today, 12));
+    groupBy = 'month';
+    dateFormat = 'MMM yyyy';
+  } else {
+    startDate = startOfDay(subDays(today, 6));
+  }
+
+  return { startDate, endDate, groupBy, dateFormat };
 };
 
 const COLORS = {
@@ -100,17 +159,18 @@ export default function Dashboard() {
     documentStats: [],
     alertDetectionStats: [],
     policyStatusStats: [],
-    companyStatusStats: [],
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [trendPeriod, setTrendPeriod] = useState<'7days' | '30days' | '3months' | '6months' | '1year'>('7days');
 
   useEffect(() => {
     loadAllStats();
     // Auto-refresh every 5 minutes
     const interval = setInterval(loadAllStats, 5 * 60 * 1000);
     return () => clearInterval(interval);
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [trendPeriod]);
 
   const loadAllStats = async () => {
     try {
@@ -131,7 +191,6 @@ export default function Dashboard() {
         trendPoliciesData,
         trendAlertsData,
         allPoliciesData,
-        allCompaniesData,
       ] = await Promise.all([
         adminService.getAlertStats().catch(() => null),
         adminService.getUsers(1, 1).catch(() => ({ data: [], pagination: { total: 0, page: 1, limit: 1, totalPages: 0 } })),
@@ -142,31 +201,66 @@ export default function Dashboard() {
         adminService.getAlerts(1, 5, 'PENDING').catch(() => ({ data: [], pagination: { total: 0, page: 1, limit: 5, totalPages: 0 } })),
         adminService.getAdminActions(1, 5).catch(() => ({ data: [], pagination: { total: 0, page: 1, limit: 5, totalPages: 0 } })),
         adminService.getUsers(1, 5).catch(() => ({ data: [], pagination: { total: 0, page: 1, limit: 5, totalPages: 0 } })),
-        // Fetch more data for trends (last 100 items)
-        adminService.getUsers(1, 100).catch(() => ({ data: [], pagination: { total: 0, page: 1, limit: 100, totalPages: 0 } })),
-        adminService.getPolicies(1, 100).catch(() => ({ data: [], pagination: { total: 0, page: 1, limit: 100, totalPages: 0 } })),
-        adminService.getAlerts(1, 100).catch(() => ({ data: [], pagination: { total: 0, page: 1, limit: 100, totalPages: 0 } })),
-        // Fetch all policies and companies for status distribution
+        // Fetch more data for trends (based on selected period)
+        adminService.getUsers(1, trendPeriod === '1year' ? 1000 : 500).catch(() => ({ data: [], pagination: { total: 0, page: 1, limit: 1000, totalPages: 0 } })),
+        adminService.getPolicies(1, trendPeriod === '1year' ? 1000 : 500).catch(() => ({ data: [], pagination: { total: 0, page: 1, limit: 1000, totalPages: 0 } })),
+        adminService.getAlerts(1, trendPeriod === '1year' ? 1000 : 500).catch(() => ({ data: [], pagination: { total: 0, page: 1, limit: 1000, totalPages: 0 } })),
+        // Fetch all policies for status distribution
         adminService.getPolicies(1, 500).catch(() => ({ data: [], pagination: { total: 0, page: 1, limit: 500, totalPages: 0 } })),
-        adminService.getCompanies(1, 500).catch(() => ({ data: [], pagination: { total: 0, page: 1, limit: 500, totalPages: 0 } })),
       ]);
 
-      // Calculate trends
-      const days = 7;
-      const userTrends = aggregateByDate(trendUsersData?.data || [], 'createdAt', days);
-      const policyTrends = aggregateByDate(trendPoliciesData?.data || [], 'uploadedAt', days);
-      const alertTrends = aggregateByDate(trendAlertsData?.data || [], 'createdAt', days);
+      // Calculate trends based on selected period
+      const config = getTrendConfig(trendPeriod);
+      const userTrends = aggregateByDate(
+        trendUsersData?.data || [], 
+        'createdAt', 
+        config.startDate, 
+        config.endDate,
+        config.groupBy
+      );
+      const policyTrends = aggregateByDate(
+        trendPoliciesData?.data || [], 
+        'uploadedAt', 
+        config.startDate, 
+        config.endDate,
+        config.groupBy
+      );
+      const alertTrends = aggregateByDate(
+        trendAlertsData?.data || [], 
+        'createdAt', 
+        config.startDate, 
+        config.endDate,
+        config.groupBy
+      );
 
+      // Generate trend data array
       const trendData = [];
-      for (let i = days - 1; i >= 0; i--) {
-        const date = subDays(new Date(), i);
-        const dateStr = format(date, 'yyyy-MM-dd');
+      const current = new Date(config.startDate);
+      while (current <= config.endDate) {
+        let key: string;
+        let displayDate: string;
+        
+        if (config.groupBy === 'day') {
+          key = format(current, 'yyyy-MM-dd');
+          displayDate = format(current, config.dateFormat);
+          current.setDate(current.getDate() + 1);
+        } else if (config.groupBy === 'week') {
+          const weekStart = startOfDay(current);
+          key = format(weekStart, 'yyyy-MM-dd');
+          displayDate = format(weekStart, config.dateFormat);
+          current.setDate(current.getDate() + 7);
+        } else {
+          key = format(current, 'yyyy-MM');
+          displayDate = format(current, config.dateFormat);
+          current.setMonth(current.getMonth() + 1);
+        }
+        
         trendData.push({
-          date: format(date, 'MMM dd'),
-          fullDate: dateStr,
-          users: userTrends[dateStr] || 0,
-          policies: policyTrends[dateStr] || 0,
-          alerts: alertTrends[dateStr] || 0,
+          date: displayDate,
+          fullDate: key,
+          users: userTrends[key] || 0,
+          policies: policyTrends[key] || 0,
+          alerts: alertTrends[key] || 0,
         });
       }
 
@@ -249,25 +343,6 @@ export default function Dashboard() {
         }))
         .filter(item => item.value > 0);
 
-      // Calculate Company Status Distribution
-      const companyStatusCounts: Record<string, number> = {
-        ACTIVE: 0,
-        INACTIVE: 0,
-      };
-      (allCompaniesData?.data || []).forEach((company: any) => {
-        const status = company.status || 'INACTIVE';
-        if (companyStatusCounts[status] !== undefined) {
-          companyStatusCounts[status]++;
-        }
-      });
-      const companyStatusStats = Object.entries(companyStatusCounts)
-        .map(([name, value]) => ({
-          name,
-          value,
-          color: name === 'ACTIVE' ? COLORS.success : COLORS.danger
-        }))
-        .filter(item => item.value > 0);
-
       setStats({
         alertStats,
         totalUsers: usersData.pagination.total,
@@ -284,7 +359,6 @@ export default function Dashboard() {
         documentStats,
         alertDetectionStats,
         policyStatusStats,
-        companyStatusStats,
       });
     } catch (err: any) {
       setError(err.response?.data?.error || 'Failed to load dashboard statistics');
@@ -418,15 +492,34 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
         {/* Growth Trends - Area Chart */}
         <div className="card p-4 sm:p-6 min-h-[280px] flex flex-col">
-          <div className="flex items-center justify-between mb-4 sm:mb-6">
+          <div className="flex items-center justify-between mb-4 sm:mb-6 flex-wrap gap-3">
             <div className="flex items-center gap-2 sm:gap-3">
               <div className="p-1.5 sm:p-2 bg-gradient-to-br from-brand-500 to-cyan-400 rounded-lg">
                 <LineChart className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
               </div>
               <div>
                 <h3 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white">Growth Trends</h3>
-                <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">Last 7 days</p>
+                <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
+                  {trendPeriod === '7days' ? 'Last 7 days'
+                    : trendPeriod === '30days' ? 'Last 30 days'
+                    : trendPeriod === '3months' ? 'Last 3 months'
+                    : trendPeriod === '6months' ? 'Last 6 months'
+                    : 'Last 1 year'}
+                </p>
               </div>
+            </div>
+            <div className="flex items-center gap-2 flex-wrap">
+              <select
+                value={trendPeriod}
+                onChange={(e) => setTrendPeriod(e.target.value as typeof trendPeriod)}
+                className="input-elegant text-xs sm:text-sm py-1.5 sm:py-2 px-2 sm:px-3 min-w-[120px]"
+              >
+                <option value="7days">7 Days</option>
+                <option value="30days">30 Days</option>
+                <option value="3months">3 Months</option>
+                <option value="6months">6 Months</option>
+                <option value="1year">1 Year</option>
+              </select>
             </div>
           </div>
           <div className="mt-2 flex-1 min-h-[220px]">
@@ -546,81 +639,6 @@ export default function Dashboard() {
             </div>
           </div>
         )}
-
-        {/* Activity Over Time - Line Chart */}
-        <div className="card p-4 sm:p-6 min-h-[280px] flex flex-col">
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-gradient-to-br from-cyan-400 to-brand-500 rounded-lg">
-                <Activity className="w-5 h-5 text-white" />
-              </div>
-              <div>
-                <h3 className="text-lg font-bold text-gray-900 dark:text-white">Activity Over Time</h3>
-                <p className="text-sm text-gray-500 dark:text-gray-400">Daily activity</p>
-              </div>
-            </div>
-          </div>
-          <div className="mt-2 flex-1 min-h-[220px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <RechartsLineChart
-                data={trendData}
-                margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
-              >
-                <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
-                <XAxis
-                  dataKey="date"
-                  className="text-xs"
-                  stroke="currentColor"
-                  style={{ fill: 'currentColor' }}
-                  interval="preserveStartEnd"
-                />
-                <YAxis
-                  className="text-xs"
-                  stroke="currentColor"
-                  style={{ fill: 'currentColor' }}
-                  width={32}
-                />
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: 'rgba(15,23,42,0.95)',
-                    border: '1px solid rgba(51,65,85,0.8)',
-                    borderRadius: '8px',
-                  }}
-                  labelStyle={{ color: '#ffffff' }}
-                  wrapperStyle={{ fontSize: '0.75rem' }}
-                />
-                <Legend wrapperStyle={{ fontSize: '0.75rem' }} />
-                <Line
-                  type="monotone"
-                  dataKey="users"
-                  stroke={COLORS.brand}
-                  strokeWidth={2}
-                  dot={isHighDensityTrend ? false : { fill: COLORS.brand, r: 3 }}
-                  name="Users"
-                  isAnimationActive={!isHighDensityTrend}
-                />
-                <Line
-                  type="monotone"
-                  dataKey="policies"
-                  stroke={COLORS.sunset}
-                  strokeWidth={2}
-                  dot={isHighDensityTrend ? false : { fill: COLORS.sunset, r: 3 }}
-                  name="Policies"
-                  isAnimationActive={!isHighDensityTrend}
-                />
-                <Line
-                  type="monotone"
-                  dataKey="alerts"
-                  stroke={COLORS.fire}
-                  strokeWidth={2}
-                  dot={isHighDensityTrend ? false : { fill: COLORS.fire, r: 3 }}
-                  name="Alerts"
-                  isAnimationActive={!isHighDensityTrend}
-                />
-              </RechartsLineChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
 
         {/* Subscription Distribution - Pie Chart */}
         {stats.subscriptionStats.length > 0 && (
@@ -751,7 +769,7 @@ export default function Dashboard() {
                     cx="50%"
                     cy="50%"
                     labelLine={false}
-                    label={({ name, percent }) => `${name}: ${((percent || 0) * 100).toFixed(0)}%`}
+                    label={false}
                     outerRadius="80%"
                     fill="#8884d8"
                     dataKey="value"
@@ -761,47 +779,14 @@ export default function Dashboard() {
                       <Cell key={`cell-${index}`} fill={entry.color} />
                     ))}
                   </Pie>
-                  <Tooltip wrapperStyle={{ fontSize: '0.75rem' }} />
-                  <Legend wrapperStyle={{ fontSize: '0.75rem' }} />
-                </RechartsPieChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
-        )}
-
-        {/* Company Status Distribution - Pie Chart */}
-        {stats.companyStatusStats.length > 0 && (
-          <div className="card p-4 sm:p-6 min-h-[280px] flex flex-col">
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-lg">
-                  <Building2 className="w-5 h-5 text-white" />
-                </div>
-                <div>
-                  <h3 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white">Company Status</h3>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">Active vs Inactive</p>
-                </div>
-              </div>
-            </div>
-            <div className="mt-2 flex-1 min-h-[220px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <RechartsPieChart>
-                  <Pie
-                    data={stats.companyStatusStats}
-                    cx="50%"
-                    cy="50%"
-                    labelLine={false}
-                    label={({ name, percent }) => `${name}: ${((percent || 0) * 100).toFixed(0)}%`}
-                    outerRadius="80%"
-                    fill="#8884d8"
-                    dataKey="value"
-                    isAnimationActive={stats.companyStatusStats.length < 20}
-                  >
-                    {stats.companyStatusStats.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
-                    ))}
-                  </Pie>
-                  <Tooltip wrapperStyle={{ fontSize: '0.75rem' }} />
+                  <Tooltip 
+                    wrapperStyle={{ fontSize: '0.75rem' }}
+                    formatter={(value: number, name: string, props: any) => {
+                      const total = stats.policyStatusStats.reduce((sum, item) => sum + item.value, 0);
+                      const percent = total > 0 ? ((value / total) * 100).toFixed(1) : '0';
+                      return [`${value} (${percent}%)`, name];
+                    }}
+                  />
                   <Legend wrapperStyle={{ fontSize: '0.75rem' }} />
                 </RechartsPieChart>
               </ResponsiveContainer>
