@@ -200,6 +200,10 @@ export const adminService = {
     return response.data.data;
   },
 
+  async deleteAlert(id: string): Promise<void> {
+    await api.delete(`/admin/alerts/${id}`);
+  },
+
   // Admin Actions
   async getAdminActions(page = 1, limit = 20): Promise<PaginatedResponse<AdminAction>> {
     const params = new URLSearchParams({ page: page.toString(), limit: limit.toString() });

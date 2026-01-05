@@ -18,6 +18,7 @@ import {
   Square,
   Zap,
   MessageSquare,
+  Trash2,
 } from 'lucide-react';
 import { format } from 'date-fns';
 
@@ -142,6 +143,18 @@ export default function Alerts() {
       alert('Alerts verified successfully');
     } catch (err: any) {
       alert(err.response?.data?.error || 'Failed to verify alerts');
+    }
+  };
+
+  const handleDeleteAlert = async (alert: Alert) => {
+    if (!confirm(`Are you sure you want to delete this alert? This action cannot be undone.`)) return;
+
+    try {
+      await adminService.deleteAlert(alert.id);
+      loadAlerts();
+      loadStats();
+    } catch (err: any) {
+      alert(err.response?.data?.error || 'Failed to delete alert');
     }
   };
 
@@ -526,12 +539,21 @@ export default function Alerts() {
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium" onClick={(e) => e.stopPropagation()}>
-                        <button
-                          onClick={() => handleVerify(alert)}
-                          className="text-brand-600 dark:text-cyan-400 hover:text-white dark:hover:text-white hover:bg-gradient-brand dark:hover:bg-gradient-cyan px-3 py-1.5 rounded-lg transition-all font-semibold"
-                        >
-                          {alert.verificationStatus === 'PENDING' ? 'Verify' : 'Edit'}
-                        </button>
+                        <div className="flex items-center space-x-2">
+                          <button
+                            onClick={() => handleVerify(alert)}
+                            className="text-brand-600 dark:text-cyan-400 hover:text-white dark:hover:text-white hover:bg-gradient-brand dark:hover:bg-gradient-cyan px-3 py-1.5 rounded-lg transition-all font-semibold"
+                          >
+                            {alert.verificationStatus === 'PENDING' ? 'Verify' : 'Edit'}
+                          </button>
+                          <button
+                            onClick={() => handleDeleteAlert(alert)}
+                            className="text-red-600 dark:text-red-400 hover:text-white dark:hover:text-white hover:bg-gradient-to-r hover:from-red-500 hover:to-orange-500 dark:hover:from-red-600 dark:hover:to-orange-600 px-3 py-1.5 rounded-lg transition-all font-semibold flex items-center space-x-1"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                            <span>Delete</span>
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))
@@ -742,6 +764,17 @@ export default function Alerts() {
                   className="flex-1 btn-brand text-sm sm:text-base py-2.5 sm:py-3"
                 >
                   {selectedAlertForDetail.verificationStatus === 'PENDING' ? 'Verify Alert' : 'Edit Verification'}
+                </button>
+                <button
+                  onClick={() => {
+                    handleDeleteAlert(selectedAlertForDetail);
+                    setShowDetailModal(false);
+                    setSelectedAlertForDetail(null);
+                  }}
+                  className="flex-1 bg-red-500 hover:bg-red-600 dark:bg-red-600 dark:hover:bg-red-700 text-white py-2.5 sm:py-3 rounded-lg transition-all font-semibold text-sm sm:text-base flex items-center justify-center space-x-2"
+                >
+                  <Trash2 className="w-4 h-4" />
+                  <span>Delete</span>
                 </button>
                 <button
                   onClick={() => {
