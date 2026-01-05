@@ -146,11 +146,11 @@ export default function Alerts() {
     }
   };
 
-  const handleDeleteAlert = async (alert: Alert) => {
+  const handleDeleteAlert = async (alertItem: Alert) => {
     if (!confirm(`Are you sure you want to delete this alert? This action cannot be undone.`)) return;
 
     try {
-      await adminService.deleteAlert(alert.id);
+      await adminService.deleteAlert(alertItem.id);
       loadAlerts();
       loadStats();
     } catch (err: any) {
