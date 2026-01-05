@@ -5,7 +5,7 @@ import { AlertStats, Alert, AdminAction, User } from '../types';
 import {
   Users, Building2, FileText, AlertCircle, CheckCircle, XCircle,
   ShieldCheck, Clock, ArrowRight, TrendingUp, TrendingDown, Activity,
-  BarChart3, PieChart, LineChart, Zap, History, UserPlus,
+  PieChart, LineChart, Zap, History, UserPlus,
   PlusCircle, Edit, Trash2
 } from 'lucide-react';
 import { format, subDays } from 'date-fns';
@@ -42,6 +42,8 @@ interface DashboardStats {
   companyStats: any[];
   documentStats: any[];
   alertDetectionStats: any[];
+  policyStatusStats: any[];
+  companyStatusStats: any[];
 }
 
 // Helper to aggregate data by date
@@ -97,6 +99,8 @@ export default function Dashboard() {
     companyStats: [],
     documentStats: [],
     alertDetectionStats: [],
+    policyStatusStats: [],
+    companyStatusStats: [],
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -126,6 +130,8 @@ export default function Dashboard() {
         trendUsersData,
         trendPoliciesData,
         trendAlertsData,
+        allPoliciesData,
+        allCompaniesData,
       ] = await Promise.all([
         adminService.getAlertStats().catch(() => null),
         adminService.getUsers(1, 1).catch(() => ({ data: [], pagination: { total: 0, page: 1, limit: 1, totalPages: 0 } })),
@@ -140,6 +146,9 @@ export default function Dashboard() {
         adminService.getUsers(1, 100).catch(() => ({ data: [], pagination: { total: 0, page: 1, limit: 100, totalPages: 0 } })),
         adminService.getPolicies(1, 100).catch(() => ({ data: [], pagination: { total: 0, page: 1, limit: 100, totalPages: 0 } })),
         adminService.getAlerts(1, 100).catch(() => ({ data: [], pagination: { total: 0, page: 1, limit: 100, totalPages: 0 } })),
+        // Fetch all policies and companies for status distribution
+        adminService.getPolicies(1, 500).catch(() => ({ data: [], pagination: { total: 0, page: 1, limit: 500, totalPages: 0 } })),
+        adminService.getCompanies(1, 500).catch(() => ({ data: [], pagination: { total: 0, page: 1, limit: 500, totalPages: 0 } })),
       ]);
 
       // Calculate trends
@@ -216,6 +225,49 @@ export default function Dashboard() {
         { name: 'Manual', value: alertStats?.manualAlerts || 0, color: COLORS.fire },
       ].filter(item => item.value > 0);
 
+      // Calculate Policy Status Distribution
+      const policyStatusCounts: Record<string, number> = {
+        DRAFT: 0,
+        PENDING: 0,
+        ACCEPTED: 0,
+        REJECTED: 0,
+      };
+      (allPoliciesData?.data || []).forEach((policy: any) => {
+        const status = policy.status || 'DRAFT';
+        if (policyStatusCounts[status] !== undefined) {
+          policyStatusCounts[status]++;
+        }
+      });
+      const policyStatusStats = Object.entries(policyStatusCounts)
+        .map(([name, value]) => ({
+          name,
+          value,
+          color: name === 'ACCEPTED' ? COLORS.success : 
+                 name === 'PENDING' ? COLORS.yellow : 
+                 name === 'REJECTED' ? COLORS.danger : 
+                 COLORS.cyan
+        }))
+        .filter(item => item.value > 0);
+
+      // Calculate Company Status Distribution
+      const companyStatusCounts: Record<string, number> = {
+        ACTIVE: 0,
+        INACTIVE: 0,
+      };
+      (allCompaniesData?.data || []).forEach((company: any) => {
+        const status = company.status || 'INACTIVE';
+        if (companyStatusCounts[status] !== undefined) {
+          companyStatusCounts[status]++;
+        }
+      });
+      const companyStatusStats = Object.entries(companyStatusCounts)
+        .map(([name, value]) => ({
+          name,
+          value,
+          color: name === 'ACTIVE' ? COLORS.success : COLORS.danger
+        }))
+        .filter(item => item.value > 0);
+
       setStats({
         alertStats,
         totalUsers: usersData.pagination.total,
@@ -231,6 +283,8 @@ export default function Dashboard() {
         companyStats,
         documentStats,
         alertDetectionStats,
+        policyStatusStats,
+        companyStatusStats,
       });
     } catch (err: any) {
       setError(err.response?.data?.error || 'Failed to load dashboard statistics');
@@ -244,7 +298,6 @@ export default function Dashboard() {
 
   // Flags to optimize rendering for larger datasets
   const isHighDensityTrend = trendData.length > 30;
-  const isManyAlertTypes = stats.alertStats && Object.keys(stats.alertStats.typeStats || {}).length > 15;
 
   // Alert status distribution for pie chart
   const alertDistribution = useMemo(() => {
@@ -254,15 +307,6 @@ export default function Dashboard() {
       { name: 'Pending', value: stats.alertStats.pending, color: COLORS.yellow },
       { name: 'False Alerts', value: stats.alertStats.falseAlerts, color: COLORS.danger },
     ].filter(item => item.value > 0);
-  }, [stats.alertStats]);
-
-  // Alert type distribution
-  const alertTypeData = useMemo(() => {
-    if (!stats.alertStats?.typeStats) return [];
-    return Object.entries(stats.alertStats.typeStats)
-      .map(([name, value]) => ({ name: name.replace('_', ' '), value }))
-      .filter(item => item.value > 0)
-      .sort((a, b) => b.value - a.value);
   }, [stats.alertStats]);
 
   // Calculate growth percentages (mock for now)
@@ -680,6 +724,86 @@ export default function Dashboard() {
                     ))}
                   </Bar>
                 </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+        )}
+
+        {/* Policy Status Distribution - Pie Chart */}
+        {stats.policyStatusStats.length > 0 && (
+          <div className="card p-4 sm:p-6 min-h-[280px] flex flex-col">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-lg">
+                  <FileText className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white">Policy Status</h3>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">Distribution</p>
+                </div>
+              </div>
+            </div>
+            <div className="mt-2 flex-1 min-h-[220px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <RechartsPieChart>
+                  <Pie
+                    data={stats.policyStatusStats}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={false}
+                    label={({ name, percent }) => `${name}: ${((percent || 0) * 100).toFixed(0)}%`}
+                    outerRadius="80%"
+                    fill="#8884d8"
+                    dataKey="value"
+                    isAnimationActive={stats.policyStatusStats.length < 20}
+                  >
+                    {stats.policyStatusStats.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Pie>
+                  <Tooltip wrapperStyle={{ fontSize: '0.75rem' }} />
+                  <Legend wrapperStyle={{ fontSize: '0.75rem' }} />
+                </RechartsPieChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+        )}
+
+        {/* Company Status Distribution - Pie Chart */}
+        {stats.companyStatusStats.length > 0 && (
+          <div className="card p-4 sm:p-6 min-h-[280px] flex flex-col">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-lg">
+                  <Building2 className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white">Company Status</h3>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">Active vs Inactive</p>
+                </div>
+              </div>
+            </div>
+            <div className="mt-2 flex-1 min-h-[220px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <RechartsPieChart>
+                  <Pie
+                    data={stats.companyStatusStats}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={false}
+                    label={({ name, percent }) => `${name}: ${((percent || 0) * 100).toFixed(0)}%`}
+                    outerRadius="80%"
+                    fill="#8884d8"
+                    dataKey="value"
+                    isAnimationActive={stats.companyStatusStats.length < 20}
+                  >
+                    {stats.companyStatusStats.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Pie>
+                  <Tooltip wrapperStyle={{ fontSize: '0.75rem' }} />
+                  <Legend wrapperStyle={{ fontSize: '0.75rem' }} />
+                </RechartsPieChart>
               </ResponsiveContainer>
             </div>
           </div>
