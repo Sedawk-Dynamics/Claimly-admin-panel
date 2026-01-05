@@ -604,7 +604,9 @@ export default function Dashboard() {
                     className="text-[10px] sm:text-xs"
                     stroke="currentColor"
                     style={{ fill: 'currentColor' }}
-                    interval="auto"
+                    angle={-45}
+                    textAnchor="end"
+                    height={60}
                   />
                   <YAxis
                     className="text-[10px] sm:text-xs"
