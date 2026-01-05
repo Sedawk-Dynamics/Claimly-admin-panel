@@ -242,6 +242,10 @@ export default function Dashboard() {
   // Generate trend data based on current stats
   const trendData = stats.trendData;
 
+  // Flags to optimize rendering for larger datasets
+  const isHighDensityTrend = trendData.length > 30;
+  const isManyAlertTypes = stats.alertStats && Object.keys(stats.alertStats.typeStats || {}).length > 15;
+
   // Alert status distribution for pie chart
   const alertDistribution = useMemo(() => {
     if (!stats.alertStats) return [];
@@ -369,7 +373,7 @@ export default function Dashboard() {
       {/* Charts Section */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
         {/* Growth Trends - Area Chart */}
-        <div className="card p-4 sm:p-6">
+        <div className="card p-4 sm:p-6 min-h-[280px] flex flex-col">
           <div className="flex items-center justify-between mb-4 sm:mb-6">
             <div className="flex items-center gap-2 sm:gap-3">
               <div className="p-1.5 sm:p-2 bg-gradient-to-br from-brand-500 to-cyan-400 rounded-lg">
@@ -381,8 +385,12 @@ export default function Dashboard() {
               </div>
             </div>
           </div>
-          <ResponsiveContainer width="100%" height={250}>
-            <AreaChart data={trendData}>
+          <div className="mt-2 flex-1 min-h-[220px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart
+                data={trendData}
+                margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
+              >
               <defs>
                 <linearGradient id="colorUsers" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%" stopColor={COLORS.brand} stopOpacity={0.8} />
@@ -397,58 +405,65 @@ export default function Dashboard() {
                   <stop offset="95%" stopColor={COLORS.fire} stopOpacity={0} />
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
-              <XAxis
-                dataKey="date"
-                className="text-xs"
-                stroke="currentColor"
-                style={{ fill: 'currentColor' }}
-              />
-              <YAxis
-                className="text-xs"
-                stroke="currentColor"
-                style={{ fill: 'currentColor' }}
-              />
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: 'var(--tw-color-gray-800)',
-                  border: '1px solid var(--tw-color-gray-700)',
-                  borderRadius: '8px',
-                }}
-                labelStyle={{ color: 'var(--tw-color-white)' }}
-              />
-              <Legend />
-              <Area
-                type="monotone"
-                dataKey="users"
-                stroke={COLORS.brand}
-                fillOpacity={1}
-                fill="url(#colorUsers)"
-                name="Users"
-              />
-              <Area
-                type="monotone"
-                dataKey="policies"
-                stroke={COLORS.sunset}
-                fillOpacity={1}
-                fill="url(#colorPolicies)"
-                name="Policies"
-              />
-              <Area
-                type="monotone"
-                dataKey="alerts"
-                stroke={COLORS.fire}
-                fillOpacity={1}
-                fill="url(#colorAlerts)"
-                name="Alerts"
-              />
-            </AreaChart>
-          </ResponsiveContainer>
+                <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
+                <XAxis
+                  dataKey="date"
+                  className="text-xs"
+                  stroke="currentColor"
+                  style={{ fill: 'currentColor' }}
+                  interval="preserveStartEnd"
+                />
+                <YAxis
+                  className="text-xs"
+                  stroke="currentColor"
+                  style={{ fill: 'currentColor' }}
+                  width={32}
+                />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: 'rgba(15,23,42,0.95)',
+                    border: '1px solid rgba(51,65,85,0.8)',
+                    borderRadius: '8px',
+                  }}
+                  labelStyle={{ color: '#ffffff' }}
+                  wrapperStyle={{ fontSize: '0.75rem' }}
+                />
+                <Legend wrapperStyle={{ fontSize: '0.75rem' }} />
+                <Area
+                  type="monotone"
+                  dataKey="users"
+                  stroke={COLORS.brand}
+                  fillOpacity={1}
+                  fill="url(#colorUsers)"
+                  name="Users"
+                  isAnimationActive={!isHighDensityTrend}
+                />
+                <Area
+                  type="monotone"
+                  dataKey="policies"
+                  stroke={COLORS.sunset}
+                  fillOpacity={1}
+                  fill="url(#colorPolicies)"
+                  name="Policies"
+                  isAnimationActive={!isHighDensityTrend}
+                />
+                <Area
+                  type="monotone"
+                  dataKey="alerts"
+                  stroke={COLORS.fire}
+                  fillOpacity={1}
+                  fill="url(#colorAlerts)"
+                  name="Alerts"
+                  isAnimationActive={!isHighDensityTrend}
+                />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
         </div>
 
         {/* Alert Status Distribution - Pie Chart */}
         {alertDistribution.length > 0 && (
-          <div className="card p-6">
+          <div className="card p-4 sm:p-6 min-h-[280px] flex flex-col">
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-gradient-to-br from-sunset-400 to-yellow-400 rounded-lg">
@@ -460,31 +475,36 @@ export default function Dashboard() {
                 </div>
               </div>
             </div>
-            <ResponsiveContainer width="100%" height={250}>
-              <RechartsPieChart>
-                <Pie
-                  data={alertDistribution}
-                  cx="50%"
-                  cy="50%"
-                  labelLine={false}
-                  label={({ name, percent }) => `${name}: ${percent ? (percent * 100).toFixed(0) : 0}%`}
-                  outerRadius={100}
-                  fill="#8884d8"
-                  dataKey="value"
-                >
-                  {alertDistribution.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
-                  ))}
-                </Pie>
-                <Tooltip />
-                <Legend />
-              </RechartsPieChart>
-            </ResponsiveContainer>
+            <div className="mt-2 flex-1 min-h-[220px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <RechartsPieChart>
+                  <Pie
+                    data={alertDistribution}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={false}
+                    label={({ name, percent }) => `${name}: ${percent ? (percent * 100).toFixed(0) : 0}%`}
+                    outerRadius="80%"
+                    fill="#8884d8"
+                    dataKey="value"
+                    isAnimationActive={alertDistribution.length < 20}
+                  >
+                    {alertDistribution.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Pie>
+                  <Tooltip
+                    wrapperStyle={{ fontSize: '0.75rem' }}
+                  />
+                  <Legend wrapperStyle={{ fontSize: '0.75rem' }} />
+                </RechartsPieChart>
+              </ResponsiveContainer>
+            </div>
           </div>
         )}
 
         {/* Activity Over Time - Line Chart */}
-        <div className="card p-6">
+        <div className="card p-4 sm:p-6 min-h-[280px] flex flex-col">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-3">
               <div className="p-2 bg-gradient-to-br from-cyan-400 to-brand-500 rounded-lg">
@@ -496,60 +516,71 @@ export default function Dashboard() {
               </div>
             </div>
           </div>
-          <ResponsiveContainer width="100%" height={250}>
-            <RechartsLineChart data={trendData}>
-              <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
-              <XAxis
-                dataKey="date"
-                className="text-xs"
-                stroke="currentColor"
-                style={{ fill: 'currentColor' }}
-              />
-              <YAxis
-                className="text-xs"
-                stroke="currentColor"
-                style={{ fill: 'currentColor' }}
-              />
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: 'var(--tw-color-gray-800)',
-                  border: '1px solid var(--tw-color-gray-700)',
-                  borderRadius: '8px',
-                }}
-                labelStyle={{ color: 'var(--tw-color-white)' }}
-              />
-              <Legend />
-              <Line
-                type="monotone"
-                dataKey="users"
-                stroke={COLORS.brand}
-                strokeWidth={2}
-                dot={{ fill: COLORS.brand, r: 4 }}
-                name="Users"
-              />
-              <Line
-                type="monotone"
-                dataKey="policies"
-                stroke={COLORS.sunset}
-                strokeWidth={2}
-                dot={{ fill: COLORS.sunset, r: 4 }}
-                name="Policies"
-              />
-              <Line
-                type="monotone"
-                dataKey="alerts"
-                stroke={COLORS.fire}
-                strokeWidth={2}
-                dot={{ fill: COLORS.fire, r: 4 }}
-                name="Alerts"
-              />
-            </RechartsLineChart>
-          </ResponsiveContainer>
+          <div className="mt-2 flex-1 min-h-[220px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <RechartsLineChart
+                data={trendData}
+                margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
+              >
+                <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
+                <XAxis
+                  dataKey="date"
+                  className="text-xs"
+                  stroke="currentColor"
+                  style={{ fill: 'currentColor' }}
+                  interval="preserveStartEnd"
+                />
+                <YAxis
+                  className="text-xs"
+                  stroke="currentColor"
+                  style={{ fill: 'currentColor' }}
+                  width={32}
+                />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: 'rgba(15,23,42,0.95)',
+                    border: '1px solid rgba(51,65,85,0.8)',
+                    borderRadius: '8px',
+                  }}
+                  labelStyle={{ color: '#ffffff' }}
+                  wrapperStyle={{ fontSize: '0.75rem' }}
+                />
+                <Legend wrapperStyle={{ fontSize: '0.75rem' }} />
+                <Line
+                  type="monotone"
+                  dataKey="users"
+                  stroke={COLORS.brand}
+                  strokeWidth={2}
+                  dot={isHighDensityTrend ? false : { fill: COLORS.brand, r: 3 }}
+                  name="Users"
+                  isAnimationActive={!isHighDensityTrend}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="policies"
+                  stroke={COLORS.sunset}
+                  strokeWidth={2}
+                  dot={isHighDensityTrend ? false : { fill: COLORS.sunset, r: 3 }}
+                  name="Policies"
+                  isAnimationActive={!isHighDensityTrend}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="alerts"
+                  stroke={COLORS.fire}
+                  strokeWidth={2}
+                  dot={isHighDensityTrend ? false : { fill: COLORS.fire, r: 3 }}
+                  name="Alerts"
+                  isAnimationActive={!isHighDensityTrend}
+                />
+              </RechartsLineChart>
+            </ResponsiveContainer>
+          </div>
         </div>
 
         {/* Alert Types - Bar Chart */}
         {alertTypeData.length > 0 && (
-          <div className="card p-6">
+          <div className="card p-4 sm:p-6 min-h-[280px] flex flex-col">
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-gradient-to-br from-fire-500 to-orange-600 rounded-lg">
@@ -561,41 +592,54 @@ export default function Dashboard() {
                 </div>
               </div>
             </div>
-            <ResponsiveContainer width="100%" height={250}>
-              <BarChart data={alertTypeData}>
-                <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
-                <XAxis
-                  dataKey="name"
-                  className="text-xs"
-                  stroke="currentColor"
-                  style={{ fill: 'currentColor' }}
-                />
-                <YAxis
-                  className="text-xs"
-                  stroke="currentColor"
-                  style={{ fill: 'currentColor' }}
-                />
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: 'var(--tw-color-gray-800)',
-                    border: '1px solid var(--tw-color-gray-700)',
-                    borderRadius: '8px',
-                  }}
-                  labelStyle={{ color: 'var(--tw-color-white)' }}
-                />
-                <Bar dataKey="value" fill={COLORS.fire} radius={[8, 8, 0, 0]}>
-                  {alertTypeData.map((_, index) => (
-                    <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />
-                  ))}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
+            <div className="mt-2 flex-1 min-h-[220px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart
+                  data={alertTypeData}
+                  margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
+                  <XAxis
+                    dataKey="name"
+                    className="text-[10px] sm:text-xs"
+                    stroke="currentColor"
+                    style={{ fill: 'currentColor' }}
+                    interval="auto"
+                  />
+                  <YAxis
+                    className="text-[10px] sm:text-xs"
+                    stroke="currentColor"
+                    style={{ fill: 'currentColor' }}
+                    width={32}
+                  />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: 'rgba(15,23,42,0.95)',
+                      border: '1px solid rgba(51,65,85,0.8)',
+                      borderRadius: '8px',
+                    }}
+                    labelStyle={{ color: '#ffffff' }}
+                    wrapperStyle={{ fontSize: '0.75rem' }}
+                  />
+                  <Bar
+                    dataKey="value"
+                    fill={COLORS.fire}
+                    radius={[8, 8, 0, 0]}
+                    isAnimationActive={!isManyAlertTypes}
+                  >
+                    {alertTypeData.map((_, index) => (
+                      <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
           </div>
         )}
 
         {/* Subscription Distribution - Pie Chart */}
         {stats.subscriptionStats.length > 0 && (
-          <div className="card p-6">
+          <div className="card p-4 sm:p-6 min-h-[280px] flex flex-col">
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-gradient-to-br from-green-500 to-emerald-600 rounded-lg">
@@ -607,32 +651,35 @@ export default function Dashboard() {
                 </div>
               </div>
             </div>
-            <ResponsiveContainer width="100%" height={250}>
-              <RechartsPieChart>
-                <Pie
-                  data={stats.subscriptionStats}
-                  cx="50%"
-                  cy="50%"
-                  labelLine={false}
-                  label={({ name, percent }) => `${name} ${((percent || 0) * 100).toFixed(0)}%`}
-                  outerRadius={100}
-                  fill="#8884d8"
-                  dataKey="value"
-                >
-                  {stats.subscriptionStats.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
-                  ))}
-                </Pie>
-                <Tooltip />
-                <Legend />
-              </RechartsPieChart>
-            </ResponsiveContainer>
+            <div className="mt-2 flex-1 min-h-[220px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <RechartsPieChart>
+                  <Pie
+                    data={stats.subscriptionStats}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={false}
+                    label={({ name, percent }) => `${name} ${((percent || 0) * 100).toFixed(0)}%`}
+                    outerRadius="80%"
+                    fill="#8884d8"
+                    dataKey="value"
+                    isAnimationActive={stats.subscriptionStats.length < 20}
+                  >
+                    {stats.subscriptionStats.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Pie>
+                  <Tooltip wrapperStyle={{ fontSize: '0.75rem' }} />
+                  <Legend wrapperStyle={{ fontSize: '0.75rem' }} />
+                </RechartsPieChart>
+              </ResponsiveContainer>
+            </div>
           </div>
         )}
 
         {/* Policies by Company - Bar Chart */}
         {stats.companyStats.length > 0 && (
-          <div className="card p-6">
+          <div className="card p-4 sm:p-6 min-h-[280px] flex flex-col">
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-gradient-to-br from-blue-500 to-cyan-600 rounded-lg">
@@ -644,37 +691,52 @@ export default function Dashboard() {
                 </div>
               </div>
             </div>
-            <ResponsiveContainer width="100%" height={250}>
-              <BarChart data={stats.companyStats} layout="vertical">
-                <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
-                <XAxis type="number" className="text-xs" stroke="currentColor" />
-                <YAxis
-                  dataKey="name"
-                  type="category"
-                  width={100}
-                  className="text-xs"
-                  stroke="currentColor"
-                />
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: 'var(--tw-color-gray-800)',
-                    border: '1px solid var(--tw-color-gray-700)',
-                    borderRadius: '8px',
-                  }}
-                  labelStyle={{ color: 'var(--tw-color-white)' }}
-                />
-                <Bar dataKey="value" fill={COLORS.cyan} radius={[0, 8, 8, 0]}>
-                  {stats.companyStats.map((_, index) => (
-                    <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />
-                  ))}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
+            <div className="mt-2 flex-1 min-h-[220px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart
+                  data={stats.companyStats}
+                  layout="vertical"
+                  margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
+                  <XAxis
+                    type="number"
+                    className="text-[10px] sm:text-xs"
+                    stroke="currentColor"
+                  />
+                  <YAxis
+                    dataKey="name"
+                    type="category"
+                    width={110}
+                    className="text-[10px] sm:text-xs"
+                    stroke="currentColor"
+                  />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: 'rgba(15,23,42,0.95)',
+                      border: '1px solid rgba(51,65,85,0.8)',
+                      borderRadius: '8px',
+                    }}
+                    labelStyle={{ color: '#ffffff' }}
+                    wrapperStyle={{ fontSize: '0.75rem' }}
+                  />
+                  <Bar
+                    dataKey="value"
+                    fill={COLORS.cyan}
+                    radius={[0, 8, 8, 0]}
+                  >
+                    {stats.companyStats.map((_, index) => (
+                      <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
           </div>
         )}
 
         {/* Document Verification Status - Donut Chart */}
-        <div className="card p-6">
+        <div className="card p-4 sm:p-6 min-h-[280px] flex flex-col">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-3">
               <div className="p-2 bg-gradient-to-br from-yellow-500 to-orange-600 rounded-lg">
@@ -686,32 +748,34 @@ export default function Dashboard() {
               </div>
             </div>
           </div>
-          <ResponsiveContainer width="100%" height={250}>
-            <RechartsPieChart>
-              <Pie
-                data={stats.documentStats}
-                cx="50%"
-                cy="50%"
-                innerRadius={60}
-                outerRadius={100}
-                fill="#8884d8"
-                paddingAngle={5}
-                dataKey="value"
-                label={({ name, value }) => `${name}: ${value}`}
-              >
-                {stats.documentStats.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={entry.color} />
-                ))}
-              </Pie>
-              <Tooltip />
-              <Legend />
-            </RechartsPieChart>
-          </ResponsiveContainer>
+          <div className="mt-2 flex-1 min-h-[220px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <RechartsPieChart>
+                <Pie
+                  data={stats.documentStats}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius="55%"
+                  outerRadius="80%"
+                  fill="#8884d8"
+                  paddingAngle={5}
+                  dataKey="value"
+                  label={({ name, value }) => `${name}: ${value}`}
+                >
+                  {stats.documentStats.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.color} />
+                  ))}
+                </Pie>
+                <Tooltip wrapperStyle={{ fontSize: '0.75rem' }} />
+                <Legend wrapperStyle={{ fontSize: '0.75rem' }} />
+              </RechartsPieChart>
+            </ResponsiveContainer>
+          </div>
         </div>
 
         {/* Alert Detection Method - Pie Chart (8th Graph) */}
         {stats.alertDetectionStats.length > 0 && (
-          <div className="card p-6">
+          <div className="card p-4 sm:p-6 min-h-[280px] flex flex-col">
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-gradient-to-br from-indigo-500 to-violet-600 rounded-lg">
@@ -723,26 +787,29 @@ export default function Dashboard() {
                 </div>
               </div>
             </div>
-            <ResponsiveContainer width="100%" height={250}>
-              <RechartsPieChart>
-                <Pie
-                  data={stats.alertDetectionStats}
-                  cx="50%"
-                  cy="50%"
-                  labelLine={false}
-                  label={({ name, percent }) => `${name} ${((percent || 0) * 100).toFixed(0)}%`}
-                  outerRadius={100}
-                  fill="#8884d8"
-                  dataKey="value"
-                >
-                  {stats.alertDetectionStats.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
-                  ))}
-                </Pie>
-                <Tooltip />
-                <Legend />
-              </RechartsPieChart>
-            </ResponsiveContainer>
+            <div className="mt-2 flex-1 min-h-[220px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <RechartsPieChart>
+                  <Pie
+                    data={stats.alertDetectionStats}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={false}
+                    label={({ name, percent }) => `${name} ${((percent || 0) * 100).toFixed(0)}%`}
+                    outerRadius="80%"
+                    fill="#8884d8"
+                    dataKey="value"
+                    isAnimationActive={stats.alertDetectionStats.length < 20}
+                  >
+                    {stats.alertDetectionStats.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Pie>
+                  <Tooltip wrapperStyle={{ fontSize: '0.75rem' }} />
+                  <Legend wrapperStyle={{ fontSize: '0.75rem' }} />
+                </RechartsPieChart>
+              </ResponsiveContainer>
+            </div>
           </div>
         )}
       </div>
