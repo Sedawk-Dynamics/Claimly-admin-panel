@@ -578,67 +578,6 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Alert Types - Bar Chart */}
-        {alertTypeData.length > 0 && (
-          <div className="card p-4 sm:p-6 min-h-[280px] flex flex-col">
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-gradient-to-br from-fire-500 to-orange-600 rounded-lg">
-                  <BarChart3 className="w-5 h-5 text-white" />
-                </div>
-                <div>
-                  <h3 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white">Alert Types</h3>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">By category</p>
-                </div>
-              </div>
-            </div>
-            <div className="mt-2 flex-1 min-h-[220px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart
-                  data={alertTypeData}
-                  margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
-                >
-                  <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
-                  <XAxis
-                    dataKey="name"
-                    className="text-[10px] sm:text-xs"
-                    stroke="currentColor"
-                    style={{ fill: 'currentColor' }}
-                    angle={-45}
-                    textAnchor="end"
-                    height={60}
-                  />
-                  <YAxis
-                    className="text-[10px] sm:text-xs"
-                    stroke="currentColor"
-                    style={{ fill: 'currentColor' }}
-                    width={32}
-                  />
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: 'rgba(15,23,42,0.95)',
-                      border: '1px solid rgba(51,65,85,0.8)',
-                      borderRadius: '8px',
-                    }}
-                    labelStyle={{ color: '#ffffff' }}
-                    wrapperStyle={{ fontSize: '0.75rem' }}
-                  />
-                  <Bar
-                    dataKey="value"
-                    fill={COLORS.fire}
-                    radius={[8, 8, 0, 0]}
-                    isAnimationActive={!isManyAlertTypes}
-                  >
-                    {alertTypeData.map((_, index) => (
-                      <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />
-                    ))}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
-        )}
-
         {/* Subscription Distribution - Pie Chart */}
         {stats.subscriptionStats.length > 0 && (
           <div className="card p-4 sm:p-6 min-h-[280px] flex flex-col">
@@ -697,21 +636,30 @@ export default function Dashboard() {
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart
                   data={stats.companyStats}
-                  layout="vertical"
                   margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
                 >
                   <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
                   <XAxis
+                    dataKey="name"
+                    type="category"
+                    className="text-[10px] sm:text-xs"
+                    stroke="currentColor"
+                    angle={-45}
+                    textAnchor="end"
+                    height={80}
+                    tick={{ fontSize: 11 }}
+                    tickFormatter={(value) => {
+                      // Truncate very long names and add ellipsis if needed
+                      const maxLength = 15;
+                      return value.length > maxLength ? `${value.substring(0, maxLength)}...` : value;
+                    }}
+                  />
+                  <YAxis
                     type="number"
                     className="text-[10px] sm:text-xs"
                     stroke="currentColor"
-                  />
-                  <YAxis
-                    dataKey="name"
-                    type="category"
-                    width={110}
-                    className="text-[10px] sm:text-xs"
-                    stroke="currentColor"
+                    padding={{ top: 0, bottom: 0 }}
+                    domain={[0, 'auto']}
                   />
                   <Tooltip
                     contentStyle={{
@@ -725,7 +673,7 @@ export default function Dashboard() {
                   <Bar
                     dataKey="value"
                     fill={COLORS.cyan}
-                    radius={[0, 8, 8, 0]}
+                    radius={[8, 8, 0, 0]}
                   >
                     {stats.companyStats.map((_, index) => (
                       <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />
@@ -737,83 +685,6 @@ export default function Dashboard() {
           </div>
         )}
 
-        {/* Document Verification Status - Donut Chart */}
-        <div className="card p-4 sm:p-6 min-h-[280px] flex flex-col">
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-gradient-to-br from-yellow-500 to-orange-600 rounded-lg">
-                <FileText className="w-5 h-5 text-white" />
-              </div>
-              <div>
-                <h3 className="text-lg font-bold text-gray-900 dark:text-white">Documents</h3>
-                <p className="text-sm text-gray-500 dark:text-gray-400">Verification status</p>
-              </div>
-            </div>
-          </div>
-          <div className="mt-2 flex-1 min-h-[220px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <RechartsPieChart>
-                <Pie
-                  data={stats.documentStats}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius="55%"
-                  outerRadius="80%"
-                  fill="#8884d8"
-                  paddingAngle={5}
-                  dataKey="value"
-                  label={({ name, value }) => `${name}: ${value}`}
-                >
-                  {stats.documentStats.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
-                  ))}
-                </Pie>
-                <Tooltip wrapperStyle={{ fontSize: '0.75rem' }} />
-                <Legend wrapperStyle={{ fontSize: '0.75rem' }} />
-              </RechartsPieChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-
-        {/* Alert Detection Method - Pie Chart (8th Graph) */}
-        {stats.alertDetectionStats.length > 0 && (
-          <div className="card p-4 sm:p-6 min-h-[280px] flex flex-col">
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-gradient-to-br from-indigo-500 to-violet-600 rounded-lg">
-                  <AlertCircle className="w-5 h-5 text-white" />
-                </div>
-                <div>
-                  <h3 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white">Detection Method</h3>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">SMS vs Manual</p>
-                </div>
-              </div>
-            </div>
-            <div className="mt-2 flex-1 min-h-[220px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <RechartsPieChart>
-                  <Pie
-                    data={stats.alertDetectionStats}
-                    cx="50%"
-                    cy="50%"
-                    labelLine={false}
-                    label={({ name, percent }) => `${name} ${((percent || 0) * 100).toFixed(0)}%`}
-                    outerRadius="80%"
-                    fill="#8884d8"
-                    dataKey="value"
-                    isAnimationActive={stats.alertDetectionStats.length < 20}
-                  >
-                    {stats.alertDetectionStats.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
-                    ))}
-                  </Pie>
-                  <Tooltip wrapperStyle={{ fontSize: '0.75rem' }} />
-                  <Legend wrapperStyle={{ fontSize: '0.75rem' }} />
-                </RechartsPieChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
-        )}
       </div>
 
       {/* Alert Statistics */}
