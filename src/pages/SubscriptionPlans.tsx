@@ -183,7 +183,7 @@ export default function SubscriptionPlans() {
                 <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">{plan.name}</h3>
                 <div className="flex items-baseline">
                   <span className="text-3xl font-bold text-gray-900 dark:text-white">₹{plan.price}</span>
-                  <span className="text-gray-600 dark:text-gray-400 ml-2">/year</span>
+                <span className="text-gray-600 dark:text-gray-400 ml-2">/lifetime</span>
                 </div>
                 <span
                   className={`inline-block mt-2 px-2 py-1 text-xs rounded ${
