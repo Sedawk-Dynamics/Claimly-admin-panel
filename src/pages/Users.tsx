@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { adminService } from '../services/admin.service';
 import { User, PaginatedResponse } from '../types';
 import { Search, ChevronLeft, ChevronRight, UserCheck, UserX, Eye, X, Users as UsersIcon, Sparkles } from 'lucide-react';
+import api from '../services/api';
 
 export default function Users() {
   const [users, setUsers] = useState<PaginatedResponse<User> | null>(null);
@@ -164,9 +165,17 @@ export default function Users() {
                       <tr key={user.id} className="hover:bg-cyan-50 dark:hover:bg-cyan-950/10 transition-all duration-200 group">
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="flex items-center">
-                            <div className="flex-shrink-0 h-11 w-11 rounded-full bg-gradient-to-br from-orange-400 to-yellow-400 flex items-center justify-center text-white font-bold text-base shadow-glow-orange group-hover:scale-110 transition-transform duration-200">
-                              {user.name.charAt(0).toUpperCase()}
-                            </div>
+                            {user.profilePicture ? (
+                              <img
+                                src={user.profilePicture.startsWith('http') ? user.profilePicture : `${api.defaults.baseURL || window.location.origin}${user.profilePicture.startsWith('/') ? user.profilePicture : `/${user.profilePicture}`}`}
+                                alt={user.name}
+                                className="flex-shrink-0 h-11 w-11 rounded-full object-cover border-2 border-brand-200 dark:border-brand-700 shadow-glow-orange group-hover:scale-110 transition-transform duration-200"
+                              />
+                            ) : (
+                              <div className="flex-shrink-0 h-11 w-11 rounded-full bg-gradient-to-br from-orange-400 to-yellow-400 flex items-center justify-center text-white font-bold text-base shadow-glow-orange group-hover:scale-110 transition-transform duration-200">
+                                {user.name.charAt(0).toUpperCase()}
+                              </div>
+                            )}
                             <div className="ml-4">
                               <div className="text-sm font-bold text-gray-900 dark:text-white">{user.name}</div>
                             </div>
@@ -246,11 +255,19 @@ export default function Users() {
             {users?.data && users.data.length > 0 ? (
               users.data.map((user) => (
                 <div key={user.id} className="card p-5 border border-cyan-400/20 hover:border-cyan-400 hover:shadow-glow-cyan transition-all duration-300">
-                  <div className="flex items-start justify-between mb-3">
+                    <div className="flex items-start justify-between mb-3">
                     <div className="flex items-center space-x-3 flex-1 min-w-0">
-                      <div className="flex-shrink-0 h-12 w-12 rounded-full bg-gradient-to-br from-orange-400 to-yellow-400 flex items-center justify-center text-white font-bold shadow-glow-orange">
-                        {user.name.charAt(0).toUpperCase()}
-                      </div>
+                      {user.profilePicture ? (
+                        <img
+                          src={user.profilePicture.startsWith('http') ? user.profilePicture : `${api.defaults.baseURL || window.location.origin}${user.profilePicture.startsWith('/') ? user.profilePicture : `/${user.profilePicture}`}`}
+                          alt={user.name}
+                          className="flex-shrink-0 h-12 w-12 rounded-full object-cover border-2 border-brand-200 dark:border-brand-700 shadow-glow-orange"
+                        />
+                      ) : (
+                        <div className="flex-shrink-0 h-12 w-12 rounded-full bg-gradient-to-br from-orange-400 to-yellow-400 flex items-center justify-center text-white font-bold shadow-glow-orange">
+                          {user.name.charAt(0).toUpperCase()}
+                        </div>
+                      )}
                       <div className="min-w-0 flex-1">
                         <div className="text-sm font-bold text-gray-900 dark:text-white truncate">{user.name}</div>
                         <div className="text-xs text-gray-600 dark:text-gray-400 truncate mt-1">{user.email}</div>

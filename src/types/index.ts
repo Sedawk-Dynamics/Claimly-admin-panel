@@ -16,6 +16,7 @@ export interface User {
   mobileNumber: string;
   subscriptionStatus: 'ACTIVE' | 'INACTIVE' | 'EXPIRED';
   dob?: string;
+  profilePicture?: string | null;
   createdAt: string;
   updatedAt: string;
   stats?: {
@@ -119,6 +120,7 @@ export interface UserDetail extends User {
   deviceId?: string | null;
   referralCode?: string | null;
   walletBalance?: number;
+  profilePicture?: string | null;
   stats: {
     policiesCount: number;
     nomineesCount: number;

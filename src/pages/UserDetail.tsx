@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, CheckCircle, XCircle, RotateCcw, ExternalLink, Clock, FileText, CreditCard, UserPlus, UserCog, Shield, Upload, Edit, Trash2 } from 'lucide-react';
 import { adminService } from '../services/admin.service';
 import { UserDetail as AdminUserDetail, UserActivityLog, PaginatedResponse } from '../types';
+import api from '../services/api';
 
 const formatDate = (value?: string | Date | null) => {
   if (!value) return '-';
@@ -301,9 +302,22 @@ export default function UserDetail() {
             <section className="bg-white dark:bg-navy-800 rounded-xl sm:rounded-2xl shadow-xl border border-gray-100 dark:border-navy-700 p-4 sm:p-6 relative overflow-hidden">
               <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-brand opacity-5 rounded-full blur-3xl -mr-32 -mt-32"></div>
               <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 sm:gap-4 mb-4 sm:mb-6">
-                <div className="min-w-0 flex-1">
-                  <h1 className="text-2xl sm:text-3xl font-bold text-gradient-brand mb-1 sm:mb-2 truncate">{user.name}</h1>
-                  <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 break-all">User ID: {user.id}</p>
+                <div className="flex items-center gap-4 min-w-0 flex-1">
+                  {user.profilePicture ? (
+                    <img
+                      src={user.profilePicture.startsWith('http') ? user.profilePicture : `${api.defaults.baseURL || window.location.origin}${user.profilePicture.startsWith('/') ? user.profilePicture : `/${user.profilePicture}`}`}
+                      alt={user.name}
+                      className="w-16 h-16 sm:w-20 sm:h-20 rounded-full object-cover border-2 border-brand-200 dark:border-brand-700 shadow-lg"
+                    />
+                  ) : (
+                    <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-gradient-to-br from-orange-400 to-yellow-400 flex items-center justify-center text-white font-bold text-2xl sm:text-3xl shadow-lg">
+                      {user.name.charAt(0).toUpperCase()}
+                    </div>
+                  )}
+                  <div className="min-w-0 flex-1">
+                    <h1 className="text-2xl sm:text-3xl font-bold text-gradient-brand mb-1 sm:mb-2 truncate">{user.name}</h1>
+                    <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 break-all">User ID: {user.id}</p>
+                  </div>
                 </div>
                 <div className="flex items-center gap-2 flex-shrink-0">
                   <button
