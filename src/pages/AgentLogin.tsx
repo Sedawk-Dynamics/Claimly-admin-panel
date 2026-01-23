@@ -20,56 +20,77 @@ export default function AgentLogin() {
   const navigate = useNavigate();
   const { setTheme } = useTheme();
 
-  useEffect(() => {
-    // Setup reCAPTCHA - wait for DOM to be ready
-    const setupRecaptcha = async () => {
-      try {
-        // Wait for the container element to exist
-        const container = document.getElementById('recaptcha-container');
-        if (!container) {
-          // Retry after a short delay if container doesn't exist yet
-          setTimeout(setupRecaptcha, 100);
-          return;
-        }
+  // Initialize reCAPTCHA lazily when needed (not on mount)
+  const initializeRecaptcha = async (): Promise<any> => {
+    // If verifier already exists and is valid, return it
+    if (recaptchaVerifierRef.current) {
+      return recaptchaVerifierRef.current;
+    }
 
-        // Clear any existing verifier first
-        if (recaptchaVerifierRef.current) {
-          try {
-            recaptchaVerifierRef.current.clear();
-          } catch (e) {
-            // Ignore errors when clearing
-          }
-        }
-
-        // Dynamically import Firebase
-        const { auth } = await import('../config/firebase');
-        const { RecaptchaVerifier } = await import('firebase/auth');
-        
-        // Ensure container is visible (even for invisible reCAPTCHA)
-        container.style.display = 'block';
-        
-        const verifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
-          size: 'invisible',
-          callback: () => {
-            // reCAPTCHA solved
-          },
-          'expired-callback': () => {
-            // reCAPTCHA expired - will be recreated when needed
-            recaptchaVerifierRef.current = null;
-          },
-        });
-        recaptchaVerifierRef.current = verifier;
-      } catch (err: any) {
-        console.error('Failed to setup reCAPTCHA:', err);
-        setError(err.message || 'Failed to initialize verification. Please refresh the page.');
+    try {
+      // Wait for the container element to exist
+      const container = document.getElementById('recaptcha-container');
+      if (!container) {
+        throw new Error('reCAPTCHA container not found. Please refresh the page.');
       }
-    };
-    
-    // Small delay to ensure DOM is ready
-    const timeoutId = setTimeout(setupRecaptcha, 100);
 
+      // Clear any existing verifier first
+      if (recaptchaVerifierRef.current) {
+        try {
+          recaptchaVerifierRef.current.clear();
+        } catch (e) {
+          // Ignore errors when clearing
+        }
+      }
+
+      // Dynamically import Firebase
+      const { auth } = await import('../config/firebase');
+      const { RecaptchaVerifier } = await import('firebase/auth');
+      
+      // Ensure container is visible
+      container.style.display = 'block';
+      container.style.minHeight = '78px'; // Minimum height for reCAPTCHA
+      
+      // Use 'normal' size instead of 'invisible' for better compatibility
+      // 'normal' size is less strict with domain matching
+      const verifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+        size: 'normal',
+        callback: () => {
+          // reCAPTCHA solved
+          console.log('reCAPTCHA verified successfully');
+        },
+        'expired-callback': () => {
+          // reCAPTCHA expired - will be recreated when needed
+          console.log('reCAPTCHA expired');
+          recaptchaVerifierRef.current = null;
+        },
+        'error-callback': (error: any) => {
+          console.error('reCAPTCHA error:', error);
+          recaptchaVerifierRef.current = null;
+        },
+      });
+      
+      recaptchaVerifierRef.current = verifier;
+      return verifier;
+    } catch (err: any) {
+      console.error('Failed to initialize reCAPTCHA:', err);
+      
+      // Provide helpful error message
+      let errorMessage = 'Failed to initialize verification. ';
+      if (err.code === 'auth/captcha-check-failed' || err.message?.includes('Hostname match not found')) {
+        errorMessage += 'Please ensure your domain is authorized in Firebase Console. ';
+        errorMessage += 'Go to Firebase Console → Authentication → Settings → Authorized domains and add your domain.';
+      } else {
+        errorMessage += err.message || 'Please refresh the page and try again.';
+      }
+      
+      throw new Error(errorMessage);
+    }
+  };
+
+  // Cleanup on unmount
+  useEffect(() => {
     return () => {
-      clearTimeout(timeoutId);
       if (recaptchaVerifierRef.current) {
         try {
           recaptchaVerifierRef.current.clear();
@@ -95,31 +116,23 @@ export default function AgentLogin() {
     setLoading(true);
 
     try {
-      // Ensure reCAPTCHA verifier exists
-      let verifier = recaptchaVerifierRef.current;
-      if (!verifier) {
-        const { auth } = await import('../config/firebase');
-        const { RecaptchaVerifier } = await import('firebase/auth');
-        const container = document.getElementById('recaptcha-container');
-        if (!container) {
-          throw new Error('Verification container not found. Please refresh the page.');
-        }
-        container.style.display = 'block';
-        verifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
-          size: 'invisible',
-          callback: () => {
-            // reCAPTCHA solved
-          },
-          'expired-callback': () => {
-            recaptchaVerifierRef.current = null;
-          },
-        });
-        recaptchaVerifierRef.current = verifier;
-      }
+      // Initialize reCAPTCHA verifier (lazy initialization)
+      const verifier = await initializeRecaptcha();
 
       const { auth } = await import('../config/firebase');
       const { signInWithPhoneNumber } = await import('firebase/auth');
       const formattedPhone = phoneNumber.startsWith('+') ? phoneNumber : `+91${phoneNumber}`;
+      
+      // Render reCAPTCHA if using normal size
+      if (verifier && typeof verifier.render === 'function') {
+        try {
+          await verifier.render();
+        } catch (renderError) {
+          // If render fails, try to proceed anyway (might already be rendered)
+          console.warn('reCAPTCHA render warning:', renderError);
+        }
+      }
+      
       const confirmationResult = await signInWithPhoneNumber(auth, formattedPhone, verifier);
       setVerificationId(confirmationResult.verificationId);
       setStep('otp');
@@ -134,7 +147,13 @@ export default function AgentLogin() {
         }
         recaptchaVerifierRef.current = null;
       }
-      setError(err.message || 'Failed to send OTP. Please try again.');
+      
+      // Provide user-friendly error message
+      let errorMessage = err.message || 'Failed to send OTP. Please try again.';
+      if (err.code === 'auth/captcha-check-failed' || errorMessage.includes('Hostname match not found')) {
+        errorMessage = 'Domain authorization error. Please contact support or ensure your domain is authorized in Firebase Console.';
+      }
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -246,7 +265,7 @@ export default function AgentLogin() {
               </p>
             </div>
 
-            <div id="recaptcha-container" style={{ display: 'block', minHeight: '1px' }}></div>
+            <div id="recaptcha-container" style={{ display: 'block', minHeight: '78px', marginBottom: '1rem' }}></div>
 
             {error && (
               <div className="bg-orange-500/20 dark:bg-orange-900/20 border-2 border-orange-400 dark:border-orange-500 backdrop-blur-sm text-orange-900 dark:text-orange-300 px-4 py-3 rounded-lg text-sm shadow-glow-orange mb-6">
