@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { bannerService, Banner } from '../services/banner.service';
-import { Plus, Edit, Trash2, Image as ImageIcon, CheckCircle, XCircle, Upload, Sparkles } from 'lucide-react';
+import { Plus, Edit, Trash2, Image as ImageIcon, CheckCircle, Upload, Sparkles } from 'lucide-react';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 

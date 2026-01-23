@@ -99,15 +99,14 @@ export default function AgentDashboard() {
         <div className="card border border-gray-200 shadow-card-3d p-4 sm:p-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div className="flex items-center gap-4">
             <div className="flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-full bg-gradient-to-br from-brand-500 to-cyan-400 text-white text-lg sm:text-xl font-semibold">
-              {agent?.name?.[0]?.toUpperCase() || agent?.email?.[0]?.toUpperCase() || 'A'}
+              {agent?.email?.[0]?.toUpperCase() || 'A'}
             </div>
             <div className="space-y-1">
               <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Agent Panel</h1>
               {agent && (
                 <>
                   <p className="text-sm text-gray-700">
-                    <span className="font-semibold">{agent.name}</span>
-                    {agent.email && <span className="text-gray-500"> • {agent.email}</span>}
+                    <span className="font-semibold">{agent.email}</span>
                   </p>
                   <p className="text-xs text-gray-500">
                     Role: <span className="uppercase tracking-wide font-semibold">{agent.role}</span>
