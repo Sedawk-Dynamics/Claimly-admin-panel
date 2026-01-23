@@ -1,4 +1,4 @@
-import { useState, FormEvent, useEffect } from 'react';
+import { useState, FormEvent, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { authService } from '../services/auth.service';
 import { useTheme } from '../contexts/ThemeContext';
@@ -16,30 +16,67 @@ export default function AgentSignup() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [idToken, setIdToken] = useState<string>('');
-  const [recaptchaVerifier, setRecaptchaVerifier] = useState<any>(null);
+  const recaptchaVerifierRef = useRef<any>(null);
   const navigate = useNavigate();
   const { setTheme } = useTheme();
 
   useEffect(() => {
-    // Setup reCAPTCHA
+    // Setup reCAPTCHA - wait for DOM to be ready
     const setupRecaptcha = async () => {
       try {
+        // Wait for the container element to exist
+        const container = document.getElementById('recaptcha-container');
+        if (!container) {
+          // Retry after a short delay if container doesn't exist yet
+          setTimeout(setupRecaptcha, 100);
+          return;
+        }
+
+        // Clear any existing verifier first
+        if (recaptchaVerifierRef.current) {
+          try {
+            recaptchaVerifierRef.current.clear();
+          } catch (e) {
+            // Ignore errors when clearing
+          }
+        }
+
+        // Dynamically import Firebase
         const { auth } = await import('../config/firebase');
         const { RecaptchaVerifier } = await import('firebase/auth');
+        
+        // Ensure container is visible (even for invisible reCAPTCHA)
+        container.style.display = 'block';
+        
         const verifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
           size: 'invisible',
-          callback: () => {},
+          callback: () => {
+            // reCAPTCHA solved
+          },
+          'expired-callback': () => {
+            // reCAPTCHA expired - will be recreated when needed
+            recaptchaVerifierRef.current = null;
+          },
         });
-        setRecaptchaVerifier(verifier);
-      } catch (err) {
+        recaptchaVerifierRef.current = verifier;
+      } catch (err: any) {
         console.error('Failed to setup reCAPTCHA:', err);
+        setError(err.message || 'Failed to initialize verification. Please refresh the page.');
       }
     };
-    setupRecaptcha();
+    
+    // Small delay to ensure DOM is ready
+    const timeoutId = setTimeout(setupRecaptcha, 100);
 
     return () => {
-      if (recaptchaVerifier) {
-        recaptchaVerifier.clear();
+      clearTimeout(timeoutId);
+      if (recaptchaVerifierRef.current) {
+        try {
+          recaptchaVerifierRef.current.clear();
+          recaptchaVerifierRef.current = null;
+        } catch (e) {
+          // Ignore errors when clearing
+        }
       }
     };
   }, []);
@@ -58,13 +95,45 @@ export default function AgentSignup() {
     setLoading(true);
 
     try {
+      // Ensure reCAPTCHA verifier exists
+      let verifier = recaptchaVerifierRef.current;
+      if (!verifier) {
+        const { auth } = await import('../config/firebase');
+        const { RecaptchaVerifier } = await import('firebase/auth');
+        const container = document.getElementById('recaptcha-container');
+        if (!container) {
+          throw new Error('Verification container not found. Please refresh the page.');
+        }
+        container.style.display = 'block';
+        verifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+          size: 'invisible',
+          callback: () => {
+            // reCAPTCHA solved
+          },
+          'expired-callback': () => {
+            recaptchaVerifierRef.current = null;
+          },
+        });
+        recaptchaVerifierRef.current = verifier;
+      }
+
       const { auth } = await import('../config/firebase');
       const { signInWithPhoneNumber } = await import('firebase/auth');
       const formattedPhone = phoneNumber.startsWith('+') ? phoneNumber : `+91${phoneNumber}`;
-      const confirmationResult = await signInWithPhoneNumber(auth, formattedPhone, recaptchaVerifier);
+      const confirmationResult = await signInWithPhoneNumber(auth, formattedPhone, verifier);
       setVerificationId(confirmationResult.verificationId);
       setStep('otp');
     } catch (err: any) {
+      console.error('Phone submission error:', err);
+      // Clear verifier on error to allow retry
+      if (recaptchaVerifierRef.current) {
+        try {
+          recaptchaVerifierRef.current.clear();
+        } catch (e) {
+          // Ignore
+        }
+        recaptchaVerifierRef.current = null;
+      }
       setError(err.message || 'Failed to send OTP. Please try again.');
     } finally {
       setLoading(false);
@@ -173,7 +242,7 @@ export default function AgentSignup() {
               </p>
             </div>
 
-            <div id="recaptcha-container"></div>
+            <div id="recaptcha-container" style={{ display: 'block', minHeight: '1px' }}></div>
 
             {error && (
               <div className="bg-orange-500/20 dark:bg-orange-900/20 border-2 border-orange-400 dark:border-orange-500 backdrop-blur-sm text-orange-900 dark:text-orange-300 px-4 py-3 rounded-lg text-sm shadow-glow-orange mb-6">
@@ -199,6 +268,7 @@ export default function AgentSignup() {
                       onChange={(e) => setPhoneNumber(e.target.value.replace(/\D/g, '').slice(0, 10))}
                       required
                       maxLength={10}
+                      autoComplete="tel"
                       className="input-elegant pl-12"
                       placeholder="Enter your phone number"
                     />
@@ -229,6 +299,8 @@ export default function AgentSignup() {
                       onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
                       required
                       maxLength={6}
+                      autoComplete="one-time-code"
+                      inputMode="numeric"
                       className="input-elegant pl-12 text-center text-2xl tracking-widest"
                       placeholder="000000"
                     />
@@ -270,6 +342,7 @@ export default function AgentSignup() {
                       value={name}
                       onChange={(e) => setName(e.target.value)}
                       required
+                      autoComplete="name"
                       className="input-elegant pl-12"
                       placeholder="Enter your full name"
                     />
@@ -287,6 +360,7 @@ export default function AgentSignup() {
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       required
+                      autoComplete="email"
                       className="input-elegant pl-12"
                       placeholder="Enter your email"
                     />
@@ -305,6 +379,7 @@ export default function AgentSignup() {
                       onChange={(e) => setPassword(e.target.value)}
                       required
                       minLength={6}
+                      autoComplete="new-password"
                       className="input-elegant pl-12"
                       placeholder="Enter your password"
                     />
