@@ -12,6 +12,8 @@ import {
   Menu,
   X,
   CreditCard,
+  Shield,
+  Image as ImageIcon,
 } from 'lucide-react';
 import { useState } from 'react';
 import ThemeToggle from './ThemeToggle';
@@ -28,6 +30,8 @@ const navigation = [
   { name: 'Subscription Plans', href: '/subscription-plans', icon: CreditCard },
   { name: 'Alerts', href: '/alerts', icon: AlertCircle },
   { name: 'Notifications', href: '/notifications', icon: Bell },
+  { name: 'Banners', href: '/banners', icon: ImageIcon },
+  { name: 'Agents', href: '/agents', icon: Shield, roles: ['SUPER_ADMIN', 'STAFF'] },
 ];
 
 export default function Layout() {
@@ -80,6 +84,11 @@ export default function Layout() {
           {/* Navigation */}
           <nav className="flex-1 px-3 sm:px-4 py-4 sm:py-6 space-y-2 overflow-y-auto">
             {navigation.map((item) => {
+              // Check if item should be visible based on role
+              if (item.roles && admin && !item.roles.includes(admin.role)) {
+                return null;
+              }
+
               const Icon = item.icon;
               const isActive = item.href === '/'
                 ? location.pathname === '/'

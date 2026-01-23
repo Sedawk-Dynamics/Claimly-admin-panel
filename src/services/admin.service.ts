@@ -545,5 +545,37 @@ export const adminService = {
   async deleteNominee(nomineeId: string): Promise<void> {
     await api.delete(`/admin/documents/nominee/${nomineeId}`);
   },
+
+  // Agents
+  async getAgents(page = 1, limit = 20, search?: string): Promise<{ agents: Array<{ id: string; name: string; email: string; mobileNumber: string | null; role: string; isVerified: boolean; verifiedBy: string | null; verifiedAt: Date | null; createdAt: Date }>; pagination: { page: number; limit: number; total: number; totalPages: number } }> {
+    const params = new URLSearchParams({ page: page.toString(), limit: limit.toString() });
+    if (search) params.append('search', search);
+    const response = await api.get<{ success: boolean; data: { agents: Array<any>; pagination: any } }>(
+      `/admin/agents?${params.toString()}`
+    );
+    return response.data.data;
+  },
+
+  async verifyAgent(agentId: string): Promise<{ id: string; isVerified: boolean; verifiedAt: Date | null }> {
+    const response = await api.post<{ success: boolean; data: { id: string; isVerified: boolean; verifiedAt: Date | null } }>(
+      `/admin/agents/${agentId}/verify`
+    );
+    return response.data.data;
+  },
+
+  async revokeAgentVerification(agentId: string): Promise<{ id: string; isVerified: boolean; verifiedAt: Date | null }> {
+    const response = await api.post<{ success: boolean; data: { id: string; isVerified: boolean; verifiedAt: Date | null } }>(
+      `/admin/agents/${agentId}/revoke-verification`
+    );
+    return response.data.data;
+  },
+
+  async rejectAgent(agentId: string): Promise<void> {
+    await api.post(`/admin/agents/${agentId}/reject`);
+  },
+
+  async deleteAgent(agentId: string): Promise<void> {
+    await api.delete(`/admin/agents/${agentId}`);
+  },
 };
 

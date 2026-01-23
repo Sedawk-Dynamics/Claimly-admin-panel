@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { authService } from '../services/auth.service';
 import { useTheme } from '../contexts/ThemeContext';
 import logo from '../logo/claimly logo png.png';
-import { Mail, Lock, LogIn } from 'lucide-react';
+import { Mail, Lock, LogIn, UserPlus } from 'lucide-react';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -28,12 +28,27 @@ export default function Login() {
     setLoading(true);
 
     try {
-      const response = await authService.login(email, password);
-      localStorage.setItem('adminToken', response.token);
-      localStorage.setItem('admin', JSON.stringify(response.admin));
+      // First try admin login
+      const adminResponse = await authService.login(email, password);
+      localStorage.setItem('adminToken', adminResponse.token);
+      localStorage.setItem('admin', JSON.stringify(adminResponse.admin));
       navigate('/');
-    } catch (err: any) {
-      setError(err.response?.data?.error || 'Login failed. Please check your credentials.');
+      return;
+    } catch (adminErr: any) {
+      // If admin login fails, try agent login with email/password (no OTP)
+      try {
+        const agentResponse = await authService.agentLogin('', email, password);
+        localStorage.setItem('adminToken', agentResponse.token);
+        localStorage.setItem('admin', JSON.stringify(agentResponse.admin));
+        navigate('/agent');
+        return;
+      } catch (agentErr: any) {
+        const message =
+          agentErr?.response?.data?.error ||
+          adminErr?.response?.data?.error ||
+          'Login failed. Please check your credentials.';
+        setError(message);
+      }
     } finally {
       setLoading(false);
     }
@@ -90,7 +105,9 @@ export default function Login() {
             {/* Login Header */}
             <div className="mb-8">
               <h2 className="text-2xl sm:text-3xl font-bold text-gradient-brand mb-2">Welcome Back</h2>
-              <p className="text-gray-600 dark:text-gray-400">Sign in to your admin account</p>
+              <p className="text-gray-600 dark:text-gray-400">
+                Sign in with your email and password
+              </p>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-6">
@@ -164,11 +181,26 @@ export default function Login() {
               </button>
             </form>
 
-            {/* Security Note */}
-            <div className="mt-6 pt-6 border-t border-gray-200 dark:border-navy-700">
+            {/* Security Note + Agent Signup Link */}
+            <div className="mt-6 pt-6 border-t border-gray-200 dark:border-navy-700 space-y-3">
               <p className="text-xs text-center text-gray-500 dark:text-gray-400">
                 Secure login powered by AI-driven Claimly platform.
               </p>
+              <div className="flex flex-col items-center space-y-2">
+                {/* <p className="text-xs text-gray-600 dark:text-gray-400">
+                  Agent? You can sign up with OTP.
+                </p> */}
+                <div className="flex flex-wrap gap-2 justify-center">
+                  <button
+                    type="button"
+                    onClick={() => navigate('/agent/signup')}
+                    className="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold text-brand-600 dark:text-cyan-300 bg-brand-50 dark:bg-cyan-500/10 hover:bg-brand-100 dark:hover:bg-cyan-500/20 border border-brand-200/70 dark:border-cyan-500/40 transition-colors"
+                  >
+                    <UserPlus className="w-3.5 h-3.5 mr-1.5" />
+                    Signup with OTP
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         </div>

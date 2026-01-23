@@ -32,5 +32,25 @@ export const authService = {
   isAuthenticated(): boolean {
     return !!this.getToken();
   },
+
+  async agentSignup(idToken: string, name: string, email: string, mobileNumber: string, password: string): Promise<{ token: string; agent: Admin }> {
+    const response = await api.post<{ success: boolean; data: { token: string; agent: Admin } }>('/admin/agent/signup', {
+      idToken,
+      name,
+      email,
+      mobileNumber,
+      password,
+    });
+    return response.data.data;
+  },
+
+  async agentLogin(idToken: string, email: string, password: string): Promise<LoginResponse> {
+    const response = await api.post<{ success: boolean; data: LoginResponse }>('/admin/agent/login', {
+      idToken,
+      email,
+      password,
+    });
+    return response.data.data;
+  },
 };
 

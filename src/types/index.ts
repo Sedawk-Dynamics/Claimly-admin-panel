@@ -1,7 +1,7 @@
 export interface Admin {
   adminId: string;
   email: string;
-  role: 'SUPER_ADMIN' | 'STAFF';
+  role: 'SUPER_ADMIN' | 'STAFF' | 'AGENT';
 }
 
 export interface LoginResponse {
