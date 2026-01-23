@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { adminService } from '../services/admin.service';
 import { Search, ChevronLeft, ChevronRight, UserCheck, UserX, Shield, Sparkles, XCircle, Trash2, ShieldOff } from 'lucide-react';
+import TruncatedText from '../components/TruncatedText';
 
 interface Agent {
   id: string;
@@ -181,16 +182,24 @@ export default function Agents() {
           {/* Desktop Table View */}
           <div className="hidden md:block card elevated overflow-hidden border border-cyan-400/20">
             <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200 dark:divide-navy-700">
+              <table className="w-full divide-y divide-gray-200 dark:divide-navy-700 table-fixed">
+                <colgroup>
+                  <col className="w-[20%]" />
+                  <col className="w-[25%]" />
+                  <col className="w-[15%]" />
+                  <col className="w-[12%]" />
+                  <col className="w-[13%]" />
+                  <col className="w-[15%]" />
+                </colgroup>
                 <thead className="bg-gradient-to-r from-navy-900 via-brand-900 to-navy-900 dark:from-navy-950 dark:via-brand-950 dark:to-navy-950">
                   <tr>
-                    <th className="px-6 py-4 text-left text-xs font-bold text-cyan-400 uppercase tracking-wider">
+                    <th className="px-4 py-4 text-left text-xs font-bold text-cyan-400 uppercase tracking-wider">
                       Name
                     </th>
-                    <th className="px-6 py-4 text-left text-xs font-bold text-cyan-400 uppercase tracking-wider">
+                    <th className="px-4 py-4 text-left text-xs font-bold text-cyan-400 uppercase tracking-wider">
                       Email
                     </th>
-                    <th className="px-6 py-4 text-left text-xs font-bold text-cyan-400 uppercase tracking-wider">
+                    <th className="px-4 py-4 text-left text-xs font-bold text-cyan-400 uppercase tracking-wider">
                       Phone
                     </th>
                     <th className="px-6 py-4 text-left text-xs font-bold text-cyan-400 uppercase tracking-wider">
@@ -207,16 +216,28 @@ export default function Agents() {
                 <tbody className="bg-white dark:bg-navy-900 divide-y divide-gray-200 dark:divide-navy-700">
                   {agents.agents.map((agent) => (
                     <tr key={agent.id} className="hover:bg-cyan-50 dark:hover:bg-cyan-950/10 transition-all duration-200">
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-bold text-gray-900 dark:text-white">{agent.name}</div>
+                      <td className="px-4 py-4 overflow-hidden">
+                        <TruncatedText 
+                          text={agent.name} 
+                          maxLength={20}
+                          className="text-sm font-bold text-gray-900 dark:text-white block"
+                        />
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-700 dark:text-gray-300">{agent.email}</div>
+                      <td className="px-4 py-4 overflow-hidden">
+                        <TruncatedText 
+                          text={agent.email} 
+                          maxLength={25}
+                          className="text-sm text-gray-700 dark:text-gray-300 block"
+                        />
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-700 dark:text-gray-300">{agent.mobileNumber || '—'}</div>
+                      <td className="px-4 py-4 overflow-hidden">
+                        <TruncatedText 
+                          text={agent.mobileNumber || '—'} 
+                          maxLength={15}
+                          className="text-sm text-gray-700 dark:text-gray-300 block"
+                        />
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td className="px-4 py-4 overflow-hidden">
                         {agent.isVerified ? (
                           <span className="status-active flex items-center space-x-1">
                             <UserCheck className="w-4 h-4" />
@@ -229,10 +250,10 @@ export default function Agents() {
                           </span>
                         )}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-700 dark:text-gray-300">{formatDate(agent.createdAt)}</div>
+                      <td className="px-4 py-4 overflow-hidden">
+                        <div className="text-sm text-gray-700 dark:text-gray-300 truncate">{formatDate(agent.createdAt)}</div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td className="px-4 py-4 overflow-hidden">
                         <div className="flex items-center space-x-2 flex-wrap">
                           {!agent.isVerified && (
                             <>
@@ -293,8 +314,16 @@ export default function Agents() {
               <div key={agent.id} className="card p-4 sm:p-5 border border-cyan-400/20 hover:border-cyan-400/40 transition-all">
                 <div className="flex items-start justify-between gap-3 mb-3">
                   <div className="flex-1 min-w-0">
-                    <div className="text-base sm:text-lg font-bold text-gray-900 dark:text-white truncate">{agent.name}</div>
-                    <div className="text-xs text-gray-500 dark:text-gray-400 mt-1 break-all">{agent.email}</div>
+                    <TruncatedText 
+                      text={agent.name} 
+                      maxLength={20}
+                      className="text-base sm:text-lg font-bold text-gray-900 dark:text-white"
+                    />
+                    <TruncatedText 
+                      text={agent.email} 
+                      maxLength={25}
+                      className="text-xs text-gray-500 dark:text-gray-400 mt-1"
+                    />
                   </div>
                   <div className="flex-shrink-0">
                     {agent.isVerified ? (

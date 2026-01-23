@@ -21,6 +21,7 @@ import {
   Trash2,
 } from 'lucide-react';
 import { format } from 'date-fns';
+import TruncatedText from '../components/TruncatedText';
 
 export default function Alerts() {
   const [alerts, setAlerts] = useState<PaginatedResponse<Alert> | null>(null);
@@ -458,10 +459,18 @@ export default function Alerts() {
           {/* Desktop Table View */}
           <div className="hidden lg:block card elevated overflow-hidden border border-yellow-400/20">
             <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200 dark:divide-navy-700">
+              <table className="w-full divide-y divide-gray-200 dark:divide-navy-700 table-fixed">
+                <colgroup>
+                  <col className="w-[5%]" />
+                  <col className="w-[28%]" />
+                  <col className="w-[22%]" />
+                  <col className="w-[12%]" />
+                  <col className="w-[13%]" />
+                  <col className="w-[20%]" />
+                </colgroup>
                 <thead className="bg-gradient-to-r from-navy-900 via-yellow-900/50 to-navy-900 dark:from-navy-950 dark:via-yellow-950/50 dark:to-navy-950">
                   <tr>
-                    <th className="px-6 py-4 text-left">
+                    <th className="px-3 py-4 text-left">
                       <button onClick={toggleSelectAll} className="flex items-center">
                         {selectedAlerts.size === alerts?.data.length && alerts.data.length > 0 ? (
                           <CheckSquare className="w-5 h-5 text-yellow-400" />
@@ -470,19 +479,19 @@ export default function Alerts() {
                         )}
                       </button>
                     </th>
-                    <th className="px-6 py-4 text-left text-xs font-bold text-yellow-400 uppercase tracking-wider">
+                    <th className="px-4 py-4 text-left text-xs font-bold text-yellow-400 uppercase tracking-wider">
                       Alert
                     </th>
-                    <th className="px-6 py-4 text-left text-xs font-bold text-yellow-400 uppercase tracking-wider">
+                    <th className="px-4 py-4 text-left text-xs font-bold text-yellow-400 uppercase tracking-wider">
                       User
                     </th>
-                    <th className="px-6 py-4 text-left text-xs font-bold text-yellow-400 uppercase tracking-wider">
+                    <th className="px-4 py-4 text-left text-xs font-bold text-yellow-400 uppercase tracking-wider">
                       Status
                     </th>
-                    <th className="px-6 py-4 text-left text-xs font-bold text-yellow-400 uppercase tracking-wider">
+                    <th className="px-4 py-4 text-left text-xs font-bold text-yellow-400 uppercase tracking-wider">
                       Date
                     </th>
-                    <th className="px-6 py-4 text-left text-xs font-bold text-yellow-400 uppercase tracking-wider">
+                    <th className="px-4 py-4 text-left text-xs font-bold text-yellow-400 uppercase tracking-wider">
                       Actions
                     </th>
                   </tr>
@@ -491,7 +500,7 @@ export default function Alerts() {
                   {alerts?.data && alerts.data.length > 0 ? (
                     alerts.data.map((alert) => (
                       <tr key={alert.id} className="hover:bg-yellow-50 dark:hover:bg-yellow-950/10 transition-all duration-200 group">
-                        <td className="px-6 py-4" onClick={(e) => e.stopPropagation()}>
+                        <td className="px-3 py-4 overflow-hidden" onClick={(e) => e.stopPropagation()}>
                           <button onClick={() => toggleSelectAlert(alert.id)}>
                             {selectedAlerts.has(alert.id) ? (
                               <CheckSquare className="w-5 h-5 text-yellow-500 dark:text-yellow-400" />
@@ -500,50 +509,64 @@ export default function Alerts() {
                             )}
                           </button>
                         </td>
-                        <td className="px-6 py-4 cursor-pointer" onClick={() => handleViewAlert(alert)}>
-                          <div className="flex items-start space-x-3">
-                            <div className="p-2 bg-gradient-to-br from-yellow-100 to-orange-100 dark:from-yellow-900/30 dark:to-orange-900/30 rounded-lg group-hover:scale-110 transition-transform">
+                        <td className="px-4 py-4 cursor-pointer overflow-hidden" onClick={() => handleViewAlert(alert)}>
+                          <div className="flex items-start space-x-2 min-w-0">
+                            <div className="p-1.5 bg-gradient-to-br from-yellow-100 to-orange-100 dark:from-yellow-900/30 dark:to-orange-900/30 rounded-lg group-hover:scale-110 transition-transform flex-shrink-0">
                               {getAlertTypeIcon(alert.alertType)}
                             </div>
-                            <div>
-                              <div className="text-sm font-bold text-gray-900 dark:text-white">
+                            <div className="min-w-0 flex-1">
+                              <div className="text-sm font-bold text-gray-900 dark:text-white truncate">
                                 {getAlertTypeLabel(alert.alertType)}
                               </div>
-                              <div className="text-xs text-gray-600 dark:text-gray-400 mt-1">{alert.detectedVia}</div>
+                              <div className="text-xs text-gray-600 dark:text-gray-400 mt-1 truncate">{alert.detectedVia}</div>
                               {alert.smsText && (
-                                <div className="flex items-start mt-1 space-x-1">
+                                <div className="flex items-start mt-1 space-x-1 min-w-0">
                                   <MessageSquare className="w-3 h-3 text-gray-400 mt-0.5 flex-shrink-0" />
-                                  <span className="text-xs text-gray-500 dark:text-gray-500 line-clamp-1 italic">"{alert.smsText}"</span>
+                                  <span className="text-xs text-gray-500 dark:text-gray-500 truncate italic">"{alert.smsText}"</span>
                                 </div>
                               )}
                               {alert.remarks && (
-                                <div className="text-xs text-gray-500 dark:text-gray-500 mt-1 line-clamp-1">{alert.remarks}</div>
+                                <div className="text-xs text-gray-500 dark:text-gray-500 mt-1 truncate">{alert.remarks}</div>
                               )}
                             </div>
                           </div>
                         </td>
-                        <td className="px-6 py-4 cursor-pointer" onClick={() => handleViewAlert(alert)}>
-                          <div className="text-sm font-medium text-gray-900 dark:text-white">{alert.user?.name || 'N/A'}</div>
-                          <div className="text-sm text-gray-600 dark:text-gray-400">{alert.user?.email || 'N/A'}</div>
-                          <div className="text-xs text-gray-500 dark:text-gray-500">{alert.user?.mobileNumber || 'N/A'}</div>
+                        <td className="px-4 py-4 cursor-pointer overflow-hidden" onClick={() => handleViewAlert(alert)}>
+                          <div className="min-w-0 space-y-0.5">
+                            <TruncatedText 
+                              text={alert.user?.name || 'N/A'} 
+                              maxLength={20}
+                              className="text-sm font-medium text-gray-900 dark:text-white block"
+                            />
+                            <TruncatedText 
+                              text={alert.user?.email || 'N/A'} 
+                              maxLength={25}
+                              className="text-sm text-gray-600 dark:text-gray-400 block"
+                            />
+                            <TruncatedText 
+                              text={alert.user?.mobileNumber || 'N/A'} 
+                              maxLength={15}
+                              className="text-xs text-gray-500 dark:text-gray-500 block"
+                            />
+                          </div>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap cursor-pointer" onClick={() => handleViewAlert(alert)}>
+                        <td className="px-4 py-4 cursor-pointer overflow-hidden" onClick={() => handleViewAlert(alert)}>
                           <div className="flex items-center space-x-2">
                             {getStatusIcon(alert.verificationStatus)}
-                            <span className={getStatusColor(alert.verificationStatus)}>
+                            <span className={`${getStatusColor(alert.verificationStatus)} truncate`}>
                               {alert.verificationStatus}
                             </span>
                           </div>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap cursor-pointer" onClick={() => handleViewAlert(alert)}>
-                          <div className="text-sm font-semibold text-gray-900 dark:text-white">
+                        <td className="px-4 py-4 cursor-pointer overflow-hidden" onClick={() => handleViewAlert(alert)}>
+                          <div className="text-sm font-semibold text-gray-900 dark:text-white truncate">
                             {format(new Date(alert.createdAt), 'MMM dd, yyyy')}
                           </div>
-                          <div className="text-sm text-gray-600 dark:text-gray-400">
+                          <div className="text-sm text-gray-600 dark:text-gray-400 truncate">
                             {format(new Date(alert.createdAt), 'hh:mm a')}
                           </div>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium" onClick={(e) => e.stopPropagation()}>
+                        <td className="px-4 py-4 text-sm font-medium overflow-hidden" onClick={(e) => e.stopPropagation()}>
                           <div className="flex items-center space-x-2">
                             <button
                               onClick={() => handleVerify(alert)}

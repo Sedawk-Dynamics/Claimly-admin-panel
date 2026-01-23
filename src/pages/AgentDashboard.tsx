@@ -9,6 +9,7 @@ import {
   AgentReferralTransaction,
 } from '../services/agent.service';
 import { Search, ChevronLeft, ChevronRight } from 'lucide-react';
+import TruncatedText from '../components/TruncatedText';
 
 export default function AgentDashboard() {
   const { setTheme } = useTheme();
@@ -297,23 +298,49 @@ export default function AgentDashboard() {
               {/* Desktop: table layout */}
               <div className="hidden sm:block">
                 <div className="overflow-x-auto max-h-[600px] overflow-y-auto">
-                  <table className="min-w-full text-left text-sm">
+                  <table className="w-full text-left text-sm table-fixed">
+                    <colgroup>
+                      <col className="w-[18%]" />
+                      <col className="w-[25%]" />
+                      <col className="w-[15%]" />
+                      <col className="w-[12%]" />
+                      <col className="w-[12%]" />
+                      <col className="w-[18%]" />
+                    </colgroup>
                     <thead className="border-b bg-gray-50 sticky top-0">
                       <tr>
-                        <th className="px-4 py-2 font-semibold text-gray-700">Name</th>
-                        <th className="px-4 py-2 font-semibold text-gray-700">Email</th>
-                        <th className="px-4 py-2 font-semibold text-gray-700">Phone</th>
-                        <th className="px-4 py-2 font-semibold text-gray-700">Joined</th>
-                        <th className="px-4 py-2 font-semibold text-gray-700">Subscribed</th>
-                        <th className="px-4 py-2 font-semibold text-gray-700">Earnings</th>
+                        <th className="px-3 py-2 font-semibold text-gray-700">Name</th>
+                        <th className="px-3 py-2 font-semibold text-gray-700">Email</th>
+                        <th className="px-3 py-2 font-semibold text-gray-700">Phone</th>
+                        <th className="px-3 py-2 font-semibold text-gray-700">Joined</th>
+                        <th className="px-3 py-2 font-semibold text-gray-700">Subscribed</th>
+                        <th className="px-3 py-2 font-semibold text-gray-700">Earnings</th>
                       </tr>
                     </thead>
                     <tbody>
                       {paginatedUsers.map((u) => (
                         <tr key={u.id} className="border-b last:border-0">
-                          <td className="px-4 py-2 text-gray-800">{u.name}</td>
-                          <td className="px-4 py-2 text-gray-700">{u.email || '-'}</td>
-                          <td className="px-4 py-2 text-gray-700">{u.mobileNumber}</td>
+                          <td className="px-3 py-2 overflow-hidden">
+                            <TruncatedText 
+                              text={u.name} 
+                              maxLength={20}
+                              className="text-gray-800 block"
+                            />
+                          </td>
+                          <td className="px-3 py-2 overflow-hidden">
+                            <TruncatedText 
+                              text={u.email || '-'} 
+                              maxLength={25}
+                              className="text-gray-700 block"
+                            />
+                          </td>
+                          <td className="px-3 py-2 overflow-hidden">
+                            <TruncatedText 
+                              text={u.mobileNumber} 
+                              maxLength={15}
+                              className="text-gray-700 block"
+                            />
+                          </td>
                           <td className="px-4 py-2 text-gray-500">
                             {new Date(u.createdAt).toLocaleDateString()}
                           </td>
@@ -383,8 +410,20 @@ export default function AgentDashboard() {
                       <td className="px-4 py-2 text-gray-500">
                         {new Date(t.transactionDate).toLocaleDateString()}
                       </td>
-                      <td className="px-4 py-2 text-gray-800">{t.userName}</td>
-                      <td className="px-4 py-2 text-gray-700">{t.planName}</td>
+                      <td className="px-4 py-2">
+                        <TruncatedText 
+                          text={t.userName} 
+                          maxLength={25}
+                          className="text-gray-800"
+                        />
+                      </td>
+                      <td className="px-4 py-2">
+                        <TruncatedText 
+                          text={t.planName} 
+                          maxLength={30}
+                          className="text-gray-700"
+                        />
+                      </td>
                       <td className="px-4 py-2 text-gray-700">₹{t.amount.toFixed(2)}</td>
                       <td className="px-4 py-2 text-emerald-700 font-semibold">
                         ₹{t.commissionAmount.toFixed(2)}

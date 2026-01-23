@@ -21,6 +21,7 @@ import {
   ShieldCheck,
   User,
 } from 'lucide-react';
+import TruncatedText from '../components/TruncatedText';
 
 type ReviewStatus = 'pending' | 'verified' | 'rejected' | 'draft' | 'all';
 
@@ -404,48 +405,78 @@ export default function PolicyReview() {
           {/* Desktop Table View */}
           <div className="hidden lg:block card elevated overflow-hidden border border-brand-400/20">
             <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200 dark:divide-navy-700">
+              <table className="w-full divide-y divide-gray-200 dark:divide-navy-700 table-fixed">
+                <colgroup>
+                  <col className="w-[20%]" />
+                  <col className="w-[25%]" />
+                  <col className="w-[12%]" />
+                  <col className="w-[12%]" />
+                  <col className="w-[12%]" />
+                  <col className="w-[19%]" />
+                </colgroup>
                 <thead className="bg-gradient-to-r from-navy-900 via-brand-900/50 to-navy-900 dark:from-navy-950 dark:via-brand-950/50 dark:to-navy-950">
                   <tr>
-                    <th className="px-6 py-4 text-left text-xs font-bold text-cyan-400 uppercase tracking-wider">Policy Details</th>
-                    <th className="px-6 py-4 text-left text-xs font-bold text-cyan-400 uppercase tracking-wider">User Information</th>
-                    <th className="px-6 py-4 text-left text-xs font-bold text-cyan-400 uppercase tracking-wider">Sum Assured</th>
-                    <th className="px-6 py-4 text-left text-xs font-bold text-cyan-400 uppercase tracking-wider">Uploaded</th>
-                    <th className="px-6 py-4 text-left text-xs font-bold text-cyan-400 uppercase tracking-wider">Status</th>
-                    <th className="px-6 py-4 text-left text-xs font-bold text-cyan-400 uppercase tracking-wider">Actions</th>
+                    <th className="px-4 py-4 text-left text-xs font-bold text-cyan-400 uppercase tracking-wider">Policy Details</th>
+                    <th className="px-4 py-4 text-left text-xs font-bold text-cyan-400 uppercase tracking-wider">User Information</th>
+                    <th className="px-4 py-4 text-left text-xs font-bold text-cyan-400 uppercase tracking-wider">Sum Assured</th>
+                    <th className="px-4 py-4 text-left text-xs font-bold text-cyan-400 uppercase tracking-wider">Uploaded</th>
+                    <th className="px-4 py-4 text-left text-xs font-bold text-cyan-400 uppercase tracking-wider">Status</th>
+                    <th className="px-4 py-4 text-left text-xs font-bold text-cyan-400 uppercase tracking-wider">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="bg-white dark:bg-navy-900 divide-y divide-gray-200 dark:divide-navy-700">
                   {records?.data && records.data.length > 0 ? (
                     records.data.map(policy => (
                       <tr key={policy.id} className="hover:bg-brand-50 dark:hover:bg-brand-950/10 transition-all duration-200 group">
-                        <td className="px-6 py-4">
-                          <div className="flex items-center space-x-3">
-                            <div className="p-2 bg-gradient-to-br from-brand-100 to-cyan-100 dark:from-brand-900/30 dark:to-cyan-900/30 rounded-lg group-hover:scale-110 transition-transform">
-                              <FileText className="w-5 h-5 text-brand-600 dark:text-brand-400" />
+                        <td className="px-4 py-4 overflow-hidden">
+                          <div className="flex items-center space-x-2 min-w-0">
+                            <div className="p-1.5 bg-gradient-to-br from-brand-100 to-cyan-100 dark:from-brand-900/30 dark:to-cyan-900/30 rounded-lg group-hover:scale-110 transition-transform flex-shrink-0">
+                              <FileText className="w-4 h-4 text-brand-600 dark:text-brand-400" />
                             </div>
-                            <div className="min-w-0">
-                              <div className="text-sm font-bold text-gray-900 dark:text-white break-words">{policy.policyNumber}</div>
-                              <div className="flex items-center mt-1 text-xs text-gray-500 dark:text-gray-400">
+                            <div className="min-w-0 flex-1">
+                              <TruncatedText 
+                                text={policy.policyNumber} 
+                                maxLength={20}
+                                className="text-sm font-bold text-gray-900 dark:text-white"
+                              />
+                              <div className="flex items-center mt-1 text-xs text-gray-500 dark:text-gray-400 min-w-0">
                                 <Building2 className="w-3 h-3 mr-1 flex-shrink-0" />
-                                <span className="break-words">{policy.insuranceCompany.name}</span>
+                                <TruncatedText 
+                                  text={policy.insuranceCompany.name} 
+                                  maxLength={20}
+                                  className=""
+                                />
                               </div>
                             </div>
                           </div>
                         </td>
-                        <td className="px-6 py-4">
-                          <div className="text-sm font-bold text-gray-900 dark:text-white break-words">{policy.user.name}</div>
-                          <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{policy.user.email || '-'}</div>
-                          <div className="text-xs text-gray-500 dark:text-gray-400">{policy.user.mobileNumber}</div>
+                        <td className="px-4 py-4 overflow-hidden">
+                          <div className="min-w-0 space-y-0.5">
+                            <TruncatedText 
+                              text={policy.user.name} 
+                              maxLength={20}
+                              className="text-sm font-bold text-gray-900 dark:text-white block"
+                            />
+                            <TruncatedText 
+                              text={policy.user.email || '-'} 
+                              maxLength={25}
+                              className="text-xs text-gray-500 dark:text-gray-400 block"
+                            />
+                            <TruncatedText 
+                              text={policy.user.mobileNumber} 
+                              maxLength={15}
+                              className="text-xs text-gray-500 dark:text-gray-400 block"
+                            />
+                          </div>
                         </td>
-                        <td className="px-6 py-4">
-                          <div className="text-sm font-bold text-gray-900 dark:text-white">₹{parseFloat(policy.sumAssured).toLocaleString('en-IN')}</div>
+                        <td className="px-4 py-4 overflow-hidden">
+                          <div className="text-sm font-bold text-gray-900 dark:text-white truncate">₹{parseFloat(policy.sumAssured).toLocaleString('en-IN')}</div>
                         </td>
-                        <td className="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
-                          {policy.documents.length > 0 ? new Date(policy.documents[0].uploadedAt).toLocaleDateString() : '—'}
+                        <td className="px-4 py-4 text-sm text-gray-500 dark:text-gray-400 overflow-hidden">
+                          <div className="truncate">{policy.documents.length > 0 ? new Date(policy.documents[0].uploadedAt).toLocaleDateString() : '—'}</div>
                         </td>
-                        <td className="px-6 py-4">{renderStatusBadge(policy)}</td>
-                        <td className="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">
+                        <td className="px-4 py-4 overflow-hidden">{renderStatusBadge(policy)}</td>
+                        <td className="px-4 py-4 text-sm text-gray-700 dark:text-gray-300 overflow-hidden">
                           {(() => {
                             const pendingDocs = policy.documents.filter((doc) => !doc.isVerified && !doc.rejectedAt).length;
                             const verifiedDocs = policy.documents.filter((doc) => doc.isVerified).length;

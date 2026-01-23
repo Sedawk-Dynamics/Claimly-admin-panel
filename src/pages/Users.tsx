@@ -4,6 +4,7 @@ import { adminService } from '../services/admin.service';
 import { User, PaginatedResponse } from '../types';
 import { Search, ChevronLeft, ChevronRight, UserCheck, UserX, Eye, X, Users as UsersIcon, Sparkles } from 'lucide-react';
 import api from '../services/api';
+import TruncatedText from '../components/TruncatedText';
 
 export default function Users() {
   const [users, setUsers] = useState<PaginatedResponse<User> | null>(null);
@@ -134,27 +135,35 @@ export default function Users() {
       ) : (
         <>
           {/* Desktop Table View */}
-          <div className="hidden md:block card elevated overflow-hidden border border-cyan-400/20">
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200 dark:divide-navy-700">
+          <div className="hidden md:block card elevated overflow-hidden border border-cyan-400/20 w-full max-w-full">
+            <div className="overflow-x-auto overflow-y-visible w-full max-w-full table-wrapper">
+              <table className="w-full divide-y divide-gray-200 dark:divide-navy-700 table-fixed min-w-0 max-w-full">
+                <colgroup>
+                  <col className="w-[20%]" />
+                  <col className="w-[25%]" />
+                  <col className="w-[15%]" />
+                  <col className="w-[12%]" />
+                  <col className="w-[13%]" />
+                  <col className="w-[15%]" />
+                </colgroup>
                 <thead className="bg-gradient-to-r from-navy-900 via-brand-900 to-navy-900 dark:from-navy-950 dark:via-brand-950 dark:to-navy-950">
                   <tr>
-                    <th className="px-6 py-4 text-left text-xs font-bold text-cyan-400 uppercase tracking-wider">
+                    <th className="px-4 py-4 text-left text-xs font-bold text-cyan-400 uppercase tracking-wider min-w-0">
                       User
                     </th>
-                    <th className="px-6 py-4 text-left text-xs font-bold text-cyan-400 uppercase tracking-wider">
+                    <th className="px-4 py-4 text-left text-xs font-bold text-cyan-400 uppercase tracking-wider min-w-0">
                       Email
                     </th>
-                    <th className="px-6 py-4 text-left text-xs font-bold text-cyan-400 uppercase tracking-wider">
+                    <th className="px-4 py-4 text-left text-xs font-bold text-cyan-400 uppercase tracking-wider min-w-0">
                       Phone
                     </th>
-                    <th className="px-6 py-4 text-left text-xs font-bold text-cyan-400 uppercase tracking-wider">
+                    <th className="px-6 py-4 text-left text-xs font-bold text-cyan-400 uppercase tracking-wider min-w-0">
                       DOB
                     </th>
-                    <th className="px-6 py-4 text-left text-xs font-bold text-cyan-400 uppercase tracking-wider">
+                    <th className="px-6 py-4 text-left text-xs font-bold text-cyan-400 uppercase tracking-wider min-w-0">
                       Status
                     </th>
-                    <th className="px-6 py-4 text-left text-xs font-bold text-cyan-400 uppercase tracking-wider">
+                    <th className="px-6 py-4 text-left text-xs font-bold text-cyan-400 uppercase tracking-wider min-w-0">
                       Actions
                     </th>
                   </tr>
@@ -163,43 +172,55 @@ export default function Users() {
                   {users?.data && users.data.length > 0 ? (
                     users.data.map((user) => (
                       <tr key={user.id} className="hover:bg-cyan-50 dark:hover:bg-cyan-950/10 transition-all duration-200 group">
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="flex items-center">
+                        <td className="px-4 py-4 overflow-hidden min-w-0 max-w-full">
+                          <div className="flex items-center min-w-0 max-w-full">
                             {user.profilePicture ? (
                               <img
                                 src={user.profilePicture.startsWith('http') ? user.profilePicture : `${api.defaults.baseURL || window.location.origin}${user.profilePicture.startsWith('/') ? user.profilePicture : `/${user.profilePicture}`}`}
                                 alt={user.name}
-                                className="flex-shrink-0 h-11 w-11 rounded-full object-cover border-2 border-brand-200 dark:border-brand-700 shadow-glow-orange group-hover:scale-110 transition-transform duration-200"
+                                className="flex-shrink-0 h-9 w-9 rounded-full object-cover border-2 border-brand-200 dark:border-brand-700 shadow-glow-orange group-hover:scale-110 transition-transform duration-200"
                               />
                             ) : (
-                              <div className="flex-shrink-0 h-11 w-11 rounded-full bg-gradient-to-br from-orange-400 to-yellow-400 flex items-center justify-center text-white font-bold text-base shadow-glow-orange group-hover:scale-110 transition-transform duration-200">
+                              <div className="flex-shrink-0 h-9 w-9 rounded-full bg-gradient-to-br from-orange-400 to-yellow-400 flex items-center justify-center text-white font-bold text-sm shadow-glow-orange group-hover:scale-110 transition-transform duration-200">
                                 {user.name.charAt(0).toUpperCase()}
                               </div>
                             )}
-                            <div className="ml-4">
-                              <div className="text-sm font-bold text-gray-900 dark:text-white">{user.name}</div>
+                            <div className="ml-3 min-w-0 flex-1 max-w-full overflow-hidden">
+                              <TruncatedText 
+                                text={user.name} 
+                                maxLength={20}
+                                className="text-sm font-bold text-gray-900 dark:text-white block text-zoom-safe"
+                              />
                             </div>
                           </div>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-700 dark:text-gray-300">{user.email}</div>
+                        <td className="px-4 py-4 overflow-hidden min-w-0 max-w-full">
+                          <TruncatedText 
+                            text={user.email} 
+                            maxLength={25}
+                            className="text-sm text-gray-700 dark:text-gray-300 block text-zoom-safe"
+                          />
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-700 dark:text-gray-300">{user.mobileNumber || '—'}</div>
+                        <td className="px-4 py-4 overflow-hidden min-w-0 max-w-full">
+                          <TruncatedText 
+                            text={user.mobileNumber || '—'} 
+                            maxLength={15}
+                            className="text-sm text-gray-700 dark:text-gray-300 block text-zoom-safe"
+                          />
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-700 dark:text-gray-300">{formatDate(user.dob)}</div>
+                        <td className="px-4 py-4 overflow-hidden min-w-0 max-w-full">
+                          <div className="text-sm text-gray-700 dark:text-gray-300 truncate text-zoom-safe">{formatDate(user.dob)}</div>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <span className={`${getStatusBadge(user.subscriptionStatus)}`}>
+                        <td className="px-4 py-4 overflow-hidden min-w-0 max-w-full">
+                          <span className={`${getStatusBadge(user.subscriptionStatus)} text-zoom-safe`}>
                             {user.subscriptionStatus}
                           </span>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                          <div className="flex items-center space-x-2">
+                        <td className="px-4 py-4 text-sm font-medium overflow-hidden min-w-0 max-w-full">
+                          <div className="flex items-center space-x-2 flex-wrap">
                             <button
                               onClick={() => handleViewDetails(user.id)}
-                              className="p-2.5 text-brand-600 dark:text-cyan-400 hover:text-white hover:bg-gradient-brand rounded-lg transition-all shadow-md hover:shadow-glow-brand hover:scale-110"
+                              className="p-2.5 text-brand-600 dark:text-cyan-400 hover:text-white hover:bg-gradient-brand rounded-lg transition-all shadow-md hover:shadow-glow-brand hover:scale-110 flex-shrink-0"
                               title="View details"
                             >
                               <Eye className="w-5 h-5" />
@@ -207,7 +228,7 @@ export default function Users() {
                             {user.subscriptionStatus !== 'ACTIVE' && (
                               <button
                                 onClick={() => handleStatusChange(user.id, 'ACTIVE')}
-                                className="p-2.5 text-cyan-600 dark:text-cyan-400 hover:text-white hover:bg-gradient-cyan rounded-lg transition-all shadow-md hover:shadow-glow-cyan hover:scale-110"
+                                className="p-2.5 text-cyan-600 dark:text-cyan-400 hover:text-white hover:bg-gradient-cyan rounded-lg transition-all shadow-md hover:shadow-glow-cyan hover:scale-110 flex-shrink-0"
                                 title="Activate"
                               >
                                 <UserCheck className="w-5 h-5" />
@@ -216,7 +237,7 @@ export default function Users() {
                             {user.subscriptionStatus !== 'INACTIVE' && (
                               <button
                                 onClick={() => handleStatusChange(user.id, 'INACTIVE')}
-                                className="p-2.5 text-gray-600 dark:text-gray-400 hover:text-white hover:bg-gray-600 dark:hover:bg-gray-700 rounded-lg transition-all shadow-md hover:scale-110"
+                                className="p-2.5 text-gray-600 dark:text-gray-400 hover:text-white hover:bg-gray-600 dark:hover:bg-gray-700 rounded-lg transition-all shadow-md hover:scale-110 flex-shrink-0"
                                 title="Deactivate"
                               >
                                 <UserX className="w-5 h-5" />
@@ -269,8 +290,16 @@ export default function Users() {
                         </div>
                       )}
                       <div className="min-w-0 flex-1">
-                        <div className="text-sm font-bold text-gray-900 dark:text-white truncate">{user.name}</div>
-                        <div className="text-xs text-gray-600 dark:text-gray-400 truncate mt-1">{user.email}</div>
+                        <TruncatedText 
+                          text={user.name} 
+                          maxLength={20}
+                          className="text-sm font-bold text-gray-900 dark:text-white"
+                        />
+                        <TruncatedText 
+                          text={user.email} 
+                          maxLength={25}
+                          className="text-xs text-gray-600 dark:text-gray-400 mt-1"
+                        />
                       </div>
                     </div>
                     <span className={`${getStatusBadge(user.subscriptionStatus)} flex-shrink-0 ml-2`}>

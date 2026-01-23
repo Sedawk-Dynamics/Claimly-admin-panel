@@ -425,12 +425,12 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="space-y-6 sm:space-y-8">
+    <div className="space-y-6 sm:space-y-8 w-full min-w-0 max-w-full overflow-x-hidden">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
-        <div className="min-w-0 flex-1">
-          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gradient-brand mb-1 sm:mb-2">Dashboard</h1>
-          <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">Welcome back! Here's what's happening today.</p>
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 w-full min-w-0 max-w-full">
+        <div className="min-w-0 flex-1 max-w-full">
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gradient-brand mb-1 sm:mb-2 text-zoom-safe break-words">Dashboard</h1>
+          <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 text-zoom-safe break-words">Welcome back! Here's what's happening today.</p>
         </div>
         <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
           <div className="hidden sm:flex items-center gap-2 text-xs sm:text-sm text-gray-600 dark:text-gray-400">
@@ -491,15 +491,15 @@ export default function Dashboard() {
       {/* Charts Section */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
         {/* Growth Trends - Area Chart */}
-        <div className="card p-4 sm:p-6 min-h-[280px] flex flex-col">
-          <div className="flex items-center justify-between mb-4 sm:mb-6 flex-wrap gap-3">
-            <div className="flex items-center gap-2 sm:gap-3">
-              <div className="p-1.5 sm:p-2 bg-gradient-to-br from-brand-500 to-cyan-400 rounded-lg">
+        <div className="card p-4 sm:p-6 min-h-[280px] flex flex-col w-full min-w-0 max-w-full overflow-x-hidden">
+          <div className="flex items-center justify-between mb-4 sm:mb-6 flex-wrap gap-3 w-full min-w-0 max-w-full">
+            <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+              <div className="p-1.5 sm:p-2 bg-gradient-to-br from-brand-500 to-cyan-400 rounded-lg flex-shrink-0">
                 <LineChart className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
               </div>
-              <div>
-                <h3 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white">Growth Trends</h3>
-                <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
+              <div className="min-w-0 flex-1">
+                <h3 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white text-zoom-safe break-words">Growth Trends</h3>
+                <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 text-zoom-safe break-words">
                   {trendPeriod === '7days' ? 'Last 7 days'
                     : trendPeriod === '30days' ? 'Last 30 days'
                     : trendPeriod === '3months' ? 'Last 3 months'
@@ -508,11 +508,11 @@ export default function Dashboard() {
                 </p>
               </div>
             </div>
-            <div className="flex items-center gap-2 flex-wrap">
+            <div className="flex items-center gap-2 flex-wrap flex-shrink-0">
               <select
                 value={trendPeriod}
                 onChange={(e) => setTrendPeriod(e.target.value as typeof trendPeriod)}
-                className="input-elegant text-xs sm:text-sm py-1.5 sm:py-2 px-2 sm:px-3 min-w-[120px]"
+                className="input-elegant text-xs sm:text-sm py-1.5 sm:py-2 px-2 sm:px-3 min-w-[120px] max-w-full"
               >
                 <option value="7days">7 Days</option>
                 <option value="30days">30 Days</option>
@@ -522,7 +522,7 @@ export default function Dashboard() {
               </select>
             </div>
           </div>
-          <div className="mt-2 flex-1 min-h-[220px]">
+          <div className="mt-2 flex-1 min-h-[220px] w-full min-w-0 max-w-full overflow-x-hidden">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart
                 data={trendData}
@@ -877,32 +877,32 @@ export default function Dashboard() {
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </Link>
           </div>
-          <div className="card elevated overflow-hidden border border-yellow-400/20 dark:border-yellow-500/20">
+          <div className="card elevated overflow-hidden border border-yellow-400/20 dark:border-yellow-500/20 w-full min-w-0 max-w-full">
             <div className="divide-y divide-gray-200 dark:divide-navy-700">
               {stats.recentAlerts.map((alert) => (
                 <Link
                   key={alert.id}
                   to="/alerts"
-                  className="block p-4 hover:bg-yellow-50 dark:hover:bg-yellow-950/10 transition-all duration-200 group"
+                  className="block p-4 hover:bg-yellow-50 dark:hover:bg-yellow-950/10 transition-all duration-200 group w-full min-w-0 max-w-full"
                 >
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center space-x-2 mb-1">
-                        <div className="p-1.5 bg-gradient-sunset rounded-lg shadow-glow-orange">
+                  <div className="flex items-start justify-between gap-2 w-full min-w-0 max-w-full">
+                    <div className="flex-1 min-w-0 max-w-full overflow-hidden">
+                      <div className="flex items-center space-x-2 mb-1 flex-wrap">
+                        <div className="p-1.5 bg-gradient-sunset rounded-lg shadow-glow-orange flex-shrink-0">
                           <AlertCircle className="w-3.5 h-3.5 text-white" />
                         </div>
-                        <p className="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">
+                        <p className="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate min-w-0 text-zoom-safe">
                           {alert.user?.name || 'Unknown User'}
                         </p>
-                        <span className="badge badge-yellow">
+                        <span className="badge badge-yellow flex-shrink-0 text-zoom-safe">
                           {alert.alertType || 'ALERT'}
                         </span>
                       </div>
-                      <p className="text-xs text-gray-500 dark:text-gray-400 ml-7">
+                      <p className="text-xs text-gray-500 dark:text-gray-400 ml-7 text-zoom-safe break-words">
                         {alert.user?.email || 'No email'} • {alert.user?.mobileNumber || 'No phone'}
                       </p>
                       {alert.remarks && (
-                        <p className="text-xs text-gray-600 dark:text-gray-400 mt-1 ml-7 truncate">{alert.remarks}</p>
+                        <p className="text-xs text-gray-600 dark:text-gray-400 mt-1 ml-7 truncate text-zoom-safe">{alert.remarks}</p>
                       )}
                     </div>
                     <div className="ml-4 flex-shrink-0 text-right">

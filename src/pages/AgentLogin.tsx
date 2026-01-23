@@ -127,34 +127,34 @@ export default function AgentLogin() {
 
 
   return (
-    <div className="min-h-screen flex flex-col lg:flex-row relative overflow-hidden">
+    <div className="min-h-screen flex flex-col lg:flex-row relative overflow-hidden w-full max-w-full overflow-x-hidden">
       {/* Left Side - Brand / Story */}
-      <div className="w-full lg:w-1/2 bg-gradient-to-br from-brand-50 via-cyan-50 to-blue-50 dark:from-navy-950 dark:via-navy-900 dark:to-navy-950 flex flex-col items-center justify-center px-6 sm:px-8 md:px-12 py-12 lg:py-16 relative overflow-hidden">
+      <div className="w-full lg:w-1/2 bg-gradient-to-br from-brand-50 via-cyan-50 to-blue-50 dark:from-navy-950 dark:via-navy-900 dark:to-navy-950 flex flex-col items-center justify-center px-6 sm:px-8 md:px-12 py-12 lg:py-16 relative overflow-hidden min-w-0 max-w-full">
         <div className="absolute inset-0 overflow-hidden">
           <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-glow opacity-10 dark:opacity-5 rounded-full blur-3xl"></div>
           <div className="absolute bottom-0 left-0 w-96 h-96 bg-gradient-sunset opacity-10 dark:opacity-5 rounded-full blur-3xl"></div>
         </div>
 
-        <div className="relative z-10 w-full max-w-md text-center lg:text-left">
+        <div className="relative z-10 w-full max-w-md text-center lg:text-left min-w-0 max-w-full">
           <div className="flex justify-center lg:justify-start mb-8 lg:mb-12">
             <div className="relative">
               <div className="relative p-4 bg-white dark:bg-navy-800 rounded-2xl shadow-card-3d">
-                <img src={logo} alt="Claimly" className="h-16 sm:h-20 w-auto" />
+                <img src={logo} alt="Claimly" className="h-16 sm:h-20 w-auto max-w-full" />
               </div>
             </div>
           </div>
 
-          <div className="space-y-6 mb-8 lg:mb-12">
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white leading-tight">
+          <div className="space-y-6 mb-8 lg:mb-12 min-w-0 max-w-full">
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white leading-tight text-zoom-safe break-words">
               Agent Portal
             </h1>
-            <p className="text-lg sm:text-xl text-gray-700 dark:text-gray-300 leading-relaxed">
+            <p className="text-lg sm:text-xl text-gray-700 dark:text-gray-300 leading-relaxed text-zoom-safe break-words">
               Access your agent account with secure phone verification.
             </p>
           </div>
 
-          <div className="mt-8 lg:mt-12 pt-8 border-t border-cyan-400/20 dark:border-cyan-500/20">
-            <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">
+          <div className="mt-8 lg:mt-12 pt-8 border-t border-cyan-400/20 dark:border-cyan-500/20 min-w-0 max-w-full">
+            <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 text-zoom-safe break-words">
               Secure agent authentication powered by Claimly platform.
             </p>
           </div>
@@ -162,18 +162,18 @@ export default function AgentLogin() {
       </div>
 
       {/* Right Side - Login Panel */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center px-4 sm:px-6 md:px-8 lg:px-12 py-12 lg:py-16 bg-white dark:bg-gray-900 relative">
+      <div className="w-full lg:w-1/2 flex items-center justify-center px-4 sm:px-6 md:px-8 lg:px-12 py-12 lg:py-16 bg-white dark:bg-gray-900 relative min-w-0 max-w-full overflow-x-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-gray-50 to-white dark:from-navy-950 dark:to-navy-900"></div>
 
-        <div className="w-full max-w-md relative z-10">
-          <div className="card shadow-card-3d-hover p-8 sm:p-10 border border-gray-200 dark:border-navy-700">
-            <div className="mb-8">
-              <h2 className="text-2xl sm:text-3xl font-bold text-gradient-brand mb-2">
+        <div className="w-full max-w-md relative z-10 min-w-0 max-w-full">
+          <div className="card shadow-card-3d-hover p-8 sm:p-10 border border-gray-200 dark:border-navy-700 w-full min-w-0 max-w-full overflow-x-hidden">
+            <div className="mb-8 min-w-0 max-w-full">
+              <h2 className="text-2xl sm:text-3xl font-bold text-gradient-brand mb-2 text-zoom-safe break-words">
                 {step === 'phone' && 'Enter Phone Number'}
                 {step === 'otp' && 'Verify OTP'}
                 {step === 'signup' && 'Create Agent Account'}
               </h2>
-              <p className="text-gray-600 dark:text-gray-400">
+              <p className="text-gray-600 dark:text-gray-400 text-zoom-safe break-words">
                 {step === 'phone' && 'We will send you an OTP to verify your phone number'}
                 {step === 'otp' && 'Enter the OTP sent to your phone'}
                 {step === 'signup' && 'Fill in your details to create an agent account'}
@@ -214,7 +214,7 @@ export default function AgentLogin() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="group relative w-full overflow-hidden bg-gradient-sunset text-white px-6 py-3 rounded-xl font-semibold text-base shadow-lg hover:shadow-glow-orange-lg transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="group relative w-full overflow-hidden bg-gradient-sunset text-white px-6 py-3 rounded-xl font-semibold text-base shadow-lg hover:shadow-glow-orange-lg transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed min-w-0 max-w-full text-zoom-safe"
                 >
                   {loading ? 'Sending OTP...' : 'Send OTP'}
                 </button>

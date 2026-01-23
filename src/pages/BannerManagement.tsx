@@ -244,13 +244,13 @@ export default function BannerManagement() {
 
       {/* Modal */}
       {showModal && (
-        <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto">
-          <div className="fixed inset-0 bg-black/50 dark:bg-black/70 backdrop-blur-sm"></div>
-          <div className="relative z-50 card border-2 border-brand-400/30 dark:border-cyan-500/30 w-full max-w-md sm:max-w-lg md:max-w-xl shadow-2xl shadow-brand-500/20 m-3 sm:m-4 md:m-6 mt-4 sm:mt-6 md:mt-8 mb-4 sm:mb-8 p-4 sm:p-5 md:p-6 lg:p-8">
-            <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-gradient-brand mb-4 sm:mb-5 md:mb-6">
+        <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto overflow-x-hidden modal-container">
+          <div className="fixed inset-0 bg-black/50 dark:bg-black/70 backdrop-blur-sm modal-backdrop"></div>
+          <div className="relative z-50 card border-2 border-brand-400/30 dark:border-cyan-500/30 w-full max-w-md sm:max-w-lg md:max-w-xl shadow-2xl shadow-brand-500/20 m-3 sm:m-4 md:m-6 mt-4 sm:mt-6 md:mt-8 mb-4 sm:mb-8 p-4 sm:p-5 md:p-6 lg:p-8 modal-content-zoom-safe">
+            <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-gradient-brand mb-4 sm:mb-5 md:mb-6 text-zoom-safe truncate min-w-0">
               {editingBanner ? 'Edit Banner' : 'Upload Banner'}
             </h3>
-            <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4 md:space-y-5">
+            <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4 md:space-y-5 w-full min-w-0 max-w-full">
               <div>
                 <label className="block text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5 sm:mb-2">
                   Title (Optional)

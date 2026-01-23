@@ -55,38 +55,38 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col lg:flex-row relative overflow-hidden">
+    <div className="min-h-screen flex flex-col lg:flex-row relative overflow-hidden w-full max-w-full overflow-x-hidden">
       {/* Left Side - Brand / Story */}
-      <div className="w-full lg:w-1/2 bg-gradient-to-br from-brand-50 via-cyan-50 to-blue-50 dark:from-navy-950 dark:via-navy-900 dark:to-navy-950 flex flex-col items-center justify-center px-6 sm:px-8 md:px-12 py-12 lg:py-16 relative overflow-hidden">
+      <div className="w-full lg:w-1/2 bg-gradient-to-br from-brand-50 via-cyan-50 to-blue-50 dark:from-navy-950 dark:via-navy-900 dark:to-navy-950 flex flex-col items-center justify-center px-6 sm:px-8 md:px-12 py-12 lg:py-16 relative overflow-hidden min-w-0 max-w-full">
         {/* Background decorative elements */}
         <div className="absolute inset-0 overflow-hidden">
           <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-glow opacity-10 dark:opacity-5 rounded-full blur-3xl"></div>
           <div className="absolute bottom-0 left-0 w-96 h-96 bg-gradient-sunset opacity-10 dark:opacity-5 rounded-full blur-3xl"></div>
         </div>
 
-        <div className="relative z-10 w-full max-w-md text-center lg:text-left">
+        <div className="relative z-10 w-full max-w-md text-center lg:text-left min-w-0 max-w-full">
           {/* Logo */}
           <div className="flex justify-center lg:justify-start mb-8 lg:mb-12">
             <div className="relative">
               <div className="relative p-4 bg-white dark:bg-navy-800 rounded-2xl shadow-card-3d">
-                <img src={logo} alt="Claimly" className="h-16 sm:h-20 w-auto" />
+                <img src={logo} alt="Claimly" className="h-16 sm:h-20 w-auto max-w-full" />
               </div>
             </div>
           </div>
 
           {/* Tagline / Value Proposition */}
-          <div className="space-y-6 mb-8 lg:mb-12">
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white leading-tight">
+          <div className="space-y-6 mb-8 lg:mb-12 min-w-0 max-w-full">
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white leading-tight text-zoom-safe break-words">
               India's First AI-Driven Insurance Claim Platform
             </h1>
-            <p className="text-lg sm:text-xl text-gray-700 dark:text-gray-300 leading-relaxed">
+            <p className="text-lg sm:text-xl text-gray-700 dark:text-gray-300 leading-relaxed text-zoom-safe break-words">
               Helping families claim their rightful insurance, stress-free & fast.
             </p>
           </div>
 
           {/* Additional Information */}
-          <div className="mt-8 lg:mt-12 pt-8 border-t border-cyan-400/20 dark:border-cyan-500/20">
-            <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">
+          <div className="mt-8 lg:mt-12 pt-8 border-t border-cyan-400/20 dark:border-cyan-500/20 min-w-0 max-w-full">
+            <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 text-zoom-safe break-words">
               Experience seamless insurance management with cutting-edge AI technology.
             </p>
           </div>
@@ -95,22 +95,22 @@ export default function Login() {
       </div>
 
       {/* Right Side - Login Panel */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center px-4 sm:px-6 md:px-8 lg:px-12 py-12 lg:py-16 bg-white dark:bg-gray-900 relative">
+      <div className="w-full lg:w-1/2 flex items-center justify-center px-4 sm:px-6 md:px-8 lg:px-12 py-12 lg:py-16 bg-white dark:bg-gray-900 relative min-w-0 max-w-full overflow-x-hidden">
         {/* Background subtle pattern */}
         <div className="absolute inset-0 bg-gradient-to-br from-gray-50 to-white dark:from-navy-950 dark:to-navy-900"></div>
 
-        <div className="w-full max-w-md relative z-10">
+        <div className="w-full max-w-md relative z-10 min-w-0 max-w-full">
           {/* Login Card */}
-          <div className="card shadow-card-3d-hover p-8 sm:p-10 border border-gray-200 dark:border-navy-700">
+          <div className="card shadow-card-3d-hover p-8 sm:p-10 border border-gray-200 dark:border-navy-700 w-full min-w-0 max-w-full overflow-x-hidden">
             {/* Login Header */}
-            <div className="mb-8">
-              <h2 className="text-2xl sm:text-3xl font-bold text-gradient-brand mb-2">Welcome Back</h2>
-              <p className="text-gray-600 dark:text-gray-400">
+            <div className="mb-8 min-w-0 max-w-full">
+              <h2 className="text-2xl sm:text-3xl font-bold text-gradient-brand mb-2 text-zoom-safe break-words">Welcome Back</h2>
+              <p className="text-gray-600 dark:text-gray-400 text-zoom-safe break-words">
                 Sign in with your email and password
               </p>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <form onSubmit={handleSubmit} className="space-y-6 w-full min-w-0 max-w-full">
               {error && (
                 <div className="bg-orange-500/20 dark:bg-orange-900/20 border-2 border-orange-400 dark:border-orange-500 backdrop-blur-sm text-orange-900 dark:text-orange-300 px-4 py-3 rounded-lg text-sm shadow-glow-orange">
                   <div className="flex items-center space-x-2">
@@ -162,7 +162,7 @@ export default function Login() {
               <button
                 type="submit"
                 disabled={loading}
-                className="group relative w-full overflow-hidden bg-gradient-sunset text-white px-6 py-3 rounded-xl font-semibold text-base shadow-lg hover:shadow-glow-orange-lg transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:hover:shadow-lg"
+                className="group relative w-full overflow-hidden bg-gradient-sunset text-white px-6 py-3 rounded-xl font-semibold text-base shadow-lg hover:shadow-glow-orange-lg transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:hover:shadow-lg min-w-0 max-w-full text-zoom-safe"
               >
                 <div className="absolute inset-0 bg-gradient-fire opacity-0 group-hover:opacity-100 transition-opacity duration-300 group-disabled:opacity-0"></div>
                 <div className="relative flex items-center justify-center space-x-2.5">

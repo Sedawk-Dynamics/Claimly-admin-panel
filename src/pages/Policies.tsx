@@ -3,6 +3,7 @@ import { adminService } from '../services/admin.service';
 import { Policy, PaginatedResponse } from '../types';
 import { ChevronLeft, ChevronRight, FileText, Search, Shield, Sparkles } from 'lucide-react';
 import { format } from 'date-fns';
+import TruncatedText from '../components/TruncatedText';
 
 export default function Policies() {
   const [policies, setPolicies] = useState<PaginatedResponse<Policy> | null>(null);
@@ -100,21 +101,30 @@ export default function Policies() {
         <>
           {/* Desktop Table View */}
           <div className="hidden md:block card elevated overflow-hidden border border-brand-400/20">
-            <table className="min-w-full divide-y divide-gray-200 dark:divide-navy-700">
-              <thead className="bg-gradient-to-r from-navy-900 via-brand-900 to-navy-900 dark:from-navy-950 dark:via-brand-950 dark:to-navy-950">
-                <tr>
-                  <th className="px-6 py-4 text-left text-xs font-bold text-cyan-400 uppercase tracking-wider">
-                    Policy Number
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-bold text-cyan-400 uppercase tracking-wider">
-                    User
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-bold text-cyan-400 uppercase tracking-wider">
-                    Sum Assured
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-bold text-cyan-400 uppercase tracking-wider">
-                    Company
-                  </th>
+            <div className="overflow-x-auto">
+              <table className="w-full divide-y divide-gray-200 dark:divide-navy-700 table-fixed">
+                <colgroup>
+                  <col className="w-[20%]" />
+                  <col className="w-[22%]" />
+                  <col className="w-[15%]" />
+                  <col className="w-[23%]" />
+                  <col className="w-[12%]" />
+                  <col className="w-[8%]" />
+                </colgroup>
+                <thead className="bg-gradient-to-r from-navy-900 via-brand-900 to-navy-900 dark:from-navy-950 dark:via-brand-950 dark:to-navy-950">
+                  <tr>
+                    <th className="px-4 py-4 text-left text-xs font-bold text-cyan-400 uppercase tracking-wider">
+                      Policy Number
+                    </th>
+                    <th className="px-4 py-4 text-left text-xs font-bold text-cyan-400 uppercase tracking-wider">
+                      User
+                    </th>
+                    <th className="px-4 py-4 text-left text-xs font-bold text-cyan-400 uppercase tracking-wider">
+                      Sum Assured
+                    </th>
+                    <th className="px-4 py-4 text-left text-xs font-bold text-cyan-400 uppercase tracking-wider">
+                      Company
+                    </th>
                   <th className="px-6 py-4 text-left text-xs font-bold text-cyan-400 uppercase tracking-wider">
                     Uploaded
                   </th>
@@ -127,29 +137,43 @@ export default function Policies() {
                 {policies?.data && policies.data.length > 0 ? (
                   policies.data.map((policy) => (
                     <tr key={policy.id} className="hover:bg-cyan-50 dark:hover:bg-cyan-950/10 transition-all duration-200 group">
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center space-x-3">
-                          <div className="p-2 bg-gradient-brand rounded-lg shadow-glow-brand group-hover:scale-110 transition-transform duration-200">
+                      <td className="px-4 py-4 overflow-hidden">
+                        <div className="flex items-center space-x-2 min-w-0">
+                          <div className="p-1.5 bg-gradient-brand rounded-lg shadow-glow-brand group-hover:scale-110 transition-transform duration-200 flex-shrink-0">
                             <FileText className="w-4 h-4 text-white" />
                           </div>
-                          <div className="text-sm font-bold text-gray-900 dark:text-white">{policy.policyNumber}</div>
+                          <TruncatedText 
+                            text={policy.policyNumber} 
+                            maxLength={20}
+                            className="text-sm font-bold text-gray-900 dark:text-white block"
+                          />
                         </div>
                       </td>
-                      <td className="px-6 py-4">
-                        <div className="text-sm font-medium text-gray-900 dark:text-white">
-                          {policy.user?.name || 'N/A'}
+                      <td className="px-4 py-4 overflow-hidden">
+                        <div className="min-w-0 space-y-0.5">
+                          <TruncatedText 
+                            text={policy.user?.name || 'N/A'} 
+                            maxLength={20}
+                            className="text-sm font-medium text-gray-900 dark:text-white block"
+                          />
+                          <TruncatedText 
+                            text={policy.user?.email || 'N/A'} 
+                            maxLength={25}
+                            className="text-sm text-gray-600 dark:text-gray-400 block"
+                          />
                         </div>
-                        <div className="text-sm text-gray-600 dark:text-gray-400">
-                          {policy.user?.email || 'N/A'}
-                        </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-semibold text-cyan-600 dark:text-cyan-400">{formatCurrency(parseFloat(policy.sumAssured))}</div>
+                      <td className="px-4 py-4 overflow-hidden">
+                        <div className="text-sm font-semibold text-cyan-600 dark:text-cyan-400 truncate">{formatCurrency(parseFloat(policy.sumAssured))}</div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-medium text-gray-900 dark:text-white">{policy.insuranceCompany?.name || 'N/A'}</div>
+                      <td className="px-4 py-4 overflow-hidden">
+                        <TruncatedText 
+                          text={policy.insuranceCompany?.name || 'N/A'} 
+                          maxLength={25}
+                          className="text-sm font-medium text-gray-900 dark:text-white block"
+                        />
                       </td>
-                      <td className="px-6 py-4">
+                      <td className="px-4 py-4 overflow-hidden">
                         <div className="text-sm text-gray-900 dark:text-white">
                           {format(new Date(policy.uploadedAt), 'MMM dd, yyyy')}
                         </div>
@@ -198,6 +222,7 @@ export default function Policies() {
                 )}
               </tbody>
             </table>
+            </div>
           </div>
 
           {/* Pagination */}

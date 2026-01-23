@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { adminService } from '../services/admin.service';
 import { Company, PaginatedResponse } from '../types';
 import { Plus, Edit, Trash2, ChevronLeft, ChevronRight, Building2, Search, Sparkles } from 'lucide-react';
+import TruncatedText from '../components/TruncatedText';
 
 export default function Companies() {
   const [companies, setCompanies] = useState<PaginatedResponse<Company> | null>(null);
@@ -98,7 +99,7 @@ export default function Companies() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 w-full min-w-0 max-w-full overflow-x-hidden">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div className="flex items-center space-x-4">
@@ -190,62 +191,87 @@ export default function Companies() {
       ) : (
         <>
           {/* Desktop Table View */}
-          <div className="hidden md:block card elevated overflow-hidden border border-orange-400/20">
-            <table className="min-w-full divide-y divide-gray-200 dark:divide-navy-700">
-              <thead className="bg-gradient-to-r from-navy-900 via-orange-900/50 to-navy-900 dark:from-navy-950 dark:via-orange-950/50 dark:to-navy-950">
-                <tr>
-                  <th className="px-6 py-4 text-left text-xs font-bold text-orange-400 uppercase tracking-wider">
-                    Company
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-bold text-orange-400 uppercase tracking-wider">
-                    Contact
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-bold text-orange-400 uppercase tracking-wider">
-                    Status
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-bold text-orange-400 uppercase tracking-wider">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white dark:bg-navy-900 divide-y divide-gray-200 dark:divide-navy-700">
-                {companies?.data && companies.data.length > 0 ? (
-                  companies.data.map((company) => (
-                    <tr key={company.id} className="hover:bg-orange-50 dark:hover:bg-orange-950/10 transition-all duration-200 group">
-                      <td className="px-6 py-4">
-                        <div className="flex items-center space-x-3">
-                          <div className="p-2 bg-gradient-sunset rounded-lg shadow-glow-orange group-hover:scale-110 transition-transform duration-200">
-                            <Building2 className="w-5 h-5 text-white" />
+          <div className="hidden md:block card elevated overflow-hidden border border-orange-400/20 w-full max-w-full">
+            <div className="overflow-x-auto overflow-y-visible w-full max-w-full table-wrapper">
+              <table className="w-full divide-y divide-gray-200 dark:divide-navy-700 min-w-[800px]">
+                <colgroup>
+                  <col className="w-[30%]" />
+                  <col className="w-[30%]" />
+                  <col className="w-[15%]" />
+                  <col className="w-[25%]" />
+                </colgroup>
+                <thead className="bg-gradient-to-r from-navy-900 via-orange-900/50 to-navy-900 dark:from-navy-950 dark:via-orange-950/50 dark:to-navy-950">
+                  <tr>
+                    <th className="px-4 py-4 text-left text-xs font-bold text-orange-400 uppercase tracking-wider min-w-[200px]">
+                      Company
+                    </th>
+                    <th className="px-4 py-4 text-left text-xs font-bold text-orange-400 uppercase tracking-wider min-w-[200px]">
+                      Contact
+                    </th>
+                    <th className="px-4 py-4 text-left text-xs font-bold text-orange-400 uppercase tracking-wider min-w-[100px]">
+                      Status
+                    </th>
+                    <th className="px-4 py-4 text-left text-xs font-bold text-orange-400 uppercase tracking-wider min-w-[180px]">
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white dark:bg-navy-900 divide-y divide-gray-200 dark:divide-navy-700">
+                  {companies?.data && companies.data.length > 0 ? (
+                    companies.data.map((company) => (
+                      <tr key={company.id} className="hover:bg-orange-50 dark:hover:bg-orange-950/10 transition-all duration-200 group">
+                        <td className="px-4 py-4 overflow-hidden min-w-[200px]">
+                          <div className="flex items-center space-x-2 min-w-0">
+                            <div className="p-1.5 bg-gradient-sunset rounded-lg shadow-glow-orange group-hover:scale-110 transition-transform duration-200 flex-shrink-0">
+                              <Building2 className="w-4 h-4 text-white" />
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <TruncatedText 
+                                text={company.name} 
+                                maxLength={25}
+                                className="text-sm font-bold text-gray-900 dark:text-white block"
+                              />
+                              {company.websiteUrl && (
+                                <TruncatedText 
+                                  text={company.websiteUrl} 
+                                  maxLength={30}
+                                  className="text-xs text-gray-600 dark:text-gray-400 mt-1 block"
+                                />
+                              )}
+                            </div>
                           </div>
-                          <div>
-                            <div className="text-sm font-bold text-gray-900 dark:text-white">{company.name}</div>
-                            {company.websiteUrl && (
-                              <div className="text-xs text-gray-600 dark:text-gray-400 mt-1">{company.websiteUrl}</div>
-                            )}
+                        </td>
+                        <td className="px-4 py-4 overflow-hidden min-w-[200px]">
+                          <div className="min-w-0 space-y-0.5">
+                            <TruncatedText 
+                              text={company.contactEmail} 
+                              maxLength={25}
+                              className="text-sm font-medium text-gray-900 dark:text-white block"
+                            />
+                            <TruncatedText 
+                              text={company.contactNumber} 
+                              maxLength={15}
+                              className="text-sm text-gray-600 dark:text-gray-400 block"
+                            />
                           </div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="text-sm font-medium text-gray-900 dark:text-white">{company.contactEmail}</div>
-                        <div className="text-sm text-gray-600 dark:text-gray-400">{company.contactNumber}</div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={company.status === 'ACTIVE' ? 'status-active' : 'status-inactive'}>
-                          {company.status}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        <div className="flex space-x-3">
+                        </td>
+                        <td className="px-4 py-4 overflow-hidden min-w-[100px]">
+                          <span className={company.status === 'ACTIVE' ? 'status-active' : 'status-inactive'}>
+                            {company.status}
+                          </span>
+                        </td>
+                        <td className="px-4 py-4 text-sm font-medium overflow-hidden min-w-[180px]">
+                        <div className="flex space-x-3 flex-wrap">
                           <button
                             onClick={() => handleEdit(company)}
-                            className="flex items-center px-3 py-2 text-sm font-medium text-brand-600 dark:text-cyan-400 hover:bg-brand-50 dark:hover:bg-navy-800 rounded-lg transition-all border border-transparent hover:border-brand-200 dark:hover:border-navy-600"
+                            className="flex items-center px-3 py-2 text-sm font-medium text-brand-600 dark:text-cyan-400 hover:bg-brand-50 dark:hover:bg-navy-800 rounded-lg transition-all border border-transparent hover:border-brand-200 dark:hover:border-navy-600 whitespace-nowrap"
                           >
                             <Edit className="w-4 h-4 mr-2" />
                             Edit
                           </button>
                           <button
                             onClick={() => handleDelete(company.id)}
-                            className="flex items-center px-3 py-2 text-sm font-medium text-orange-600 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-navy-800 rounded-lg transition-all border border-transparent hover:border-orange-200 dark:hover:border-navy-600"
+                            className="flex items-center px-3 py-2 text-sm font-medium text-orange-600 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-navy-800 rounded-lg transition-all border border-transparent hover:border-orange-200 dark:hover:border-navy-600 whitespace-nowrap"
                           >
                             <Trash2 className="w-4 h-4 mr-2" />
                             Delete
@@ -268,6 +294,7 @@ export default function Companies() {
                 )}
               </tbody>
             </table>
+            </div>
           </div>
 
           {/* Pagination */}
