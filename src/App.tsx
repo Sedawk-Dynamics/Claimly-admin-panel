@@ -19,6 +19,7 @@ import Notifications from './pages/Notifications';
 import SubscriptionPlans from './pages/SubscriptionPlans';
 import Agents from './pages/Agents';
 import BannerManagement from './pages/BannerManagement';
+import OfferBannerManagement from './pages/OfferBannerManagement';
 
 function PrivateRoute({ children }: { children: React.ReactNode }) {
   const admin = authService.getStoredAdmin();
@@ -76,6 +77,7 @@ function App() {
             <Route path="subscription-plans" element={<SubscriptionPlans />} />
             <Route path="agents" element={<Agents />} />
             <Route path="banners" element={<BannerManagement />} />
+            <Route path="offer-banners" element={<OfferBannerManagement />} />
           </Route>
         </Routes>
       </BrowserRouter>

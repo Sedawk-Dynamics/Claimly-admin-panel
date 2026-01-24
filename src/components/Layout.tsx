@@ -14,6 +14,7 @@ import {
   CreditCard,
   Shield,
   Image as ImageIcon,
+  BadgePercent,
 } from 'lucide-react';
 import { useState } from 'react';
 import ThemeToggle from './ThemeToggle';
@@ -31,6 +32,7 @@ const navigation = [
   { name: 'Alerts', href: '/alerts', icon: AlertCircle },
   { name: 'Notifications', href: '/notifications', icon: Bell },
   { name: 'Banners', href: '/banners', icon: ImageIcon },
+  { name: 'Offer Banners', href: '/offer-banners', icon: BadgePercent },
   { name: 'Agents', href: '/agents', icon: Shield, roles: ['SUPER_ADMIN', 'STAFF'] },
 ];
 
