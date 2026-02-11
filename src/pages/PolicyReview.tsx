@@ -141,6 +141,26 @@ export default function PolicyReview() {
     }
   };
 
+  const handleAcceptPolicy = async (policyId: string) => {
+    if (!confirm('Are you sure you want to accept this policy?')) return;
+    try {
+      await adminService.verifyPolicyDetails(policyId);
+      loadPolicies();
+    } catch (err: any) {
+      alert(err.response?.data?.error || 'Failed to accept policy');
+    }
+  };
+
+  const handleRejectPolicy = async (policyId: string) => {
+    if (!confirm('Are you sure you want to reject this policy?')) return;
+    try {
+      await adminService.rejectPolicyWithoutDocuments(policyId);
+      loadPolicies();
+    } catch (err: any) {
+      alert(err.response?.data?.error || 'Failed to reject policy');
+    }
+  };
+
   const openPolicyDetail = (policy: PolicyUser) => {
     setSelectedPolicy(policy);
   };
@@ -1048,6 +1068,29 @@ export default function PolicyReview() {
                     </div>
                   </div>
                 )}
+                {/* Accept/Reject Policy Actions */}
+                {selectedPolicy.status === 'PENDING' && selectedPolicy.documents.length > 0 && (
+                  <div className="mt-4 sm:mt-6 pt-4 sm:pt-6 border-t border-gray-200 dark:border-navy-700">
+                    <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase mb-3">Policy Actions</p>
+                    <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
+                      <button
+                        onClick={() => handleAcceptPolicy(selectedPolicy.id)}
+                        className="flex-1 flex items-center justify-center px-4 py-2.5 text-sm sm:text-base font-semibold text-green-600 dark:text-green-400 border-2 border-green-200 dark:border-green-500 rounded-xl hover:bg-green-50 dark:hover:bg-green-500/10 transition-all"
+                      >
+                        <CheckCircle className="w-4 h-4 mr-2" />
+                        Accept Policy
+                      </button>
+                      <button
+                        onClick={() => handleRejectPolicy(selectedPolicy.id)}
+                        className="flex-1 flex items-center justify-center px-4 py-2.5 text-sm sm:text-base font-semibold text-red-600 dark:text-red-400 border-2 border-red-200 dark:border-red-500 rounded-xl hover:bg-red-50 dark:hover:bg-red-500/10 transition-all"
+                      >
+                        <XCircle className="w-4 h-4 mr-2" />
+                        Reject Policy
+                      </button>
+                    </div>
+                  </div>
+                )}
+
                 <div className="mt-4 sm:mt-6 pt-4 sm:pt-6 border-t border-gray-200 dark:border-navy-700">
                   <button
                     onClick={() => handleDeletePolicy(selectedPolicy.id)}
